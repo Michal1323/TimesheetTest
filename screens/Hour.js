@@ -1,13 +1,16 @@
 import * as React from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TextInput, Alert } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TextInput, Alert, Pressable, Modal} from 'react-native';
+import AsyncStorage from "@react-native-community/async-storage";
 import { Button } from 'react-native-paper';
 import { TimePickerModal } from 'react-native-paper-dates';
 import { Picker } from '@react-native-picker/picker';
+import CheckBox from '@react-native-community/checkbox';
 import WeekSelector from 'react-native-week-selector';
 import "intl";
 import "intl/locale-data/jsonp/en";
 import { DatabaseConnection } from '../components/database-connection';
 import moment from 'moment';
+
 
 const db = DatabaseConnection.getConnection();
 
@@ -15,8 +18,9 @@ const db = DatabaseConnection.getConnection();
 
   const selectDate = new Date();
   const [currentDate, setCurrentDate] = React.useState('');
-  
+  const [toggleCheckBox, setToggleCheckBox] = React.useState(false)
 
+  const [modalVisible, setModalVisible] = React.useState(false);
   const [dayoftheWeek, setDayoftheWeek] = React.useState('');
   const [projNum, setprojNum] = React.useState('');
   const [siteID, setsiteID] = React.useState('')
@@ -104,7 +108,57 @@ const db = DatabaseConnection.getConnection();
     [setLfinishVisible]
   );
 
-  
+  const save = async () => {
+    try{
+      await AsyncStorage.setItem("MyWeekEnding", selectedWeek)
+      await AsyncStorage.setItem("MyWeek", currentDate)
+      await AsyncStorage.setItem("MyDays", dayoftheWeek)
+      await AsyncStorage.setItem("MyProjNum", projNum)
+    }
+    catch (err)
+    {
+      alert(err)
+    }
+  };
+
+  const load = async () => {
+    try{
+     let selectedWeek = await AsyncStorage.getItem("MyWeekEnding")
+     let currentDate = await AsyncStorage.getItem("MyWeek")
+     let dayoftheWeek = await AsyncStorage.getItem("MyDays")
+     let projNum = await AsyncStorage.getItem("MyProjNum")
+
+     if(selectedWeek !== null)
+     {
+      setselectedWeek(selectedWeek)
+     }
+     
+     if(currentDate !== null)
+     {
+      setCurrentDate(currentDate)
+     }
+
+     if(dayoftheWeek !== null)
+     {
+      setDayoftheWeek(dayoftheWeek)
+     }
+
+     if(projNum !== null)
+      {
+        setprojNum(projNum)
+      }
+
+    }
+    catch (err){
+      alert(err)
+    }
+  };
+
+  React.useEffect(() => {
+    load();
+  },[])
+
+
 
   const renderUserNames = () => {
     if(projNum=='VOD103015'){
@@ -165,7 +219,10 @@ const db = DatabaseConnection.getConnection();
               [
                 {
                   text: 'Ok',
-                  onPress: () => navigation.navigate('Home'),
+                  onPress: () =>
+                  navigation.replace('Home', {
+                    someParam: 'Param',
+                  }),
                 },
               ],
               { cancelable: false }
@@ -173,8 +230,74 @@ const db = DatabaseConnection.getConnection();
           } else alert('Error Entry unsuccesfull !!!');
         }
       );
+      save()
     });
   };
+
+  const add_lunch = () => {
+    console.log( selectedWeek, currentDate, projNum, description, Hours, Minutes, finishHours, finishMinutes, LunchHours, LunchMinutes,  finishLunchHours, finishLunchMinutes,  Thrs, siteID, dayoftheWeek);
+
+    if(toggleCheckBox == false)
+{
+    db.transaction(function (tx) {
+      tx.executeSql(
+        'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrivalHours , arrivalMinutes,  departHours, departMinutes, startLHours, startLMinutes, FinishLHours, FinishLMinutes,  totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+        [1, selectedWeek, currentDate, 'Lunch', 'Lunch', Hours, Minutes, finishHours, finishMinutes, 0, 0, 0, 0, 0, 'Lunch', dayoftheWeek ],
+        (tx, results) => {
+          console.log('Results', results.rowsAffected);
+          if (results.rowsAffected > 0) {
+            Alert.alert(
+              'Sucess',
+              'Entry added succesfully to DB !!!',
+              [
+                {
+                  text: 'Ok',
+                  onPress: () =>
+                  navigation.replace('Home', {
+                    someParam: 'Param',
+                  }),
+                },
+              ],
+              { cancelable: false }
+            );
+          } else alert('Error Entry unsuccesfull !!!');
+        }
+      );
+      save()
+    });
+  }
+
+  else
+{
+  db.transaction(function (tx) {
+    tx.executeSql(
+      'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrivalHours , arrivalMinutes,  departHours, departMinutes, startLHours, startLMinutes, FinishLHours, FinishLMinutes,  totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+      [1, selectedWeek, currentDate, 'Lunch', 'Lunch', Hours, Minutes, finishHours, finishMinutes, 0, 0, 0, 0, 0, 'Lunch', 'Monday', 1, selectedWeek, currentDate, 'Lunch', 'Lunch', Hours, Minutes, finishHours, finishMinutes, 0, 0, 0, 0, 0, 'Lunch', 'Tuesday', 1, selectedWeek, currentDate, 'Lunch', 'Lunch', Hours, Minutes, finishHours, finishMinutes, 0, 0, 0, 0, 0, 'Lunch', 'Wednesday', 1, selectedWeek, currentDate, 'Lunch', 'Lunch', Hours, Minutes, finishHours, finishMinutes, 0, 0, 0, 0, 0, 'Lunch', 'Thursday', 1, selectedWeek, currentDate, 'Lunch', 'Lunch', Hours, Minutes, finishHours, finishMinutes, 0, 0, 0, 0, 0, 'Lunch', 'Friday' ],
+      (tx, results) => {
+        console.log('Results', results.rowsAffected);
+        if (results.rowsAffected > 0) {
+          Alert.alert(
+            'Sucess',
+            'Entry added succesfully to DB !!!',
+            [
+              {
+                text: 'Ok',
+                onPress: () =>
+                navigation.replace('Home', {
+                  someParam: 'Param',
+                }),
+              },
+            ],
+            { cancelable: false }
+          );
+        } else alert('Error Entry unsuccesfull !!!');
+      }
+    );
+    save()
+  });
+}
+
+};
 
   let options  = renderUserNames();
 
@@ -286,6 +409,7 @@ const db = DatabaseConnection.getConnection();
                   {<Picker
                       mode='dropdown'
                       selectedValue={projNum}
+                      onPress={() => save()}
                       onValueChange={(itemValue, itemIndex) =>
                           //this.setState({ projNum: itemValue })
                           setprojNum(itemValue)
@@ -316,7 +440,7 @@ const db = DatabaseConnection.getConnection();
          </View>
 
 
-          <View style={styles.section}>
+         <View style={styles.section}>
             <TimePickerModal
         visible={visible}
         onDismiss={onDismiss}
@@ -349,38 +473,7 @@ const db = DatabaseConnection.getConnection();
         Finish: {finishHours}:{finishMinutes}
       </Button>
       
-      <TimePickerModal
-        visible={Lvisible}
-        onDismiss={onLDismiss}
-        onConfirm={onLConfirm}
-        hours={12} // default: current hours
-        minutes={14} // default: current minutes
-        label="Select time" // optional, default 'Select time'
-        cancelLabel="Cancel" // optional, default: 'Cancel'
-        confirmLabel="Ok" // optional, default: 'Ok'
-        animationType="fade" // optional, default is 'none'
-        locale={'en'} // optional, default is automically detected by your system
-      />
-           <Button color="#09253a" style={styles.startLunch} icon="food" onPress={()=> setLVisible(true)}>
-        Lunch : {LunchHours}:{LunchMinutes}
-      </Button>
-
-      <TimePickerModal
-        visible={Lfinishvisible}
-        onDismiss={onLFinishDismiss}
-        onConfirm={onLFinishConfirm}
-        hours={12} // default: current hours
-        minutes={0} // default: current minutes
-        label="Select time" // optional, default 'Select time'
-        cancelLabel="Cancel" // optional, default: 'Cancel'
-        confirmLabel="Ok" // optional, default: 'Ok'
-        animationType="fade" // optional, default is 'none'
-        locale={'en'} // optional, default is automically detected by your system
-      />
-      <Button color="#09253a" style={styles.endLunch} icon="food" onPress={()=> setLfinishVisible(true)}>
-        Finishes : {finishLunchHours}:{finishLunchMinutes}
-      </Button>
-
+     
       <TextInput 
       placeholder="  Description"
       onChangeText={description => setDescription(description)} 
@@ -391,9 +484,87 @@ const db = DatabaseConnection.getConnection();
 
 
       <Button color="#09253a" onPress={add_entry}>
-              Submit
-            </Button>
+              Add
+      </Button>
+
+            <View style={styles.centeredView}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+          setModalVisible(!modalVisible);
+        }}
+      >
+                <View style={styles.centeredView}>
+                  <View style={styles.modalView}>
+                  <Text>Lunch Entry</Text>
+              
+                  <TimePickerModal
+        visible={visible}
+        onDismiss={onDismiss}
+        onConfirm={onConfirm}
+        hours={12} // default: current hours
+        minutes={14} // default: current minutes
+        label="Select time" // optional, default 'Select time'
+        cancelLabel="Cancel" // optional, default: 'Cancel'
+        confirmLabel="Ok" // optional, default: 'Ok'
+        animationType="fade" // optional, default is 'none'
+        locale={'en'} // optional, default is automically detected by your system
+      />
+      <Button color="#09253a" style={styles.startTime} icon="walk" onPress={()=> setVisible(true)}>
+        Start: {Hours}:{Minutes}
+      </Button>
+
+      <TimePickerModal
+        visible={finishvisible}
+        onDismiss={onFinishDismiss}
+        onConfirm={onFinishConfirm}
+        hours={12} // default: current hours
+        minutes={14} // default: current minutes
+        label="Select time" // optional, default 'Select time'
+        cancelLabel="Cancel" // optional, default: 'Cancel'
+        confirmLabel="Ok" // optional, default: 'Ok'
+        animationType="fade" // optional, default is 'none'
+        locale={'en'} // optional, default is automically detected by your system
+      />
+      <Button color="#09253a" style={styles.endTime} icon="run" onPress={()=> setfinishVisible(true)}>
+        Finish: {finishHours}:{finishMinutes}
+      </Button>
       
+            
+              <CheckBox style={styles.check}
+            disabled={false}
+            value={toggleCheckBox}
+            onValueChange={(newValue) => setToggleCheckBox(newValue)}
+          />
+
+        
+
+          <Text style={styles.sameWeek}>Same for the week</Text>
+
+          <Button color="#09253a" onPress={add_lunch}>
+                      Add
+              </Button>
+
+                    <Pressable
+                      style={[styles.button, styles.buttonClose]}
+                      onPress={() => setModalVisible(!modalVisible)}
+                    ><Text style={styles.textStyle}>Hide Modal</Text>
+                      
+                    </Pressable>
+                  </View>
+                </View>
+              </Modal>
+              <Pressable
+                style={[styles.button, styles.buttonOpen]}
+                onPress={() => setModalVisible(true)}
+              >
+                <Text style={styles.textStyle}>Show Modal</Text>
+              </Pressable>
+            </View>
+              
           </View>
       </View>
       </SafeAreaView>
@@ -480,36 +651,86 @@ const db = DatabaseConnection.getConnection();
               marginTop: 30
              },
              
-   input: {
-      margin: 15,
-      height: 40,
-      width: 340,
-      borderColor: "#09253a",
-      borderWidth: 2,
-      borderRadius: 10
-   },
-   titleStyle: {
-    marginLeft:20,
-    marginTop:10,
-    padding:-10,
-    fontWeight:'bold'
-    },
-
-  pickerStyle: {
-    width:325,
-    marginLeft:-50,
-    padding: -15,
-    marginTop:35,
-    marginRight: -40,
-    },
-
-    pickerStyle2: {
-      width:325,
-      marginLeft:-20,
-      padding: -15,
-      marginTop:35,
-      marginRight: -40,
-      },
-     });
+             input: {
+              margin: 15,
+              height: 40,
+              width: 340,
+              borderColor: "#09253a",
+              borderWidth: 2,
+              borderRadius: 10
+           },
+           titleStyle: {
+            marginLeft:20,
+            marginTop:10,
+            padding:-10,
+            fontWeight:'bold'
+            },
+        
+          pickerStyle: {
+            width:325,
+            marginLeft:-50,
+            padding: -15,
+            marginTop:35,
+            marginRight: -40,
+            },
+        
+            pickerStyle2: {
+              width:325,
+              marginLeft:-20,
+              padding: -15,
+              marginTop:35,
+              marginRight: -40,
+              },
+        
+              
+              modalView: {
+                margin: 20,
+                backgroundColor: "white",
+                borderRadius: 20,
+                padding: 35,
+                alignItems: "center",
+                shadowColor: "#000",
+                shadowOffset: {
+                  width: 0,
+                  height: 2
+                },
+                shadowOpacity: 0.25,
+                shadowRadius: 4,
+                elevation: 5
+              },
+              button: {
+                borderRadius: 20,
+                padding: 10,
+                elevation: 2
+              },
+              buttonOpen: {
+                backgroundColor: "#F194FF",
+              },
+              buttonClose: {
+                backgroundColor: "#2196F3",
+              },
+              sameWeek: {
+                marginTop: -25,
+                marginLeft: 20,
+                marginBottom: 20,
+                color: 'black'
+              },
+        
+              check: {
+                marginLeft: -150,
+                 marginTop: 15,
+                color: 'black'
+              },
+        
+              textStyle: {
+                color: "white",
+                fontWeight: "bold",
+                textAlign: "center"
+              },
+              modalText: {
+                marginBottom: 15,
+                textAlign: "center"
+              }
+            });
      
      export default Hour;

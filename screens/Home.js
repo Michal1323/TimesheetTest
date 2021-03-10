@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { StyleSheet, View, Text, FlatList, SafeAreaView, LayoutAnimation, UIManager, TouchableOpacity, Platform, Dimensions, Animated, } from 'react-native';
 import { Button, DataTable, Portal } from 'react-native-paper';
+import WeekSelector from 'react-native-week-selector';
 import { Collapse, CollapseHeader, CollapseBody } from "accordion-collapse-react-native";
 import { Thumbnail, ListItem, Separator, Item } from 'native-base';
 import moment from 'moment';
-import WeekSelector from 'react-native-week-selector';
+import { Ionicons } from '@expo/vector-icons';
 import { DatabaseConnection } from '../components/database-connection';
 
 const db = DatabaseConnection.getConnection();
@@ -25,6 +26,11 @@ export default function Home ({ navigation }) {
       navigation.navigate('Hour')
     }
 
+    const deleteHandler = () => 
+    {
+      navigation.navigate('ViewEntry')
+    }
+
     const saveWEEK = (value) => {
       moment.locale('en');
       console.log(moment(value).format('MMM Do'));
@@ -32,9 +38,26 @@ export default function Home ({ navigation }) {
     }
 
     React.useEffect(() => {
+      db.transaction(function (txn) {
+        txn.executeSql(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='Timesheet'",
+          [],
+          function (txn, res) {
+            console.log('item:', res.rows.length);
+            if (res.rows.length == 0) {
+              txn.executeSql('DROP TABLE IF EXISTS Timesheet', []);
+              txn.executeSql(
+                'CREATE TABLE IF NOT EXISTS Timesheet(id_timesheet INTEGER PRIMARY KEY AUTOINCREMENT, user_id BIGINT(20), eow DATE, date DATETIME, projNum VARCHAR(30), comment VARCHAR(250), arrivalHours TIME, arrivalMinutes TIME,  departHours TIME, departMinutes TIME, startLHours TIME, startLMinutes TIME, FinishLHours TIME, FinishLMinutes TIME, totalHrs FLOAT, siteID VARCHAR(45), dayoftheweek VARCHAR(45))',
+                []
+              );
+            }
+          }
+        );
+      }),
+
       db.transaction((tx) => {
         tx.executeSql(
-          'SELECT A.* FROM Timesheet A INNER JOIN (SELECT date, dayoftheweek FROM Timesheet GROUP BY date, dayoftheweek HAVING COUNT(*) > 1) B ON A.date = B.date AND A.dayoftheweek = B.dayoftheweek',
+          'SELECT * FROM Timesheet',
           [],
           (tx, results) => {
             var temp = [];
@@ -47,6 +70,9 @@ export default function Home ({ navigation }) {
     }, []);
 
     const formatTime = (item) => {
+      
+    }
+    const listItemView = (item) => {
       var SHours = moment(item.arrivalHours, 'HH');
       var SMinutes = moment(item.arrivalMinutes, 'mm');
 
@@ -58,11 +84,8 @@ export default function Home ({ navigation }) {
 
       setFINHours(FHours.format('HH'));
       setFINMinutes(FMinutes.format('mm'));
-    }
+    
 
-
-    const listItemView = (item) => {
-      
     
       return (
         <View
@@ -79,7 +102,7 @@ export default function Home ({ navigation }) {
       <CollapseBody >
         <ListItem >
           <DataTable.Cell>{item.projNum}{'\n'}{item.siteID}</DataTable.Cell>
-          <DataTable.Cell style={{marginLeft: -60}}>{Hours}:{Minutes}-{FINHours}:{FINMinutes}</DataTable.Cell>
+          <DataTable.Cell style={{marginLeft: -60}}>{item.arrivalHours}:{item.arrivalMinutes}-{item.departHours}:{item.departMinutes}</DataTable.Cell>
           
           <DataTable.Cell style={{marginLeft: -80}}>{item.comment}</DataTable.Cell>
         </ListItem>        
@@ -113,6 +136,10 @@ export default function Home ({ navigation }) {
            </View>
            <Button icon="plus" onPress={pressHandler}>
                 Add Entry
+           </Button>
+
+           <Button style icon="delete" onPress={deleteHandler}>
+                Delete
            </Button>
         </SafeAreaView>
    );

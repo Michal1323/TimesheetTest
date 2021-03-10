@@ -1,62 +1,34 @@
-import React from 'react';
-import {  createAppContainer } from 'react-navigation';
-import { createStackNavigator } from 'react-navigation-stack';
+import React, {useState} from 'react';
+import * as Font from 'expo-font';
+import AppLoading  from 'expo-app-loading';
+import Navigator from './routes/drawer';
 
-import Login from './screens/login';
-import Home from './screens/Home';
-import Hour from './screens/Hour';
-import Header from './components/Header';
-import Onboarding from './screens/Onboarding';
+const getFonts = () => Font.loadAsync({
+'nunito-regular': require('./assets/fonts/Nunito-Regular.ttf'),
+'nunito-semi-bold': require('./assets/fonts/Nunito-SemiBold.ttf')
+});
 
-const screens = {
 
-  Onboarding: {
-    screen: Onboarding,
-    navigationOptions: {
-      title: null,
-    }
-  },
-
-  Login: {
-    screen: Login,
-      navigationOptions:
-      {
-        title: null,
-      }
-},
-
-  Home:
+export default function App(){
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+    
+  if(fontsLoaded)
   {
-      screen: Home,
-      navigationOptions:({ navigation }) => {
-      return {
-        headerTitle: () => <Header navigation={navigation} title='Timesheet' />,
-        headerLeft: () => null
-            }
-      }
-  },
+    return (
+      <Navigator/>
+    );
+  }
 
-Hour:
-  {
-    screen: Hour,
-    navigationOptions:({ navigation }) => {
-    return {
-      headerTitle: () => <Header navigation={navigation} title='Enter hours' />,
-      headerLeft: () => null
-          }
-        }
-    },
+ else {
+   return(
+<AppLoading
+startAsync={getFonts}
+onFinish={()=> setFontsLoaded(true)}
+onError={console.warn}
+/>
+   )
 
-
+ }
+    
 }
 
-
-  
-
-
-const stackNavigator = createStackNavigator(screens);
-
-
-
-const App = createAppContainer(stackNavigator)
-export default App;
