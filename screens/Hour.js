@@ -107,6 +107,8 @@ const db = DatabaseConnection.getConnection();
     },
     [setLfinishVisible]
   );
+  
+
 
   const save = async () => {
     try{
@@ -158,7 +160,7 @@ const db = DatabaseConnection.getConnection();
     load();
   },[])
 
-
+ 
 
   const renderUserNames = () => {
     if(projNum=='VOD103015'){
@@ -205,6 +207,35 @@ const db = DatabaseConnection.getConnection();
 
   const add_entry = () => {
     console.log( selectedWeek, currentDate, projNum, description, Hours, Minutes, finishHours, finishMinutes, LunchHours, LunchMinutes,  finishLunchHours, finishLunchMinutes,  Thrs, siteID, dayoftheWeek);
+  
+
+    if (!selectedWeek) {
+      alert('Please select a end of the week');
+      return;
+    }
+    if (!dayoftheWeek) {
+      alert('Please select a day of the week');
+      return;
+    }
+    if (!projNum) {
+      alert('Please select a Project ');
+      return;
+    }
+
+    if (!siteID) {
+      alert("Don't forget to add a site");
+      return;
+    }
+
+    if (!Hours) {
+      alert('Add Hours for the entry');
+      return;
+    }
+    
+    if (!finishHours) {
+      alert('Add End Hours for the entry');
+      return;
+    }
 
     db.transaction(function (tx) {
       tx.executeSql(
@@ -321,8 +352,9 @@ const db = DatabaseConnection.getConnection();
 
     var next = getNextDay(itemValue);
     //console.log(next.getTime());
-    console.log(moment(next.getTime()).format('L'));
-    setCurrentDate(moment(next.getTime()).format('L'));
+    moment.locale('en');
+    console.log(moment(next.getTime()).format("L"));
+    setCurrentDate(moment(next.getTime()).format("L"));
   }
 
   const getNextDay = (dayName) => {
@@ -349,9 +381,9 @@ const db = DatabaseConnection.getConnection();
   }
 
   const saveStartingWeek = (value) => {
-        moment.locale('en');
-        console.log("saveStartingWeek - value:", moment(value).format('L'));
-        setselectedWeek(moment(value).format('L'));
+    moment.locale('en')
+        console.log("saveStartingWeek - value:", moment(value).format("L"));
+        setselectedWeek(moment(value).format("L"));
         //setselectedWeek(new Date(value).toString());
 
   }

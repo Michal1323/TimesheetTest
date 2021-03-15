@@ -10,7 +10,7 @@ const RootDrawerNavigator = createDrawerNavigator({
        
     },
 
-    Drawer: {
+    TSReview: {
         screen: DrawerStack,
     }
 

@@ -5,6 +5,7 @@ import WeekSelector from 'react-native-week-selector';
 import { Collapse, CollapseHeader, CollapseBody } from "accordion-collapse-react-native";
 import { Thumbnail, ListItem, Separator, Item } from 'native-base';
 import moment from 'moment';
+import 'moment/locale/en-gb';
 import { Ionicons } from '@expo/vector-icons';
 import { DatabaseConnection } from '../components/database-connection';
 
@@ -86,6 +87,10 @@ export default function Home ({ navigation }) {
       setFINMinutes(FMinutes.format('mm'));
     
 
+
+      const datess = item.date;
+      const Frdates = moment(datess).format('dddd, MMMM Do YYYY')
+      console.log(datess);
     
       return (
         <View
@@ -96,7 +101,7 @@ export default function Home ({ navigation }) {
               <Collapse>
       <CollapseHeader style={{marginBottom: -10}}>
         <Separator>
-          <Text style={{fontWeight: 'bold'}}>{item.dayoftheweek}  ({item.totalHrs}  Hours) {item.date}</Text>
+          <Text style={{fontWeight: 'bold'}}>{Frdates}</Text>
         </Separator>
       </CollapseHeader>
       <CollapseBody >

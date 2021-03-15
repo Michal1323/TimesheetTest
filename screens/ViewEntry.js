@@ -24,7 +24,10 @@ const DeleteUser = ({ navigation }) => {
               [
                 {
                   text: 'Ok',
-                  onPress: () => navigation.navigate('Home'),
+                  onPress: () =>
+                  navigation.replace('Home', {
+                    someParam: 'Param',
+                  }),
                 },
               ],
               { cancelable: false }

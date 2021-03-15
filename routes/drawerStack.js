@@ -11,7 +11,7 @@ const screens = {
       screen: Test,
       navigationOptions:({ navigation }) => {
       return {
-        headerTitle: () => <Header navigation={navigation} title='Timesheet' />,
+        headerTitle: () => <Header navigation={navigation} title='Timesheet Review' />,
         headerLeft: () => null
             }
       }
