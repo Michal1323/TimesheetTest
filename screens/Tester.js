@@ -54,25 +54,45 @@ export default function Test ({ navigation }) {
             }
           }
         );
-      }),
+      });
+    });
+    
+    
 
-      db.transaction((tx) => {
+     
+    const formatTime = (item) => {
+      
+    }
+ 
+    let SearchEntry = () => {
+         db.transaction((tx) => {
         tx.executeSql(
           'SELECT * FROM Timesheet',
           [],
           (tx, results) => {
+            //var temp = [];
+            //for (let i = 0; i < results.rows.length; ++i)
+              //temp.push(results.rows.item(i));
+            //setFlatListItems(temp);
             var temp = [];
-            for (let i = 0; i < results.rows.length; ++i)
+            var len = results.rows.length;
+            console.log('len', len);
+            if(len > 0 ) {
+             
+              for (let i = 0; i < results.rows.length; ++i)
+             
               temp.push(results.rows.item(i));
-            setFlatListItems(temp);
-          }
-        );
-      });
-    }, []);
+              setFlatListItems(temp);
 
-    const formatTime = (item) => {
-      
-    }
+            } else {
+              alert('Cannot Search Entry!');
+            }
+                          }
+        );
+                        });
+                            };
+
+    
     const listItemView = (item) => {
       var SHours = moment(item.arrivalHours, 'HH');
       var SMinutes = moment(item.arrivalMinutes, 'mm');
@@ -101,7 +121,7 @@ export default function Test ({ navigation }) {
               <Collapse>
       <CollapseHeader style={{marginBottom: -10}}>
         <Separator>
-          <Text style={{fontWeight: 'bold'}}>{Frdates}</Text>
+          <Text style={{fontWeight: 'bold'}}>{datess}</Text>
         </Separator>
       </CollapseHeader>
       <CollapseBody >
@@ -139,6 +159,17 @@ export default function Test ({ navigation }) {
         </View>
        
            </View>
+           <Button icon="plus" onPress={pressHandler}>
+                Add Entry
+           </Button>
+
+
+           <Button icon="magnify" onPress={SearchEntry}>
+           </Button>
+
+           <Button style icon="delete" onPress={deleteHandler}>
+                Delete
+           </Button>
         </SafeAreaView>
    );
    }
