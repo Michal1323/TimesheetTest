@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StyleSheet, View, Text, FlatList, SafeAreaView,} from 'react-native';
+import { StyleSheet, View, Text, FlatList, SafeAreaView, TouchableHighlight} from 'react-native';
 import { Button, DataTable, Portal } from 'react-native-paper';
 import { Collapse, CollapseHeader, CollapseBody } from "accordion-collapse-react-native";
 import { Picker } from '@react-native-picker/picker';
@@ -47,17 +47,18 @@ export default function Home ({ navigation }) {
 
     const saveDayofWeek = (itemValue, itemIndex) => {
       setDayoftheWeek(itemValue);
-  
-      var next = getNextDay(itemValue);
+      SearchEntry(itemValue)
+      //var next = getNextDay(itemValue);
+      var next = moment(Week).day(itemValue).format('L') 
       //console.log(next.getTime());
-      console.log(moment(next.getTime()).format('L'));
-      setCurrentDate(moment(next.getTime()).format('L'));
-      setformatDay(moment(next.getTime()).format('MMM Do'));
+      console.log(moment(next).format('L'));
+      setCurrentDate(moment(next).format('L'));
+      setformatDay(moment(next).format('L'));
     }
     const getNextDay = (dayName) => {
       var todayDate = new Date(Week);
       var now = todayDate.getDay();
-  
+      console.log('now:' + now)
       // Days of the week
     var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   
@@ -67,8 +68,9 @@ export default function Home ({ navigation }) {
     // Find the difference between the current day and the one you want
     // If it's the same day as today (or a negative number), jump to the next week
     var diff = day - now;
-    diff = diff < 1 ? diff : diff;
-  
+    console.log('diff:' + diff);
+    diff = diff < 0 ? 7 + diff  : diff;
+    console.log('new dff:' + diff)
     // Get the timestamp for the desired day
     var nextDayTimestamp = todayDate.getTime() + (1000 * 60 * 60 * 24 * diff);
   
@@ -155,8 +157,8 @@ export default function Home ({ navigation }) {
     let SearchEntry = () => {
          db.transaction((tx) => {
         tx.executeSql(
-          'SELECT * FROM Timesheet',
-          [],
+          'SELECT * FROM Timesheet WHERE date = ?',
+          [currentDate],
           (tx, results) => {
             //var temp = [];
             //for (let i = 0; i < results.rows.length; ++i)
@@ -181,6 +183,13 @@ export default function Home ({ navigation }) {
                             };
 
     
+
+// const callBoth = () => 
+//   {
+//     saveDayofWeek()
+//     SearchEntry()
+//   } 
+
    const listItemView = (item) => {
       return (
         <View
@@ -230,15 +239,13 @@ export default function Home ({ navigation }) {
                     {
                         saveDayofWeek
                     }>
-                      
-                            <Picker.Item label={'Monday' + ' ' +  moment(Week).day("Monday").format('MMM Do')} value="monday" />
-                            <Picker.Item label={'Tuesday' + ' ' +  moment(Week).day("Tuesday").format('MMM Do')} value="tuesday" />
-                            <Picker.Item label={'Wednesday' + ' ' +  moment(Week).day("Wednesday").format('MMM Do')} value="wednesday" />
-                            <Picker.Item label={'Thursday' + ' ' +  moment(Week).day("Thursday").format('MMM Do')} value="thursday" />
-                            <Picker.Item label={'Friday' + ' ' +  moment(Week).day("Friday").format('MMM Do')} value="friday" />
-                            <Picker.Item label={'Saturday' + ' ' +  moment(Week).day("Saturday").format('MMM Do')} value="saturday" />
-                            <Picker.Item label={'Sunday' + ' ' +  moment(Week).day("Sunday").format('MMM Do')} value="sunday" />
-                           
+                            <Picker.Item label={'Sunday' + ' ' +  moment(Week).day("Sunday").format('MMM Do')} value="Sunday" />
+                            <Picker.Item label={'Monday' + ' ' +  moment(Week).day("Monday").format('MMM Do')} value="Monday" />
+                            <Picker.Item label={'Tuesday' + ' ' +  moment(Week).day("Tuesday").format('MMM Do')} value="Tuesday" />
+                            <Picker.Item label={'Wednesday' + ' ' +  moment(Week).day("Wednesday").format('MMM Do')} value="Wednesday" />
+                            <Picker.Item label={'Thursday' + ' ' +  moment(Week).day("Thursday").format('MMM Do')} value="Thursday" />
+                            <Picker.Item label={'Friday' + ' ' +  moment(Week).day("Friday").format('MMM Do')} value="Friday" />
+                            <Picker.Item label={'Saturday' + ' ' +  moment(Week).day("Saturday").format('MMM Do')} value="Saturday" />                           
                             </Picker>
           </View>
           <View style={{flex: 0, marginTop: -100, alignContent: 'center', marginLeft: 130, width: 500, marginBottom: -400}}>
@@ -250,11 +257,15 @@ export default function Home ({ navigation }) {
             keyExtractor={(item, index) => index+""}
             renderItem={({ item, index }) => {
               return (
+               
                 <View style={{...styles.tableRow, backgroundColor: index % 2 == 1 ? "#F0FBFC" : "white"}}>
+                  <TouchableHighlight onPress={()=> {alert(item.date),(item.projNum)}}>
               <Text style={{...styles.columnRowTxt, fontWeight:"bold"}}>{item.projNum}</Text>
+              </TouchableHighlight>
               <Text style={styles.columnRowTxt}>{item.siteID}</Text>
               <Text style={styles.columnRowTxt}>{item.arrivalHours}:{item.arrivalMinutes}/{item.departHours}:{item.departMinutes}</Text>
               <Text style={styles.columnRowTxt}>{item.totalHrs}</Text>
+              
             </View>
               )
             }} 

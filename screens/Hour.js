@@ -207,7 +207,7 @@ const db = DatabaseConnection.getConnection();
 
   
 
-  const add_entry = () => {
+  const add_entry = () => { 
     console.log( selectedWeek, currentDate, projNum, description, Hours, Minutes, finishHours, finishMinutes, LunchHours, LunchMinutes,  finishLunchHours, finishLunchMinutes,  Thrs, siteID, dayoftheWeek);
   
 
