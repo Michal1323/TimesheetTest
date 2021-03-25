@@ -11,6 +11,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import _ from "lodash";
 import { DatabaseConnection } from '../components/database-connection';
 import { TouchableOpacity } from 'react-native'
+import Dialog from "react-native-dialog";
 const db = DatabaseConnection.getConnection();
 
 
@@ -26,10 +27,13 @@ export default function Home ({ navigation }) {
   const [dayoftheWeek, setDayoftheWeek] = React.useState('');
   const [currentDate, setCurrentDate] = React.useState('');
   const [formatDay, setformatDay] = React.useState('');
+  const [visible, setVisible] = React.useState(false);
   const [ columns, setColumns ] = React.useState([
+    
     "Project",
     "Site",
-    "Start/End"
+    "Start/End",
+    "Hours"
   ])
   const [ direction, setDirection ] = React.useState(null)
   const [ selectedColumn, setSelectedColumn ] = React.useState(null)
@@ -45,9 +49,54 @@ export default function Home ({ navigation }) {
       navigation.navigate('ViewEntry')
     }
 
+    const showDialog = () => {
+      setVisible(true);
+    };
+  
+    const handleCancel = () => {
+      setVisible(false);
+    };
+
+    const handleDelete = () => {
+      // The user has pressed the "Delete" button, so here you can do your own logic.
+      // ...Your logic
+      setVisible(false);
+    };
+
+
+  let SearchEntry = () => {
+      db.transaction((tx) => {
+     tx.executeSql(
+       'SELECT * FROM Timesheet WHERE date = ?',
+       [currentDate],
+       (tx, results) => {
+         //var temp = [];
+         //for (let i = 0; i < results.rows.length; ++i)
+           //temp.push(results.rows.item(i));
+         //setFlatListItems(temp);
+         var temp = [];
+         var len = results.rows.length;
+         console.log('len', len);
+         if(len >= 0 ) {
+          
+           for (let i = 0; i < results.rows.length; ++i)
+          
+           temp.push(results.rows.item(i));
+           setFlatListItems(temp);
+
+         } else {
+           alert('Cannot Search Entry!');
+         }
+                       }
+     );
+                     });
+                         };
+
+                         
+
     const saveDayofWeek = (itemValue, itemIndex) => {
       setDayoftheWeek(itemValue);
-      SearchEntry(itemValue)
+      //SearchEntry()
       //var next = getNextDay(itemValue);
       var next = moment(Week).day(itemValue).format('L') 
       //console.log(next.getTime());
@@ -78,6 +127,9 @@ export default function Home ({ navigation }) {
     return new Date(nextDayTimestamp);
   
     }
+
+    
+ 
 
     const saveWEEK = (value) => {
       moment.locale('en');
@@ -152,38 +204,6 @@ export default function Home ({ navigation }) {
       </View>
     )
     
-
- 
-    let SearchEntry = () => {
-         db.transaction((tx) => {
-        tx.executeSql(
-          'SELECT * FROM Timesheet WHERE date = ?',
-          [currentDate],
-          (tx, results) => {
-            //var temp = [];
-            //for (let i = 0; i < results.rows.length; ++i)
-              //temp.push(results.rows.item(i));
-            //setFlatListItems(temp);
-            var temp = [];
-            var len = results.rows.length;
-            console.log('len', len);
-            if(len > 0 ) {
-             
-              for (let i = 0; i < results.rows.length; ++i)
-             
-              temp.push(results.rows.item(i));
-              setFlatListItems(temp);
-
-            } else {
-              alert('Cannot Search Entry!');
-            }
-                          }
-        );
-                        });
-                            };
-
-    
-
 // const callBoth = () => 
 //   {
 //     saveDayofWeek()
@@ -259,13 +279,36 @@ export default function Home ({ navigation }) {
               return (
                
                 <View style={{...styles.tableRow, backgroundColor: index % 2 == 1 ? "#F0FBFC" : "white"}}>
-                  <TouchableHighlight onPress={()=> {alert(item.date),(item.projNum)}}>
-              <Text style={{...styles.columnRowTxt, fontWeight:"bold"}}>{item.projNum}</Text>
+                  <TouchableHighlight onPress={showDialog}>
+              <Text style={{...styles.columnRowTxt, fontWeight:"bold", width: 80}}>{item.projNum}</Text>
               </TouchableHighlight>
               <Text style={styles.columnRowTxt}>{item.siteID}</Text>
               <Text style={styles.columnRowTxt}>{item.arrivalHours}:{item.arrivalMinutes}/{item.departHours}:{item.departMinutes}</Text>
               <Text style={styles.columnRowTxt}>{item.totalHrs}</Text>
-              
+              <Dialog.Container visible={visible}>
+              <Dialog.Title>{item.projNum} {" "} {item.siteID}</Dialog.Title>
+              <Dialog.Description>
+                Day : {item.dayoftheweek} 
+              </Dialog.Description>
+              <Dialog.Description>
+                Project Number : {item.projNum}
+                </Dialog.Description>
+              <Dialog.Description>
+                Site ID : {item.siteID}
+                </Dialog.Description>
+              <Dialog.Description>
+                Start Hours : {item.arrivalHours}:{item.arrivalMinutes}
+                {" "} End Hours : {item.departHours}:{item.departMinutes}
+                </Dialog.Description>
+              <Dialog.Description>
+                Total Hrs : {item.totalHrs}
+                </Dialog.Description>
+              <Dialog.Description>
+                Description: {item.comment}
+              </Dialog.Description>
+              <Dialog.Button label="Edit" onPress={handleCancel} />
+              <Dialog.Button label="Delete" onPress={handleDelete} />
+            </Dialog.Container>
             </View>
               )
             }} 

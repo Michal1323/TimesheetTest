@@ -110,55 +110,55 @@ const db = DatabaseConnection.getConnection();
   
 
 
-  const save = async () => {
-    try{
-      await AsyncStorage.setItem("MyWeekEnding", selectedWeek)
-      await AsyncStorage.setItem("MyWeek", currentDate)
-      await AsyncStorage.setItem("MyDays", dayoftheWeek)
-      await AsyncStorage.setItem("MyProjNum", projNum)
-    }
-    catch (err)
-    {
-      alert(err)
-    }
-  };
+  // const save = async () => {
+  //   try{
+  //     await AsyncStorage.setItem("MyWeekEnding", selectedWeek)
+  //     await AsyncStorage.setItem("MyWeek", currentDate)
+  //     //await AsyncStorage.setItem("MyDays", dayoftheWeek)
+  //     await AsyncStorage.setItem("MyProjNum", projNum)
+  //   }
+  //   catch (err)
+  //   {
+  //     alert(err)
+  //   }
+  // };
 
-  const load = async () => {
-    try{
-     let selectedWeek = await AsyncStorage.getItem("MyWeekEnding")
-     let currentDate = await AsyncStorage.getItem("MyWeek")
-     let dayoftheWeek = await AsyncStorage.getItem("MyDays")
-     let projNum = await AsyncStorage.getItem("MyProjNum")
+  // const load = async () => {
+  //   try{
+  //    let selectedWeek = await AsyncStorage.getItem("MyWeekEnding")
+  //    let currentDate = await AsyncStorage.getItem("MyWeek")
+  //    //let dayoftheWeek = await AsyncStorage.getItem("MyDays")
+  //    let projNum = await AsyncStorage.getItem("MyProjNum")
 
-     if(selectedWeek !== null)
-     {
-      setselectedWeek(selectedWeek)
-     }
+  //    if(selectedWeek !== null)
+  //    {
+  //     setselectedWeek(selectedWeek)
+  //    }
      
-     if(currentDate !== null)
-     {
-      setCurrentDate(currentDate)
-     }
+  //    if(currentDate !== null)
+  //    {
+  //     setCurrentDate(currentDate)
+  //    }
 
-     if(dayoftheWeek !== null)
-     {
-      setDayoftheWeek(dayoftheWeek)
-     }
+  //   //  if(dayoftheWeek !== null)
+  //   //  {
+  //   //   setDayoftheWeek(dayoftheWeek)
+  //   //  }
 
-     if(projNum !== null)
-      {
-        setprojNum(projNum)
-      }
+  //    if(projNum !== null)
+  //     {
+  //       setprojNum(projNum)
+  //     }
 
-    }
-    catch (err){
-      alert(err)
-    }
-  };
+  //   }
+  //   catch (err){
+  //     alert(err)
+  //   }
+  // };
 
-  React.useEffect(() => {
-    load();
-  },[])
+  // React.useEffect(() => {
+  //   load();
+  // },[])
 
  
 
@@ -242,7 +242,7 @@ const db = DatabaseConnection.getConnection();
     db.transaction(function (tx) {
       tx.executeSql(
         'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrivalHours , arrivalMinutes,  departHours, departMinutes, startLHours, startLMinutes, FinishLHours, FinishLMinutes,  totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-        [1, selectedWeek, currentDate, projNum, description, Hours, Minutes, finishHours, finishMinutes, LunchHours, LunchMinutes, finishLunchHours, finishLunchMinutes,   Thrs, siteID, dayoftheWeek ],
+        [1, selectedWeek, currentDate, projNum, description, Hours, Minutes, finishHours, finishMinutes, LunchHours, LunchMinutes, finishLunchHours, finishLunchMinutes, 0, siteID, dayoftheWeek ],
         (tx, results) => {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
@@ -263,7 +263,7 @@ const db = DatabaseConnection.getConnection();
           } else alert('Error Entry unsuccesfull !!!');
         }
       );
-      save()
+      //save()
     });
   };
 
@@ -296,7 +296,7 @@ const db = DatabaseConnection.getConnection();
           } else alert('Error Entry unsuccesfull !!!');
         }
       );
-      save()
+      //save()
     });
   }
 
@@ -330,7 +330,7 @@ const db = DatabaseConnection.getConnection();
         } else alert('Error Entry unsuccesfull !!!');
       }
     ); 
-    save()
+    //save()
   });
  
 }
@@ -449,7 +449,7 @@ const db = DatabaseConnection.getConnection();
                   {<Picker
                       mode='dropdown'
                       selectedValue={projNum}
-                      onPress={() => save()}
+                      //onPress={() => save()}
                       onValueChange={(itemValue, itemIndex) =>
                           //this.setState({ projNum: itemValue })
                           setprojNum(itemValue)
