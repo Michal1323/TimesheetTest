@@ -39,6 +39,8 @@ const db = DatabaseConnection.getConnection();
   const [finishLunchHours, setfinishLunchHours] = React.useState(selectDate.getHours());
   const [finishLunchMinutes, setfinishLunchMinutes] = React.useState(selectDate.getMinutes());
   
+  const [frTimes, setfrTimes] = React.useState('');
+  const [frFinTimes, setfrFinTimes] = React.useState();
   const [description, setDescription] = React.useState('');
   const [selectedWeek, setselectedWeek] = React.useState();
 
@@ -70,6 +72,9 @@ const db = DatabaseConnection.getConnection();
       minutes = setMinutes(FrMinutes.format('mm'));
       //setHours(hours.toString());
       //setMinutes(minutes.toString());
+      var times = FrHours.format('HH') + ':' + FrMinutes.format('mm');
+      console.log('time: ' + times);
+      setfrTimes(times);
     },
     [setVisible]
   );
@@ -82,6 +87,10 @@ const db = DatabaseConnection.getConnection();
       var FinMnts = moment(minutes, 'mm');
       hours = setfinishHours(FinHrs.format('HH'));
       minutes = setfinishMinutes(FinMnts.format('mm'));
+      var Fintimes = FinHrs.format('HH') + ':' + FinMnts.format('mm');
+      console.log('Finish Times: ' + Fintimes);
+      setfrFinTimes(Fintimes);
+      
     },
     [setfinishVisible]
   );
@@ -208,7 +217,7 @@ const db = DatabaseConnection.getConnection();
   
 
   const add_entry = () => { 
-    console.log( selectedWeek, currentDate, projNum, description, Hours, Minutes, finishHours, finishMinutes, LunchHours, LunchMinutes,  finishLunchHours, finishLunchMinutes,  Thrs, siteID, dayoftheWeek);
+    console.log( selectedWeek, currentDate, projNum, description, frTimes, frFinTimes, Thrs, siteID, dayoftheWeek);
   
 
     if (!selectedWeek) {
@@ -241,8 +250,8 @@ const db = DatabaseConnection.getConnection();
 
     db.transaction(function (tx) {
       tx.executeSql(
-        'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrivalHours , arrivalMinutes,  departHours, departMinutes, startLHours, startLMinutes, FinishLHours, FinishLMinutes,  totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-        [1, selectedWeek, currentDate, projNum, description, Hours, Minutes, finishHours, finishMinutes, LunchHours, LunchMinutes, finishLunchHours, finishLunchMinutes, 0, siteID, dayoftheWeek ],
+        'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?)',
+        [1, selectedWeek, currentDate, projNum, description, frTimes, frFinTimes, Thrs, siteID, dayoftheWeek ],
         (tx, results) => {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
@@ -252,10 +261,7 @@ const db = DatabaseConnection.getConnection();
               [
                 {
                   text: 'Ok',
-                  onPress: () =>
-                  navigation.replace('Home', {
-                    someParam: 'Param',
-                  }),
+                  onPress: () => navigation.navigate('Home'),
                 },
               ],
               { cancelable: false }
@@ -268,14 +274,14 @@ const db = DatabaseConnection.getConnection();
   };
 
   const add_lunch = () => {
-    console.log( selectedWeek, currentDate, projNum, description, Hours, Minutes, finishHours, finishMinutes, LunchHours, LunchMinutes,  finishLunchHours, finishLunchMinutes,  Thrs, siteID, dayoftheWeek);
+    console.log( selectedWeek, currentDate, projNum, description, frTimes, frFinTimes, Thrs, siteID, dayoftheWeek);
 
     if(toggleCheckBox == false)
 {
     db.transaction(function (tx) {
       tx.executeSql(
-        'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrivalHours , arrivalMinutes,  departHours, departMinutes, startLHours, startLMinutes, FinishLHours, FinishLMinutes,  totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-        [1, selectedWeek, currentDate, 'Lunch', 'Lunch', Hours, Minutes, finishHours, finishMinutes, 0, 0, 0, 0, 0, 'Lunch', dayoftheWeek ],
+        'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?)',
+        [1, selectedWeek, currentDate, 'Lunch', 'Lunch', frTimes, frFinTimes, 0, 'Lunch', dayoftheWeek ],
         (tx, results) => {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
@@ -304,12 +310,12 @@ const db = DatabaseConnection.getConnection();
 {
   db.transaction(function (tx) {
     tx.executeSql(
-      'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrivalHours , arrivalMinutes,  departHours, departMinutes, startLHours, startLMinutes, FinishLHours, FinishLMinutes,  totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-      [1, selectedWeek, moment(selectedWeek).day("Monday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', Hours, Minutes, finishHours, finishMinutes, 0, 0, 0, 0, 0, 'Lunch', dayoftheWeek , 
-      1, selectedWeek, moment(selectedWeek).day("Tuesday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', Hours, Minutes, finishHours, finishMinutes, 0, 0, 0, 0, 0, 'Lunch', dayoftheWeek , 
-      1, selectedWeek, moment(selectedWeek).day("Wednesday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', Hours, Minutes, finishHours, finishMinutes, 0, 0, 0, 0, 0, 'Lunch', dayoftheWeek ,
-      1, selectedWeek, moment(selectedWeek).day("Thursday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', Hours, Minutes, finishHours, finishMinutes, 0, 0, 0, 0, 0, 'Lunch', dayoftheWeek ,
-      1, selectedWeek, moment(selectedWeek).day("Friday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', Hours, Minutes, finishHours, finishMinutes, 0, 0, 0, 0, 0, 'Lunch', dayoftheWeek ],
+      'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?)',
+      [1, selectedWeek, moment(selectedWeek).day("Monday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes, 0, 'Lunch', dayoftheWeek , 
+      1, selectedWeek, moment(selectedWeek).day("Tuesday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes,  0, 'Lunch', dayoftheWeek , 
+      1, selectedWeek, moment(selectedWeek).day("Wednesday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes,  0, 'Lunch', dayoftheWeek ,
+      1, selectedWeek, moment(selectedWeek).day("Thursday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes, 0, 'Lunch', dayoftheWeek ,
+      1, selectedWeek, moment(selectedWeek).day("Friday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes, 0, 'Lunch', dayoftheWeek ],
       (tx, results) => {
         console.log('Results', results.rowsAffected);
         if (results.rowsAffected > 0) {
@@ -342,27 +348,13 @@ const db = DatabaseConnection.getConnection();
 
   const saveDayofWeek = (itemValue, itemIndex) => {
     setDayoftheWeek(itemValue);
-    /*if (dayoftheWeek == 'monday') {
-      setCurrentDate(moment(selectedWeek, "DD-MM-YYYY").add(1, 'days'));
-    } else if (dayoftheWeek == 'tuesday') {
-      setCurrentDate(moment(selectedWeek).add(2, 'days').format("DD-MM-YYYY"));
-    } else if (dayoftheWeek == 'wednesday') {
-      setCurrentDate(moment(selectedWeek, "DD-MM-YYYY").add(3, 'days'));
-    } else if (dayoftheWeek == 'thursday') {
-      setCurrentDate(moment(selectedWeek, "DD-MM-YYYY").add(4, 'days'));
-    } else if (dayoftheWeek == 'friday') {
-      setCurrentDate(moment(selectedWeek, "DD-MM-YYYY").add(5, 'days'));
-    } else if (dayoftheWeek == 'saturday') {
-      setCurrentDate(moment(selectedWeek, "DD-MM-YYYY").add(6, 'days'));
-    } else if (dayoftheWeek == 'sunday') {
-      setCurrentDate(moment(selectedWeek, "DD-MM-YYYY").add(7, 'days'));
-    }*/
-
     var next = getNextDay(itemValue);
     //console.log(next.getTime());
     moment.locale('en');
     console.log(moment(next.getTime()).format("L"));
     setCurrentDate(moment(next.getTime()).format("L"));
+    calcTotalHrs();
+
   }
 
   const getNextDay = (dayName) => {
@@ -396,16 +388,36 @@ const db = DatabaseConnection.getConnection();
 
   }
 
-  const CalcTotalHrs = () => {
-    var StrtTime = moment(Hours, "HH");
-    var endTime = moment(finishHours, "HH");
+  const getTimefromMins = (mins) => {
+    if (mins >= 24 * 60 || mins < 0) {
+      Alert.alert("Valid input should be greater than or equal to 0 and less than 1440.");
+    }
+    var h = mins / 60 | 0;
+    var m = mins % 60 | 0;
 
-    var duration = moment.duration(StrtTime.diff(endTime));
-    var DHrs = parseInt(duration.asHours());
-    setThrs(DHrs);
-    Alert.alert(DHrs + 'Hrs');
-
+    return moment.utc().hours(h).minutes(m).format("HH:mm");
   }
+
+   const calcTotalHrs = () => {
+    //setfinishVisible(true)
+     var StrtTime = moment(frTimes, "HH:mm");
+     var endTime = moment(frFinTimes, "HH:mm");
+
+     var duration = moment.duration(StrtTime.diff(endTime));
+     var DHrs = parseInt(duration.asHours());
+    var Dmins = parseInt(duration.asMinutes())-DHrs* 60;
+     var Tot  = endTime.diff(StrtTime, 'minutes');
+     var timetomins = getTimefromMins(Tot);
+     //setThrs(Tot);
+     
+  //   //Alert.alert(DHrs + 'Hrs');
+     setThrs(timetomins);
+     console.log(timetomins);
+ }
+
+ const finishTime = () => {
+  setfinishVisible(true)
+ }
 
   return (
         <SafeAreaView style={styles.container}>
@@ -420,7 +432,41 @@ const db = DatabaseConnection.getConnection();
           />
           </View>
 
-          
+          <View style={styles.section}>
+            <TimePickerModal
+        visible={visible}
+        onDismiss={onDismiss}
+        onConfirm={onConfirm}
+        hours={12} // default: current hours
+        minutes={14} // default: current minutes
+        label="Select time" // optional, default 'Select time'
+        cancelLabel="Cancel" // optional, default: 'Cancel'
+        confirmLabel="Ok" // optional, default: 'Ok'
+        animationType="fade" // optional, default is 'none'
+        locale={'en'} // optional, default is automically detected by your system
+      />
+       <Button color="#09253a" style={styles.startTime} icon="walk" onPress={()=> setVisible(true)}>
+        Start: {frTimes}
+      </Button>
+
+      <TimePickerModal
+        visible={finishvisible}
+        onDismiss={onFinishDismiss}
+        onConfirm={onFinishConfirm}
+        hours={12} // default: current hours
+        minutes={14} // default: current minutes
+        label="Select time" // optional, default 'Select time'
+        cancelLabel="Cancel" // optional, default: 'Cancel'
+        confirmLabel="Ok" // optional, default: 'Ok'
+        animationType="fade" // optional, default is 'none'
+        locale={'en'} // optional, default is automically detected by your system
+      />
+           <Button color="#09253a" style={styles.endTime} icon="run" onPress={() => setfinishVisible(true)}>
+        Finish: {frFinTimes}
+      </Button>
+      
+     </View>
+
           <View>
                     <Text style={{fontWeight: 'bold'}}>
                         Day of the Week 
@@ -480,40 +526,7 @@ const db = DatabaseConnection.getConnection();
          </View>
 
 
-         <View style={styles.section}>
-            <TimePickerModal
-        visible={visible}
-        onDismiss={onDismiss}
-        onConfirm={onConfirm}
-        hours={12} // default: current hours
-        minutes={14} // default: current minutes
-        label="Select time" // optional, default 'Select time'
-        cancelLabel="Cancel" // optional, default: 'Cancel'
-        confirmLabel="Ok" // optional, default: 'Ok'
-        animationType="fade" // optional, default is 'none'
-        locale={'en'} // optional, default is automically detected by your system
-      />
-      <Button color="#09253a" style={styles.startTime} icon="walk" onPress={()=> setVisible(true)}>
-        Start: {Hours}:{Minutes}
-      </Button>
-
-      <TimePickerModal
-        visible={finishvisible}
-        onDismiss={onFinishDismiss}
-        onConfirm={onFinishConfirm}
-        hours={12} // default: current hours
-        minutes={14} // default: current minutes
-        label="Select time" // optional, default 'Select time'
-        cancelLabel="Cancel" // optional, default: 'Cancel'
-        confirmLabel="Ok" // optional, default: 'Ok'
-        animationType="fade" // optional, default is 'none'
-        locale={'en'} // optional, default is automically detected by your system
-      />
-      <Button color="#09253a" style={styles.endTime} icon="run" onPress={()=> setfinishVisible(true)}>
-        Finish: {finishHours}:{finishMinutes}
-      </Button>
-      
-     
+        
       <TextInput 
       placeholder="  Description"
       onChangeText={description => setDescription(description)} 
@@ -522,9 +535,12 @@ const db = DatabaseConnection.getConnection();
       
       />
 
+      <Button onPress={calcTotalHrs}>
+          Total hrs: {Thrs}
+      </Button>
 
       <Button color="#09253a" onPress={add_entry}>
-              Add
+              Add : {Thrs}
       </Button>
 
             <View style={styles.centeredView}>
@@ -554,7 +570,7 @@ const db = DatabaseConnection.getConnection();
         locale={'en'} // optional, default is automically detected by your system
       />
       <Button color="#09253a" style={styles.startTime} icon="walk" onPress={()=> setVisible(true)}>
-        Start: {Hours}:{Minutes}
+        Start: {frTimes}
       </Button>
 
       <TimePickerModal
@@ -569,8 +585,8 @@ const db = DatabaseConnection.getConnection();
         animationType="fade" // optional, default is 'none'
         locale={'en'} // optional, default is automically detected by your system
       />
-      <Button color="#09253a" style={styles.endTime} icon="run" onPress={()=> setfinishVisible(true)}>
-        Finish: {finishHours}:{finishMinutes}
+           <Button color="#09253a" style={styles.endTime} icon="run" onPress={() => setfinishVisible(true)}>
+        Finish: {frFinTimes}
       </Button>
       
             
@@ -606,7 +622,6 @@ const db = DatabaseConnection.getConnection();
             </View>
               
           </View>
-      </View>
       </SafeAreaView>
    );
    }

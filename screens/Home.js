@@ -33,7 +33,7 @@ export default function Home ({ navigation }) {
     "Project",
     "Site",
     "Start/End",
-    "Hours"
+    "Total"
   ])
   const [ direction, setDirection ] = React.useState(null)
   const [ selectedColumn, setSelectedColumn ] = React.useState(null)
@@ -147,7 +147,7 @@ export default function Home ({ navigation }) {
             if (res.rows.length == 0) {
               txn.executeSql('DROP TABLE IF EXISTS Timesheet', []);
               txn.executeSql(
-                'CREATE TABLE IF NOT EXISTS Timesheet(id_timesheet INTEGER PRIMARY KEY AUTOINCREMENT, user_id BIGINT(20), eow DATE, date DATETIME, projNum VARCHAR(30), comment VARCHAR(250), arrivalHours TIME, arrivalMinutes TIME,  departHours TIME, departMinutes TIME, startLHours TIME, startLMinutes TIME, FinishLHours TIME, FinishLMinutes TIME, totalHrs FLOAT, siteID VARCHAR(45), dayoftheweek VARCHAR(45))',
+                'CREATE TABLE IF NOT EXISTS Timesheet(id_timesheet INTEGER PRIMARY KEY AUTOINCREMENT, user_id BIGINT(20), eow DATE, date DATETIME, projNum VARCHAR(30), comment VARCHAR(250), arrival TIME, depart TIME, totalHrs FLOAT, siteID VARCHAR(45), dayoftheweek VARCHAR(45))',
                 []
               );
             }
@@ -209,35 +209,6 @@ export default function Home ({ navigation }) {
 //     saveDayofWeek()
 //     SearchEntry()
 //   } 
-
-   const listItemView = (item) => {
-      return (
-        <View
-          key={item.user_id}
-          style={{ marginTop: 20, padding: 30, borderRadius: 10, width: 450, marginLeft: -50 }}>
-            
-            <View style={{marginBottom: -30}}>
-              <Collapse>
-      <CollapseHeader style={{marginBottom: -10}}>
-        <Separator>
-          <Text style={{fontWeight: 'bold'}}>{item.dayoftheweek}  ({item.totalHrs}  Hours) {item.date}</Text>
-        </Separator>
-      </CollapseHeader>
-      <CollapseBody >
-        <ListItem >
-          <DataTable.Cell>{item.projNum}{'\n'}{item.siteID}</DataTable.Cell>
-          <DataTable.Cell style={{marginLeft: -60}}>{Hours}:{Minutes}-{FINHours}:{FINMinutes}</DataTable.Cell>
-          
-          <DataTable.Cell style={{marginLeft: -80}}>{item.comment}</DataTable.Cell>
-        </ListItem>        
-      </CollapseBody>
-    </Collapse>
-            </View>
-          </View>
-      );
-    };    
-  
-   
    
       return (
         <SafeAreaView style={{ flex: 1}}>
@@ -283,7 +254,7 @@ export default function Home ({ navigation }) {
               <Text style={{...styles.columnRowTxt, fontWeight:"bold", width: 80}}>{item.projNum}</Text>
               </TouchableHighlight>
               <Text style={styles.columnRowTxt}>{item.siteID}</Text>
-              <Text style={styles.columnRowTxt}>{item.arrivalHours}:{item.arrivalMinutes}/{item.departHours}:{item.departMinutes}</Text>
+              <Text style={styles.columnRowTxt}>{item.arrival}/{item.depart}</Text>
               <Text style={styles.columnRowTxt}>{item.totalHrs}</Text>
               <Dialog.Container visible={visible}>
               <Dialog.Title>{item.projNum} {" "} {item.siteID}</Dialog.Title>
@@ -297,8 +268,8 @@ export default function Home ({ navigation }) {
                 Site ID : {item.siteID}
                 </Dialog.Description>
               <Dialog.Description>
-                Start Hours : {item.arrivalHours}:{item.arrivalMinutes}
-                {" "} End Hours : {item.departHours}:{item.departMinutes}
+                Start Hours : {item.arrival}
+                {" "} End Hours : {item.depart}
                 </Dialog.Description>
               <Dialog.Description>
                 Total Hrs : {item.totalHrs}
@@ -461,7 +432,7 @@ export default function Home ({ navigation }) {
               fontWeight: "bold",
             },
             columnRowTxt: {
-              width:"25%",
+              width:"20%",
               textAlign:"center",
               
             }
