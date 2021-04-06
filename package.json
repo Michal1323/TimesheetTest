@@ -30,6 +30,7 @@
     "intl": "^1.2.5",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
+    "moment-range": "^4.0.2",
     "native-base": "^2.15.2",
     "react": "16.13.1",
     "react-devtools": "^4.10.1",

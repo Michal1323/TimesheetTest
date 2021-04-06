@@ -34,12 +34,13 @@ height:'160%',
 flexDirection: 'row',
 alignItems: 'center',
 justifyContent: 'center',
-backgroundColor: '#09253a',
+backgroundColor: '#091629',
 },
 
 headText: {
 fontWeight: 'bold',
 fontSize: 20,
+fontStyle:'normal',
 color: 'whitesmoke',
 letterSpacing: 1,
 

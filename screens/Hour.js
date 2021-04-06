@@ -10,6 +10,7 @@ import "intl";
 import "intl/locale-data/jsonp/en";
 import { DatabaseConnection } from '../components/database-connection';
 import moment from 'moment';
+import { extendMoment } from 'moment-range';
 
 
 const db = DatabaseConnection.getConnection();
@@ -40,9 +41,10 @@ const db = DatabaseConnection.getConnection();
   const [finishLunchMinutes, setfinishLunchMinutes] = React.useState(selectDate.getMinutes());
   
   const [frTimes, setfrTimes] = React.useState('');
-  const [frFinTimes, setfrFinTimes] = React.useState();
+  const [frFinTimes, setfrFinTimes] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [selectedWeek, setselectedWeek] = React.useState();
+  var timeList  = []; //array that stores entry details
 
   const onDismiss = React.useCallback(() => {
     setVisible(false)
@@ -181,10 +183,15 @@ const db = DatabaseConnection.getConnection();
      }
    
      else if(projNum=='ABO101597'){
-       return [<Picker.Item key="uniqueID3" label="CLS001 ~ Cluster 1 OHL" value="ABO101597 1" />
+       return [<Picker.Item key="uniqueID3" label="CLS001 ~ Cluster 1 OHL" value="CLS001 ~ Cluster 1 OHL" />
              ]
       }
    
+      else if(projNum=='VOD75860'){
+        return [<Picker.Item key="uniqueID4" label="DN823 Robinson Transport -  Bolts removed from fenc - DN823 Robinsons Transport" value="DN823 Robinson Transport -  Bolts removed from fenc - DN823 Robinsons Transport" />
+              ]
+       }
+
      else{
           return [<Picker.Item key="uniqueID1" label="Client 1" value="Client 1" />,
            <Picker.Item key="uniqueID2" label="Client 2" value="Client 2" />]
@@ -210,15 +217,94 @@ const db = DatabaseConnection.getConnection();
   );*/
   }, []);
 
-  /*var momentObj = moment(currentDate + Hours + Minutes, 'YYYY-MM-DDLT');
-  var dateTime = momentObj.format('YYYY-MM-DDTHH:mm:s');
-  console.log(dateTime);*/
+  const testClash = (d1, d2) => {     //calculating the weight of the conflict.
+    // d1 and d2 in array format
+// [moment from, moment to]
+var count = 0;
+for (var i = 0, t; t = d1[i]; i++) {
+  // use isBetween exclusion
+  if (t.isBetween(d2[0], d2[1], null, '()')) {
+    count++;
+  }
+}
 
-  
+for (var i = 0, t; t = d2[i]; i++) {
+  // use isBetween exclusion
+  if (t.isBetween(d1[0], d1[1], null, '()')) {
+    count++;
+  }
+}
+
+if (count > 1) {
+  return console.log('completely conflict');
+}
+
+if (count > 0) {
+  return console.log('partial conflict');
+}
+
+return console.log('something else');
+}
+
+var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
+
+const time_clash = () => {
+  db.transaction(function (tx) {
+    tx.executeSql(
+      'SELECT * FROM Timesheet WHERE ? < depart AND ? > arrival AND date=?',
+      [frTimes, frFinTimes ,currentDate],
+      (tx, results) => {
+        var temp = [];
+       var len = results.rows.length;
+       console.log('len', len);
+       if(len >= 0 ) {
+         for (let i = 0; i < results.rows.length; ++i) 
+         temp.push(results.rows.item(i));
+         if(len <= 0)
+         {
+            console.log("Time Slot Available " + temp);
+            add_entry()
+         }
+         else{
+            console.log("Error")
+            alert('There is a timesheet conflict, select a different time');
+         }
+       } 
+       else {
+         alert('Cannot Search Entry!');
+       }
+      }
+    );
+  });
+}
+
 
   const add_entry = () => { 
     console.log( selectedWeek, currentDate, projNum, description, frTimes, frFinTimes, Thrs, siteID, dayoftheWeek);
   
+  //   db.transaction(function (tx) {
+  //     tx.executeSql(
+  //       'SELECT * FROM Timesheet WHERE date=?',
+  //       [currentDate],
+  //       (tx, results) => {
+  //         var temp = [];
+  //        var len = results.rows.length;
+  
+  //        console.log('len', len);
+  //        if(len >= 0 ) {
+          
+  //          for (let i = 0; i < results.rows.length; ++i) 
+          
+  //          temp.push(results.rows.item(i));
+  //          console.log(temp);
+  //          temp.forEach()
+  // console.log(temp)
+  //        } else {
+  //          alert('Cannot Search Entry!');
+  //        }
+  //       }
+  //     );
+  //   });
 
     if (!selectedWeek) {
       alert('Please select a end of the week');
@@ -261,8 +347,11 @@ const db = DatabaseConnection.getConnection();
               [
                 {
                   text: 'Ok',
-                  onPress: () => navigation.navigate('Home'),
-                },
+                  onPress: () =>
+                  navigation.replace('Home', {
+                    someParam: 'Param',
+                  }),
+                }
               ],
               { cancelable: false }
             );
@@ -278,10 +367,11 @@ const db = DatabaseConnection.getConnection();
 
     if(toggleCheckBox == false)
 {
+  
     db.transaction(function (tx) {
       tx.executeSql(
         'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?)',
-        [1, selectedWeek, currentDate, 'Lunch', 'Lunch', frTimes, frFinTimes, 0, 'Lunch', dayoftheWeek ],
+        [1, selectedWeek, currentDate, 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek],
         (tx, results) => {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
@@ -311,11 +401,11 @@ const db = DatabaseConnection.getConnection();
   db.transaction(function (tx) {
     tx.executeSql(
       'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?)',
-      [1, selectedWeek, moment(selectedWeek).day("Monday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes, 0, 'Lunch', dayoftheWeek , 
-      1, selectedWeek, moment(selectedWeek).day("Tuesday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes,  0, 'Lunch', dayoftheWeek , 
-      1, selectedWeek, moment(selectedWeek).day("Wednesday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes,  0, 'Lunch', dayoftheWeek ,
-      1, selectedWeek, moment(selectedWeek).day("Thursday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes, 0, 'Lunch', dayoftheWeek ,
-      1, selectedWeek, moment(selectedWeek).day("Friday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes, 0, 'Lunch', dayoftheWeek ],
+      [1, selectedWeek, moment(selectedWeek).day("Monday").format('dddd, MMMM Do YYYY'), "Lunch", 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek , 
+      1, selectedWeek, moment(selectedWeek).day("Tuesday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes,  Thrs, 'Lunch', dayoftheWeek , 
+      1, selectedWeek, moment(selectedWeek).day("Wednesday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes,  Thrs, 'Lunch', dayoftheWeek ,
+      1, selectedWeek, moment(selectedWeek).day("Thursday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek ,
+      1, selectedWeek, moment(selectedWeek).day("Friday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek ],
       (tx, results) => {
         console.log('Results', results.rowsAffected);
         if (results.rowsAffected > 0) {
@@ -398,6 +488,20 @@ const db = DatabaseConnection.getConnection();
     return moment.utc().hours(h).minutes(m).format("HH:mm");
   }
 
+  // const splitTime = (time) => {  //function to split time in hours and minutes seperatly
+  //   var today = new Date();
+  //   var _t = time.split(";");
+  //   today.setHours(_t[0], _t[1], 0, 0);
+  //   return today;
+  // }
+
+  // const validate = (sTime, eTime) => {
+  //   if(+splitTime(sTime) < +splitTime(eTime)) {
+  //     var len = timeList.length;
+  //     return len>0?(+splitTime(timeList[len - 1].e))
+  //   }
+  // }
+
    const calcTotalHrs = () => {
     //setfinishVisible(true)
      var StrtTime = moment(frTimes, "HH:mm");
@@ -419,210 +523,218 @@ const db = DatabaseConnection.getConnection();
   setfinishVisible(true)
  }
 
-  return (
-        <SafeAreaView style={styles.container}>
-        <View>
-          <View style={styles.Weekarrow}>
-            <Text style={{fontWeight: 'bold'}}>Week Ending: {selectedWeek}</Text>
-        <WeekSelector
-            dateContainerStyle={styles.date}
-            whitelistRange={[new Date(2021, 1, 9), new Date()]}
-            weekStartsOn={6}
-            onWeekChanged={saveStartingWeek}
-          />
-          </View>
+ return (
+  <SafeAreaView style={styles.container}>
+  <View>
+    <View style={styles.Weekarrow}>
+      <Text style={{fontWeight: 'bold',  color: '#091629'}}>Week Ending: {selectedWeek}</Text>
+  <WeekSelector
+      dateContainerStyle={styles.date}
+      whitelistRange={[new Date(2021, 1, 9), new Date()]}
+      weekStartsOn={6}
+      onWeekChanged={saveStartingWeek}
+    />
+    </View>
 
-          <View style={styles.section}>
+    <View style={styles.section}>
+      <TimePickerModal style={styles.section}
+  visible={visible}
+  onDismiss={onDismiss}
+  onConfirm={onConfirm}
+  hours={12} // default: current hours
+  minutes={14} // default: current minutes
+  label="Select time" // optional, default 'Select time'
+  cancelLabel="Cancel" // optional, default: 'Cancel'
+  confirmLabel="Ok" // optional, default: 'Ok'
+  animationType="fade" // optional, default is 'none'
+  locale={'en'} // optional, default is automically detected by your system
+
+
+/>
+<Button color="#09253a" style={styles.startTime} icon="walk" onPress={()=> setVisible(true)}>
+  Start: {frTimes}
+</Button>
+
+<TimePickerModal
+  visible={finishvisible}
+  onDismiss={onFinishDismiss}
+  onConfirm={onFinishConfirm}
+  hours={12} // default: current hours
+  minutes={14} // default: current minutes
+  label="Select time" // optional, default 'Select time'
+  cancelLabel="Cancel" // optional, default: 'Cancel'
+  confirmLabel="Ok" // optional, default: 'Ok'
+  animationType="fade" // optional, default is 'none'
+  locale={'en'} // optional, default is automically detected by your system
+
+/>
+<Button color="#09253a" style={styles.endTime} icon="run" onPress={() => setfinishVisible(true)}>
+  Finish: {frFinTimes}
+</Button>
+
+</View>
+
+    <View>
+              <Text style={{fontWeight: 'bold', color: '#091629'}}>
+                  Day of the Week 
+              </Text>
+             <Picker style={styles.datefive}
+              selectedValue={dayoftheWeek}
+              onValueChange=
+              {
+                  saveDayofWeek
+              }>
+                      <Picker.Item label="Monday" value="monday" />
+                      <Picker.Item label="Tuesday" value="tuesday" />
+                      <Picker.Item label="Wednesday" value="wednesday" />
+                      <Picker.Item label="Thursday" value="thursday" />
+                      <Picker.Item label="Friday" value="friday" />
+                      <Picker.Item label="Saturday" value="saturday" />
+                      <Picker.Item label="Sunday" value="sunday" />
+                     
+            </Picker>
+    </View>
+
+
+
+
+    <View style={styles.btn}>
+      <View style={{ flexDirection: 'row' }}>
+        <Text style={styles.titleStyle}>Project No </Text>
+        <View style={styles.pickerStyle}>
+            {<Picker
+                mode='dropdown'
+                selectedValue={projNum}
+                onValueChange={(itemValue, itemIndex) =>
+                    //this.setState({ projNum: itemValue })
+                    setprojNum(itemValue)
+                }>
+                <Picker.Item key="uniqueID9" label="Please Select" value="" />
+                <Picker.Item key="uniqueID10" label="VOD103015 ~ Assure Provide engsupport Oct 1st to Oct 31st 2019" value="VOD103015" />
+                <Picker.Item key="uniqueID11" label="ABO101597 ~ Over head Line works Cluster 1 ~ CLS001 ~ Cluster1 OHL" value="ABO101597" />
+                <Picker.Item key="uniqueID12" label="Client" value="Client" />
+            </Picker>}
+        </View>
+    </View>
+    <View style={{ flexDirection: 'row' }}>
+        <Text style={styles.titleStyle}>Site ID</Text>
+        <View style={styles.pickerStyle2}>
+            {<Picker
+                mode='dropdown'
+                selectedValue={siteID}
+                onValueChange={(itemValue, itemIndex) =>
+                    //this.setState({ siteID: itemValue })
+                    setsiteID(itemValue)
+                }>
+                <Picker.Item label="Please Select" value="" />
+                     {options}
+
+            </Picker>}
+        </View>
+    </View>
+   </View>
+
+
+   
+
+
+<TextInput 
+placeholder="  Description"
+onChangeText={description => setDescription(description)} 
+defaultValue={description}
+style={styles.input}
+
+/>
+
+      <Button color="#09253a" onPress={time_clash}>
+        Add : {Thrs}
+</Button>
+
+      <View style={styles.centeredView}>
+<Modal
+  animationType="slide"
+  transparent={true}
+  visible={modalVisible}
+  onRequestClose={() => {
+    Alert.alert("Modal has been closed.");
+    setModalVisible(!modalVisible);
+  }}
+  
+>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+            <Text>Lunch Entry</Text>
+        
             <TimePickerModal
-        visible={visible}
-        onDismiss={onDismiss}
-        onConfirm={onConfirm}
-        hours={12} // default: current hours
-        minutes={14} // default: current minutes
-        label="Select time" // optional, default 'Select time'
-        cancelLabel="Cancel" // optional, default: 'Cancel'
-        confirmLabel="Ok" // optional, default: 'Ok'
-        animationType="fade" // optional, default is 'none'
-        locale={'en'} // optional, default is automically detected by your system
-      />
-       <Button color="#09253a" style={styles.startTime} icon="walk" onPress={()=> setVisible(true)}>
-        Start: {frTimes}
-      </Button>
+  visible={visible}
+  onDismiss={onDismiss}
+  onConfirm={onConfirm}
+  hours={12} // default: current hours
+  minutes={14} // default: current minutes
+  label="Select time" // optional, default 'Select time'
+  cancelLabel="Cancel" // optional, default: 'Cancel'
+  confirmLabel="Ok" // optional, default: 'Ok'
+  animationType="fade" // optional, default is 'none'
+  locale={'en'} // optional, default is automically detected by your system
+/>
+<Button color="#09253a" style={styles.startTime} icon="clock" onPress={()=> setVisible(true)}>
+  Start: {Hours}:{Minutes}
+</Button>
 
-      <TimePickerModal
-        visible={finishvisible}
-        onDismiss={onFinishDismiss}
-        onConfirm={onFinishConfirm}
-        hours={12} // default: current hours
-        minutes={14} // default: current minutes
-        label="Select time" // optional, default 'Select time'
-        cancelLabel="Cancel" // optional, default: 'Cancel'
-        confirmLabel="Ok" // optional, default: 'Ok'
-        animationType="fade" // optional, default is 'none'
-        locale={'en'} // optional, default is automically detected by your system
-      />
-           <Button color="#09253a" style={styles.endTime} icon="run" onPress={() => setfinishVisible(true)}>
-        Finish: {frFinTimes}
-      </Button>
+<TimePickerModal
+  visible={finishvisible}
+  onDismiss={onFinishDismiss}
+  onConfirm={onFinishConfirm}
+  hours={12} // default: current hours
+  minutes={14} // default: current minutes
+  label="Select time" // optional, default 'Select time'
+  cancelLabel="Cancel" // optional, default: 'Cancel'
+  confirmLabel="Ok" // optional, default: 'Ok'
+  animationType="fade" // optional, default is 'none'
+  locale={'en'} // optional, default is automically detected by your system
+/>
+<Button color="#09253a" style={styles.endTime} icon="clock" onPress={()=> setfinishVisible(true)}>
+  Finish: {finishHours}:{finishMinutes}
+</Button>
+
       
-     </View>
+        <CheckBox style={styles.check}
+      disabled={false}
+      value={toggleCheckBox}
+      onValueChange={(newValue) => setToggleCheckBox(newValue)}
+    />
 
-          <View>
-                    <Text style={{fontWeight: 'bold'}}>
-                        Day of the Week 
-                    </Text>
-                   <Picker style={styles.datefive}
-                    selectedValue={dayoftheWeek}
-                    onValueChange=
-                    {
-                        saveDayofWeek
-                    }>
-                            <Picker.Item label="Monday" value="monday" />
-                            <Picker.Item label="Tuesday" value="tuesday" />
-                            <Picker.Item label="Wednesday" value="wednesday" />
-                            <Picker.Item label="Thursday" value="thursday" />
-                            <Picker.Item label="Friday" value="friday" />
-                            <Picker.Item label="Saturday" value="saturday" />
-                            <Picker.Item label="Sunday" value="sunday" />
-                           
-                            </Picker>
-                            </View>
   
-          <View style={styles.btn}>
-            <View style={{ flexDirection: 'row' }}>
-              <Text style={styles.titleStyle}>Project No</Text>
-              <View style={styles.pickerStyle}>
-                  {<Picker
-                      mode='dropdown'
-                      selectedValue={projNum}
-                      //onPress={() => save()}
-                      onValueChange={(itemValue, itemIndex) =>
-                          //this.setState({ projNum: itemValue })
-                          setprojNum(itemValue)
-                      }>
-                      <Picker.Item key="uniqueID9" label="Please Select" value="" />
-                      <Picker.Item key="uniqueID10" label="VOD103015 ~ Assure Provide engsupport Oct 1st to Oct 31st 2019" value="VOD103015" />
-                      <Picker.Item key="uniqueID11" label="ABO101597 ~ Over head Line works Cluster 1 ~ CLS001 ~ Cluster1 OHL" value="ABO101597" />
-                      <Picker.Item key="uniqueID12" label="Client" value="Client" />
-                  </Picker>}
-              </View>
-          </View>
-          <View style={{ flexDirection: 'row' }}>
-              <Text style={styles.titleStyle}>Site ID</Text>
-              <View style={styles.pickerStyle2}>
-                  {<Picker
-                      mode='dropdown'
-                      selectedValue={siteID}
-                      onValueChange={(itemValue, itemIndex) =>
-                          //this.setState({ siteID: itemValue })
-                          setsiteID(itemValue)
-                      }>
-                      <Picker.Item label="Please Select" value="" />
-                           {options}
-  
-                  </Picker>}
-              </View>
-          </View>
-         </View>
 
+    <Text style={styles.sameWeek}>Same for the week</Text>
 
-        
-      <TextInput 
-      placeholder="  Description"
-      onChangeText={description => setDescription(description)} 
-      defaultValue={description}
-      style={styles.input}
-      
-      />
+    
 
-      <Button onPress={calcTotalHrs}>
-          Total hrs: {Thrs}
-      </Button>
+    <Button color="#09253a" onPress={add_lunch} style={styles.addButton}>
+                Add
+        </Button>
 
-      <Button color="#09253a" onPress={add_entry}>
-              Add : {Thrs}
-      </Button>
-
-            <View style={styles.centeredView}>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
-          setModalVisible(!modalVisible);
-        }}
-      >
-                <View style={styles.centeredView}>
-                  <View style={styles.modalView}>
-                  <Text>Lunch Entry</Text>
-              
-                  <TimePickerModal
-        visible={visible}
-        onDismiss={onDismiss}
-        onConfirm={onConfirm}
-        hours={12} // default: current hours
-        minutes={14} // default: current minutes
-        label="Select time" // optional, default 'Select time'
-        cancelLabel="Cancel" // optional, default: 'Cancel'
-        confirmLabel="Ok" // optional, default: 'Ok'
-        animationType="fade" // optional, default is 'none'
-        locale={'en'} // optional, default is automically detected by your system
-      />
-      <Button color="#09253a" style={styles.startTime} icon="walk" onPress={()=> setVisible(true)}>
-        Start: {frTimes}
-      </Button>
-
-      <TimePickerModal
-        visible={finishvisible}
-        onDismiss={onFinishDismiss}
-        onConfirm={onFinishConfirm}
-        hours={12} // default: current hours
-        minutes={14} // default: current minutes
-        label="Select time" // optional, default 'Select time'
-        cancelLabel="Cancel" // optional, default: 'Cancel'
-        confirmLabel="Ok" // optional, default: 'Ok'
-        animationType="fade" // optional, default is 'none'
-        locale={'en'} // optional, default is automically detected by your system
-      />
-           <Button color="#09253a" style={styles.endTime} icon="run" onPress={() => setfinishVisible(true)}>
-        Finish: {frFinTimes}
-      </Button>
-      
-            
-              <CheckBox style={styles.check}
-            disabled={false}
-            value={toggleCheckBox}
-            onValueChange={(newValue) => setToggleCheckBox(newValue)}
-          />
-
-        
-
-          <Text style={styles.sameWeek}>Same for the week</Text>
-
-          <Button color="#09253a" onPress={add_lunch}>
-                      Add
-              </Button>
-
-                    <Pressable
-                      style={[styles.button, styles.buttonClose]}
-                      onPress={() => setModalVisible(!modalVisible)}
-                    ><Text style={styles.textStyle}>Hide Modal</Text>
-                      
-                    </Pressable>
-                  </View>
-                </View>
-              </Modal>
-              <Pressable
-                style={[styles.button, styles.buttonOpen]}
-                onPress={() => setModalVisible(true)}
+              <Pressable 
+                style={[styles.button, styles.buttonClose]}
+                onPress={() => setModalVisible(!modalVisible)}
               >
-                <Text style={styles.textStyle}>Show Modal</Text>
+              <Text style={styles.textStyle}>Hide Modal</Text>
+                
               </Pressable>
             </View>
-              
           </View>
-      </SafeAreaView>
+        </Modal>
+        <Pressable
+          style={[styles.button, styles.buttonOpen]}
+          onPress={() => setModalVisible(true)}
+        >
+          <Text style={styles.textStyle}>Add Lunch</Text>
+        </Pressable>
+      </View>
+        
+
+    </View>
+</SafeAreaView>
    );
    }
    
@@ -649,7 +761,7 @@ const db = DatabaseConnection.getConnection();
             width:370,
             marginTop:-70,
             marginBottom: 30,
-            backgroundColor: '#e8dddc',
+            backgroundColor: '#e1ecf2',
             borderRadius: 20,
             fontWeight: 'bold'
            },
@@ -703,7 +815,9 @@ const db = DatabaseConnection.getConnection();
              section: {
               alignItems: 'center',
               justifyContent: 'center',
-              marginTop: 30
+              marginTop: 5,
+              marginBottom: 25
+              
              },
              
              input: {
@@ -718,7 +832,8 @@ const db = DatabaseConnection.getConnection();
             marginLeft:20,
             marginTop:10,
             padding:-10,
-            fontWeight:'bold'
+            fontWeight:'bold',
+            color: '#091629'
             },
         
           pickerStyle: {
@@ -727,6 +842,7 @@ const db = DatabaseConnection.getConnection();
             padding: -15,
             marginTop:35,
             marginRight: -40,
+            color: '#091629'
             },
         
             pickerStyle2: {
@@ -754,12 +870,14 @@ const db = DatabaseConnection.getConnection();
                 elevation: 5
               },
               button: {
+                backgroundColor: '#091629',
                 borderRadius: 20,
                 padding: 10,
                 elevation: 2
+                
               },
               buttonOpen: {
-                backgroundColor: "#F194FF",
+                backgroundColor: "#091629",
               },
               buttonClose: {
                 backgroundColor: "#2196F3",
@@ -778,6 +896,7 @@ const db = DatabaseConnection.getConnection();
               },
         
               textStyle: {
+                backgroundColor: '#091629',
                 color: "white",
                 fontWeight: "bold",
                 textAlign: "center"

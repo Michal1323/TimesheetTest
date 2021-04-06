@@ -1,17 +1,17 @@
 import * as React from 'react';
-import { StyleSheet, View, Text, FlatList, SafeAreaView, TouchableHighlight} from 'react-native';
-import { Button, DataTable, Portal } from 'react-native-paper';
-import { Collapse, CollapseHeader, CollapseBody } from "accordion-collapse-react-native";
+import { StyleSheet, View, Text, Image, StatusBar, Animated} from 'react-native';
+import { Button, IconButton, Card } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
-import { Thumbnail, ListItem, Separator, Item } from 'native-base';
 import moment from 'moment';
 import WeekSelector from 'react-native-week-selector';
-import { StatusBar } from 'expo-status-bar';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import _ from "lodash";
-import { DatabaseConnection } from '../components/database-connection';
-import { TouchableOpacity } from 'react-native'
 import Dialog from "react-native-dialog";
+import { DatabaseConnection } from '../components/database-connection';
+import { TouchableOpacity } from 'react-native';
+import { colors } from 'react-native-elements';
+
+
 const db = DatabaseConnection.getConnection();
 
 
@@ -23,22 +23,57 @@ export default function Home ({ navigation }) {
   const [Minutes, setMinutes] = React.useState('');
   const [FINHours, setFINHours] = React.useState('');
   const [FINMinutes, setFINMinutes] = React.useState('');
-  const [Week, setWeek] = React.useState();
   const [dayoftheWeek, setDayoftheWeek] = React.useState('');
+  const [Week, setWeek] = React.useState();
   const [currentDate, setCurrentDate] = React.useState('');
   const [formatDay, setformatDay] = React.useState('');
   const [visible, setVisible] = React.useState(false);
   const [ columns, setColumns ] = React.useState([
-    
     "Project",
     "Site",
     "Start/End",
     "Total"
   ])
-  const [ direction, setDirection ] = React.useState(null)
-  const [ selectedColumn, setSelectedColumn ] = React.useState(null)
+  const [ direction, setDirection ] = React.useState(null);
+  const [ selectedColumn, setSelectedColumn ] = React.useState(null);
+  const [totalHrsforday, settotalHrsforday] = React.useState([]);
+  var timeList = [];
+  /*_onPressButton  = () => {
+    alert(
+      <Text>pop</Text>
+        )
+      }*/
+
+      const BG_IMG = 'https://www.solidbackgrounds.com/images/950x350/950x350-snow-solid-color-background.jpg';
+
+      const SPACING = 20;
+      const AVATAR_SIZE = 30;
+      const ITEM_SIZE = AVATAR_SIZE + SPACING *3;
+      const scrollY = React.useRef(new Animated.Value(0)).current;         
 
 
+      const colors = {
+        themeColor: "#4263ec",
+        white: "#fff",
+        background: "#f4f6fc",
+        greyish: "#a4a4a4",
+        tint: "#2b49c3",
+      }
+
+      const showDialog = () => {
+        setVisible(true);
+      };
+    
+      const handleCancel = () => {
+        setVisible(false);
+      };
+  
+      const handleDelete = () => {
+        // The user has pressed the "Delete" button, so here you can do your own logic.
+        // ...Your logic
+        setVisible(false);
+      };
+  
     const pressHandler = () => 
     {
       navigation.navigate('Hour')
@@ -49,77 +84,31 @@ export default function Home ({ navigation }) {
       navigation.navigate('ViewEntry')
     }
 
-    const showDialog = () => {
-      setVisible(true);
-    };
-  
-    const handleCancel = () => {
-      setVisible(false);
-    };
-
-    const handleDelete = () => {
-      // The user has pressed the "Delete" button, so here you can do your own logic.
-      // ...Your logic
-      setVisible(false);
-    };
-
-
-  let SearchEntry = () => {
-      db.transaction((tx) => {
-     tx.executeSql(
-       'SELECT * FROM Timesheet WHERE date = ?',
-       [currentDate],
-       (tx, results) => {
-         //var temp = [];
-         //for (let i = 0; i < results.rows.length; ++i)
-           //temp.push(results.rows.item(i));
-         //setFlatListItems(temp);
-         var temp = [];
-         var len = results.rows.length;
-         console.log('len', len);
-         if(len >= 0 ) {
-          
-           for (let i = 0; i < results.rows.length; ++i)
-          
-           temp.push(results.rows.item(i));
-           setFlatListItems(temp);
-
-         } else {
-           alert('Cannot Search Entry!');
-         }
-                       }
-     );
-                     });
-                         };
-
-                         
-
     const saveDayofWeek = (itemValue, itemIndex) => {
       setDayoftheWeek(itemValue);
-      //SearchEntry()
-      //var next = getNextDay(itemValue);
-      var next = moment(Week).day(itemValue).format('L') 
+  
+      var next = getNextDay(itemValue);
       //console.log(next.getTime());
-      console.log(moment(next).format('L'));
-      setCurrentDate(moment(next).format('L'));
-      setformatDay(moment(next).format('L'));
+      console.log(moment(next.getTime()).format('L'));
+      setCurrentDate(moment(next.getTime()).format('L'));
+      setformatDay(moment(next.getTime()).format('MMM Do'));
     }
+  
     const getNextDay = (dayName) => {
       var todayDate = new Date(Week);
       var now = todayDate.getDay();
-      console.log('now:' + now)
+  
       // Days of the week
-    var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    var daysoftheweek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   
     // The index for the day you want
-    var day = days.indexOf(dayName.toLowerCase());
+    var Indexofday = daysoftheweek.indexOf(dayName.toLowerCase());
   
     // Find the difference between the current day and the one you want
     // If it's the same day as today (or a negative number), jump to the next week
-    var diff = day - now;
-    console.log('diff:' + diff);
-    diff = diff < 0 ? 7 + diff  : diff;
-    console.log('new dff:' + diff)
+    var diff = Indexofday - now;
+    diff = diff < 1 ? diff : diff;
+  
     // Get the timestamp for the desired day
     var nextDayTimestamp = todayDate.getTime() + (1000 * 60 * 60 * 24 * diff);
   
@@ -128,183 +117,384 @@ export default function Home ({ navigation }) {
   
     }
 
-    
- 
-
     const saveWEEK = (value) => {
       moment.locale('en');
       console.log("saveStartingWeek - value:", moment(value).format('L'));
         setWeek(moment(value).format('L'));
     }
 
-    React.useEffect(() => {
-      db.transaction(function (txn) {
-        txn.executeSql(
-          "SELECT name FROM sqlite_master WHERE type='table' AND name='Timesheet'",
+    /*React.useEffect(() => {
+      db.transaction((tx) => {
+        tx.executeSql(
+          'SELECT * FROM Timesheet',
           [],
-          function (txn, res) {
-            console.log('item:', res.rows.length);
-            if (res.rows.length == 0) {
-              txn.executeSql('DROP TABLE IF EXISTS Timesheet', []);
-              txn.executeSql(
-                'CREATE TABLE IF NOT EXISTS Timesheet(id_timesheet INTEGER PRIMARY KEY AUTOINCREMENT, user_id BIGINT(20), eow DATE, date DATETIME, projNum VARCHAR(30), comment VARCHAR(250), arrival TIME, depart TIME, totalHrs FLOAT, siteID VARCHAR(45), dayoftheweek VARCHAR(45))',
-                []
-              );
-            }
+          (tx, results) => {
+            var temp = [];
+            for (let i = 0; i < results.rows.length; ++i)
+              temp.push(results.rows.item(i));
+            setFlatListItems(temp);
           }
         );
       });
-    });
+    }, []);*/
+
+    const filterTimeFormat = (time) => {
+      var decimal_places = 2;
+
+      // Maximum number of hours before we should assume minutes were intended. Set to 0 to remove the maximum.
+      var maximum_hours = 15;
     
-    const formatTime = (item) => {
-      var SHours = moment(item.arrivalHours, 'HH');
-      var SMinutes = moment(item.arrivalMinutes, 'mm');
-
-      setHours(SHours.format('HH'));
-      setMinutes(SMinutes.format('mm'));
-
-      var FHours = moment(item.departHours, 'HH');
-      var FMinutes = moment(item.departMinutes, 'mm');
-
-      setFINHours(FHours.format('HH'));
-      setFINMinutes(FMinutes.format('mm'));
-    }
-
-    const sortTable  = (column) => {
-      const newDirection = direction === "desc" ? "asc" : "desc" 
-      const sortedData = _.orderBy(flatListItems, [column],[newDirection]);
-      setSelectedColumn(column);
-      setDirection(newDirection);
-      setFlatListItems(sortedData);
-    }
-
-    const tableHeader = () => (
-      <View style={styles.tableHeader}>
-        {
-          columns.map((column, index) => {
-            {
-              return (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.columnHeader}
-                  onPress={() => sortTable(column)}>
-                  <Text style={styles.columnHeaderTxt}>
-                    {column + " "}
-                    { selectedColumn === column && <MaterialCommunityIcons 
-                      name={direction === "desc" ? "arrow-down-drop-circle" : "arrow-up-drop-circle"} 
-                    />
-                    }
-                  </Text>
-
-                </TouchableOpacity>
-              )
-            }
-          })
+      // 3
+      var int_format = time.match(/^\d+$/);
+      
+      // 1:15
+      var time_format = time.match(/([\d]*):([\d]+)/);
+      console.log('time_format: ' + time_format);
+      // 10m
+      var minute_string_format = time.toLowerCase().match(/([\d]+)m/);
+    
+      // 2h
+      var hour_string_format = time.toLowerCase().match(/([\d]+)h/);
+    
+      // if (minutes >= 60) {
+      //     minutes = minutes - 60;
+      //     hours = hours + 1;
+      //     console.log('min: ' + minutes)
+      //   }
+        
+      if (time_format != null) {
+        var hours = parseInt(time_format[1]);
+        var minutes = parseFloat(time_format[2]/60);
+         if (minutes >= 0) {
+           console.log('greater!!!!');
+         }
+          var time = hours + minutes;
+        
+        
+      } else if (minute_string_format != null || hour_string_format != null) {
+        if (hour_string_format != null) {
+          hours = parseInt(hour_string_format[1]);
+        } else {
+          hours = 0;
         }
-      </View>
-    )
+        if (minute_string_format != null) {
+          minutes = parseFloat(minute_string_format[1]/60);
+          
+        } else {
+          minutes = 0;
+        }
+        time = hours + minutes;
+      } else if (int_format != null) {
+        // Entries over 15 hours are likely intended to be minutes.
+        time = parseInt(time);
+        if (maximum_hours > 0 && time > maximum_hours) {
+          time = (time/60).toFixed(decimal_places);
+        }
+      }
     
-// const callBoth = () => 
-//   {
-//     saveDayofWeek()
-//     SearchEntry()
-//   } 
+      // make sure what ever we return is a 2 digit float
+      time = parseFloat(time).toFixed(decimal_places);
+      console.log('time' + time);
+      return time;  
+    }
    
-      return (
-        <SafeAreaView style={{ flex: 1}}>
-          <View style={styles.container}>
-          <View style={{marginLeft: -200, marginTop: -880}}>
-          <WeekSelector
-            whitelistRange={[new Date(2018, 7, 13), new Date()]}
-            weekStartsOn={6}
-            onWeekChanged={saveWEEK}
-          />
-            </View>
+    
+    let SearchEntry = () => {
+      db.transaction((tx) => {
+     tx.executeSql(
+      'SELECT * FROM Timesheet WHERE date = ?',
+      [currentDate],
+       (tx, results) => {
+         //var temp = [];
+         //for (let i = 0; i < results.rows.length; ++i)
+           //temp.push(results.rows.item(i));
+         //setFlatListItems(temp);
+         var temp = [];
+         var len = results.rows.length;
 
+         console.log('len', len);
+         if(len >= 0 ) {
+          
+           for (let i = 0; i < results.rows.length; ++i) {
+             temp.push(results.rows.item(i));
+           }
+           setFlatListItems(temp);
+ console.log(temp)
+         } else {
+           alert('Cannot Search Entry!');
+         }
+                       }
+     );
+                     });
+
+          db.transaction((tx) => {
+          tx.executeSql(
+          'SELECT totalHrs FROM Timesheet WHERE date = ?',
+          [currentDate],
+          (tx, results) => {
+          //for (let i = 0; i < results.rows.length; ++i)
+          //temp.push(results.rows.item(i));
+          //setFlatListItems(temp);
+          var temp = [];
+          let sum = 0 ;
+          var tot = [];
+
+          var len = results.rows.length;
+
+          console.log('len', len);
+          if(len >= 0 ) {
+
+          for (let i = 0; i < results.rows.length; ++i) 
+      
+          temp.push(results.rows.item(i));
+          // console.log("temp" + temp)
+          // const any = ['07:20', '07:52', '05:03', '01:01', '09:02', '06:00'];
+          // const summmm = any.reduce((acc, time) => acc.add(moment.duration(time), moment.duration()));
+          // console.log('summ:  ' + [Math.floor(summmm.asHours()), summmm.minutes()].join(':'));
+
+           temp.forEach((item) => {
             
-          <View style={{borderWidth: 3,  borderColor: 'black', borderRadius: 4, marginRight: -200, marginBottom: 170, marginTop: -765}}>
-            <Picker style={{width: 150, height: 44, backgroundColor: '#FFF0E0', borderColor: 'black', borderWidth: 1, }}
-                    selectedValue={dayoftheWeek}
-                    itemStyle={styles.onePickerItems}
-                    onValueChange=
-                    {
-                        saveDayofWeek
-                    }>
-                            <Picker.Item label={'Sunday' + ' ' +  moment(Week).day("Sunday").format('MMM Do')} value="Sunday" />
-                            <Picker.Item label={'Monday' + ' ' +  moment(Week).day("Monday").format('MMM Do')} value="Monday" />
-                            <Picker.Item label={'Tuesday' + ' ' +  moment(Week).day("Tuesday").format('MMM Do')} value="Tuesday" />
-                            <Picker.Item label={'Wednesday' + ' ' +  moment(Week).day("Wednesday").format('MMM Do')} value="Wednesday" />
-                            <Picker.Item label={'Thursday' + ' ' +  moment(Week).day("Thursday").format('MMM Do')} value="Thursday" />
-                            <Picker.Item label={'Friday' + ' ' +  moment(Week).day("Friday").format('MMM Do')} value="Friday" />
-                            <Picker.Item label={'Saturday' + ' ' +  moment(Week).day("Saturday").format('MMM Do')} value="Saturday" />                           
-                            </Picker>
-          </View>
-          <View style={{flex: 0, marginTop: -100, alignContent: 'center', marginLeft: 130, width: 500, marginBottom: -400}}>
-            <FlatList
-            data={flatListItems}
-            style={{width:"90%", marginLeft: 10}}
-            ListHeaderComponent={tableHeader}
-            stickyHeaderIndices={[0]}
-            keyExtractor={(item, index) => index+""}
-            renderItem={({ item, index }) => {
-              return (
-               
-                <View style={{...styles.tableRow, backgroundColor: index % 2 == 1 ? "#F0FBFC" : "white"}}>
-                  <TouchableHighlight onPress={showDialog}>
-              <Text style={{...styles.columnRowTxt, fontWeight:"bold", width: 80}}>{item.projNum}</Text>
-              </TouchableHighlight>
-              <Text style={styles.columnRowTxt}>{item.siteID}</Text>
-              <Text style={styles.columnRowTxt}>{item.arrival}/{item.depart}</Text>
-              <Text style={styles.columnRowTxt}>{item.totalHrs}</Text>
-              <Dialog.Container visible={visible}>
-              <Dialog.Title>{item.projNum} {" "} {item.siteID}</Dialog.Title>
-              <Dialog.Description>
-                Day : {item.dayoftheweek} 
-              </Dialog.Description>
-              <Dialog.Description>
-                Project Number : {item.projNum}
-                </Dialog.Description>
-              <Dialog.Description>
-                Site ID : {item.siteID}
-                </Dialog.Description>
-              <Dialog.Description>
-                Start Hours : {item.arrival}
-                {" "} End Hours : {item.depart}
-                </Dialog.Description>
-              <Dialog.Description>
-                Total Hrs : {item.totalHrs}
-                </Dialog.Description>
-              <Dialog.Description>
-                Description: {item.comment}
-              </Dialog.Description>
-              <Dialog.Button label="Edit" onPress={handleCancel} />
-              <Dialog.Button label="Delete" onPress={handleDelete} />
-            </Dialog.Container>
-            </View>
-              )
-            }} 
-          />
-          <StatusBar style="auto" />
-          </View>
-            <View style={{marginTop: 590}}>
-<Button icon="plus" onPress={pressHandler}>
-                Add Entry
-           </Button>
-
-
-           <Button icon="magnify" onPress={SearchEntry}>
-           </Button>
-
-           <Button style icon="delete" onPress={deleteHandler}>
-                Delete
-           </Button>
-            </View>
-           
-           
-           </View>
+             tot.push(filterTimeFormat(item.totalHrs));
+             
+             
+          //   //moment(item.totalHrs, "HH:mm")
+           })
+           tot.forEach(function (i){
+             sum = sum + parseFloat(i);
+           }) 
+          
+          var n = new Date(0,0);
+          n.setSeconds(+sum * 60 * 60);
+          settotalHrsforday(n.toTimeString().slice(0,5));
+          console.log('sum: ' + sum + ' TOT: ' + tot + 'time: ' + n.toTimeString().slice(0,5));
+          } 
+          else {
+          alert('Cannot Search Entry!');
+          }
+        }
             
-        </SafeAreaView>
-   );
+          );
+          });
+};
+
+const addTimes = (startTime, endTime) => {
+  var times = [ 0, 0 ]
+  var max = times.length
+
+  var a = (startTime || '').split(':')
+  var b = (endTime || '').split(':')
+
+  // normalize time values
+  for (var i = 0; i < max; i++) {
+    a[i] = isNaN(parseInt(a[i])) ? 0 : parseInt(a[i])
+    b[i] = isNaN(parseInt(b[i])) ? 0 : parseInt(b[i])
+  }
+
+  // store time values
+  for (var i = 0; i < max; i++) {
+    times[i] = b[i] - a[i]
+  }
+
+  var hours = times[0]
+  var minutes = times[1]
+
+
+  if (minutes >= 60) {
+    var h = (minutes / 60) << 0
+    hours += h
+    minutes -= 60 * h
+  }
+
+  var addd = ('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2);
+  console.log(addd);
+
+  return ('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2)
+}
+
+
+
+
+    // const formatTime = (item) => {
+    //   var SHours = moment(item.arrivalHours, 'HH');
+    //   var SMinutes = moment(item.arrivalMinutes, 'mm');
+
+    //   setHours(SHours.format('HH'));
+    //   setMinutes(SMinutes.format('mm'));
+
+    //   var FHours = moment(item.departHours, 'HH');
+    //   var FMinutes = moment(item.departMinutes, 'mm');
+
+    //   setFINHours(FHours.format('HH'));
+    //   setFINMinutes(FMinutes.format('mm'));
+    // }
+
+    // const sortTable  = (column) => {
+    //   const newDirection = direction === "desc" ? "asc" : "desc" 
+    //   const sortedData = _.orderBy(flatListItems, [column],[newDirection]);
+    //   setSelectedColumn(column);
+    //   setDirection(newDirection);
+    //   setFlatListItems(sortedData);
+    // }
+
+    // const tableHeader = () => (
+    //   <View style={styles.tableHeader}>
+    //     {
+    //       columns.map((column, index) => {
+    //         {
+    //           return (
+    //             <TouchableOpacity
+    //               key={index}
+    //               style={styles.columnHeader}
+    //               onPress={() => sortTable(column)}>
+    //               <Text style={styles.columnHeaderTxt}>
+    //                 {column + " "}
+    //                 { selectedColumn === column && <MaterialCommunityIcons 
+    //                   name={direction === "desc" ? "arrow-down-drop-circle" : "arrow-up-drop-circle"} 
+    //                 />
+    //                 }
+    //               </Text>
+
+    //             </TouchableOpacity>
+    //           )
+    //         }
+    //       })
+    //     }
+    //   </View>
+    // )
+  
+  
+   
+   
+    return (
+      <View style={{backgroundColor: colors.white,flex: 1}}>
+         <Image 
+    source={{uri: BG_IMG}}
+    style={StyleSheet.absoluteFillObject}
+    blurRadius={80}
+    />
+<Text style={{marginLeft: 18, marginTop: 20, fontSize: 16, color: '#091629', fontWeight: 'bold'}}>Week Ending                     Day of the Week</Text>
+
+
+      <View style={{
+        marginTop:0,
+        height: 100,
+        width:380,
+        marginLeft: 8,
+        borderWidth: 3,
+        borderColor: 'white',
+        backgroundColor: '#e1ecf2',
+        borderRadius: 20,
+      }}>
+      
+        <WeekSelector
+        whitelistRange={[new Date(2018, 7, 13), new Date()]}
+        weekStartsOn={6}
+        onWeekChanged={saveWEEK}
+      />
+      <IconButton icon="magnify" size={25} style={{marginLeft: 330, marginTop: 25, position: 'absolute', backgroundColor: '#ffffff', borderWidth: 3, borderColor: 'white'}} onPress={SearchEntry} />
+
+      </View>
+
+        
+        <Picker style={{width: 135, height: 44, backgroundColor: '#f2fbff', borderColor: 'white', marginTop: -73, marginLeft: 190 }}
+                selectedValue={dayoftheWeek}
+                itemStyle={{fontWeight: 'bold'}}
+                onValueChange=
+                {
+                    saveDayofWeek
+                }>
+                  
+                        <Picker.Item label={'Monday' + ' ' +  moment(Week).day("Monday").format('MMM Do')} value="monday" />
+                        <Picker.Item label={'Tuesday' + ' ' +  moment(Week).day("Tuesday").format('MMM Do')} value="tuesday" />
+                        <Picker.Item label={'Wednesday' + ' ' +  moment(Week).day("Wednesday").format('MMM Do')} value="wednesday" />
+                        <Picker.Item label={'Thursday' + ' ' +  moment(Week).day("Thursday").format('MMM Do')} value="thursday" />
+                        <Picker.Item label={'Friday' + ' ' +  moment(Week).day("Friday").format('MMM Do')} value="friday" />
+                        <Picker.Item label={'Saturday' + ' ' +  moment(Week).day("Saturday").format('MMM Do')} value="saturday" />
+                        <Picker.Item label={'Sunday' + ' ' +  moment(Week).day("Sunday").format('MMM Do')} value="sunday" />
+                       
+                        </Picker>
+       
+        {/* <View>
+        <Text style={{marginLeft: 148, marginTop: 100, fontSize: 16, color: '#a1a1a1', fontWeight: 'bold'}}>Add an Entry</Text>
+        <IconButton icon="plus" size={45} style={{marginLeft: 160,  backgroundColor: '#ffffff', color:'#091629', borderWidth: 3, borderColor: 'white',}} onPress={pressHandler} />
+        </View>  */}
+        
+        <Text style={{fontWeight: '700', fontSize: 20, color: '#091629', marginLeft: 20, marginTop: 30}}>{moment(currentDate).format('dddd, MMMM Do')}  </Text> 
+        <Text style={{backgroundColor: "#091629", borderColor: 'black', paddingHorizontal: 25, paddingTop: 5, borderRadius: 10, height: 40, fontSize: 20, fontWeight: 'bold', color: '#f2fbff' ,width: 300, marginTop: 5, marginLeft: 60, borderWidth: 3}}>Day Total Hours: {totalHrsforday}</Text>
+             
+          <Animated.FlatList 
+    data={flatListItems}
+    onScroll={
+        Animated.event(
+            [{nativeEvent: {contentOffset: {y: scrollY}}}],
+            [{ useNativeDriver: true}]
+        )
+    }
+    keyExtractor={item => item.key}
+    contentContainerStyle={{
+        padding: SPACING,
+        paddingTop: StatusBar.currentHeight
+    }}
+    renderItem={({item, index}) => {
+        const inputRange = [
+            -1,
+            0,
+            ITEM_SIZE * index,
+            ITEM_SIZE * (index + 2)
+        ]
+        const opacityInputRange = [
+            -1,
+            0,
+            ITEM_SIZE * index,
+            ITEM_SIZE * (index + 1)
+        ]
+
+        const scale = scrollY.interpolate({
+            inputRange,
+            outputRange: [1, 1, 1, 0]
+        })
+
+        const opacity = scrollY.interpolate({
+            inputRange: opacityInputRange,
+            outputRange: [1, 1, 1, 0]
+        })
+
+
+        return <Animated.View style={{flexDirection: 'row', padding: SPACING, marginBottom: SPACING, backgroundColor: 'rgba(255,255,255,0.8)', borderRadius: 12,
+            shadowColor: '#000',
+            shadowOffset: {
+                width: 0,
+                height: 10
+            },
+            shadowOpacity: 0.3,
+            shadowRadius: 20,
+            opacity,
+            transform: [{scale}]
+        }}>
+            
+            <View>
+            <Text style={{fontWeight: '700', fontSize: 24, color: '#091629'}}>{item.projNum}  </Text> 
+                  <Text style={{opacity: .7, fontSize: 15}}>  {item.projNum} - {item.siteID}</Text>
+                <Text style={{fontWeight: '700', fontSize: 14, color: '#091629'}}>  {item.arrival} - {item.depart}     Duration : {item.totalHrs}</Text>
+              
+                
+            </View>
+        </Animated.View>   
+    }}
+    />
+    <View>
+    <Button style icon="plus" onPress={pressHandler}>
+            Add
+       </Button>
+       <Button style icon="delete" onPress={deleteHandler}>
+            Delete
+       </Button>
+        </View>
+       
+  </View>
+        
+);
+            
    }
     /*
     <View style={{marginLeft: -200, marginTop: -550}}>
@@ -316,11 +506,11 @@ export default function Home ({ navigation }) {
    
    const styles = StyleSheet.create({
        container:{
-         backgroundColor: '#fff',
+         backgroundColor: colors.themeColor,
          alignItems: 'center',
            justifyContent: 'center',
            flex: 1,
-           paddingTop: 80
+           paddingBottom: 150
            },
            
          text:{
@@ -405,7 +595,6 @@ export default function Home ({ navigation }) {
             onePickerItems: {
               height: 44,
               color: 'blue',
-              fontWeight: 'bold'
             },
             tableHeader: {
               flexDirection: "row",
@@ -419,7 +608,7 @@ export default function Home ({ navigation }) {
             },
             tableRow: {
               flexDirection: "row",
-              height: 40,
+              height: 50,
               alignItems:"center",
             },
             columnHeader: {
