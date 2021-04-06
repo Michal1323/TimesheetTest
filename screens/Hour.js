@@ -474,6 +474,7 @@ const time_clash = () => {
     moment.locale('en')
         console.log("saveStartingWeek - value:", moment(value).format("L"));
         setselectedWeek(moment(value).format("L"));
+        //setselectedWeek(navigation.getParam('eow'));
         //setselectedWeek(new Date(value).toString());
 
   }
@@ -527,7 +528,7 @@ const time_clash = () => {
   <SafeAreaView style={styles.container}>
   <View>
     <View style={styles.Weekarrow}>
-      <Text style={{fontWeight: 'bold',  color: '#091629'}}>Week Ending: {selectedWeek}</Text>
+      <Text style={{fontWeight: 'bold',  color: '#091629'}}>Week Ending: {selectedWeek}{navigation.getParam('eow')}</Text>
   <WeekSelector
       dateContainerStyle={styles.date}
       whitelistRange={[new Date(2021, 1, 9), new Date()]}

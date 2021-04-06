@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StyleSheet, View, Text, Image, StatusBar, Animated} from 'react-native';
+import { StyleSheet, View, Text, Image, StatusBar, Animated, TouchableOpacity} from 'react-native';
 import { Button, IconButton, Card } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
@@ -8,8 +8,8 @@ import { MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import _ from "lodash";
 import Dialog from "react-native-dialog";
 import { DatabaseConnection } from '../components/database-connection';
-import { TouchableOpacity } from 'react-native';
 import { colors } from 'react-native-elements';
+import AwesomeAlert from 'react-native-awesome-alerts';
 
 
 const db = DatabaseConnection.getConnection();
@@ -28,6 +28,7 @@ export default function Home ({ navigation }) {
   const [currentDate, setCurrentDate] = React.useState('');
   const [formatDay, setformatDay] = React.useState('');
   const [visible, setVisible] = React.useState(false);
+  const [showAlert, setshowAlert] = React.useState(false);
   const [ columns, setColumns ] = React.useState([
     "Project",
     "Site",
@@ -60,20 +61,22 @@ export default function Home ({ navigation }) {
         tint: "#2b49c3",
       }
 
-      const showDialog = () => {
-        setVisible(true);
+      const popAlert = (item) => 
+      {
+          setshowAlert (true);
+      }
+     
+      const hideAlert = () => 
+      {
+          setshowAlert (false);
       };
-    
-      const handleCancel = () => {
-        setVisible(false);
-      };
+
+      const AlertHandler = (item) => 
+      {
+        navigation.navigate('Hour', item)
+      }
   
-      const handleDelete = () => {
-        // The user has pressed the "Delete" button, so here you can do your own logic.
-        // ...Your logic
-        setVisible(false);
-      };
-  
+     
     const pressHandler = () => 
     {
       navigation.navigate('Hour')
@@ -421,7 +424,6 @@ const addTimes = (startTime, endTime) => {
         
         <Text style={{fontWeight: '700', fontSize: 20, color: '#091629', marginLeft: 20, marginTop: 30}}>{moment(currentDate).format('dddd, MMMM Do')}  </Text> 
         <Text style={{backgroundColor: "#091629", borderColor: 'black', paddingHorizontal: 25, paddingTop: 5, borderRadius: 10, height: 40, fontSize: 20, fontWeight: 'bold', color: '#f2fbff' ,width: 300, marginTop: 5, marginLeft: 60, borderWidth: 3}}>Day Total Hours: {totalHrsforday}</Text>
-             
           <Animated.FlatList 
     data={flatListItems}
     onScroll={
@@ -459,7 +461,6 @@ const addTimes = (startTime, endTime) => {
             outputRange: [1, 1, 1, 0]
         })
 
-
         return <Animated.View style={{flexDirection: 'row', padding: SPACING, marginBottom: SPACING, backgroundColor: 'rgba(255,255,255,0.8)', borderRadius: 12,
             shadowColor: '#000',
             shadowOffset: {
@@ -471,17 +472,38 @@ const addTimes = (startTime, endTime) => {
             opacity,
             transform: [{scale}]
         }}>
-            
+            <TouchableOpacity onPress={popAlert}>
             <View>
             <Text style={{fontWeight: '700', fontSize: 24, color: '#091629'}}>{item.projNum}  </Text> 
                   <Text style={{opacity: .7, fontSize: 15}}>  {item.projNum} - {item.siteID}</Text>
                 <Text style={{fontWeight: '700', fontSize: 14, color: '#091629'}}>  {item.arrival} - {item.depart}     Duration : {item.totalHrs}</Text>
-              
-                
-            </View>
+           </View>
+            </TouchableOpacity>  
+            <AwesomeAlert
+          show={showAlert}
+          showProgress={false}
+          title="AwesomeAlert"
+          message="I have a message for you!"
+          closeOnTouchOutside={true}
+          closeOnHardwareBackPress={false}
+          showCancelButton={true}
+          showConfirmButton={true}
+          confirmText="Delete"
+          cancelText="Edit"
+          confirmButtonColor="#DD6B55"
+          onCancelPressed={() => {
+            AlertHandler();
+            hideAlert()
+          }}
+          onConfirmPressed={() => {
+            hideAlert();
+          }}
+        />
         </Animated.View>   
+        
     }}
     />
+    
     <View>
     <Button style icon="plus" onPress={pressHandler}>
             Add
