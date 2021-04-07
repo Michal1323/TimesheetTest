@@ -613,7 +613,8 @@ const time_clash = () => {
                 <Picker.Item key="uniqueID9" label="Please Select" value="" />
                 <Picker.Item key="uniqueID10" label="VOD103015 ~ Assure Provide engsupport Oct 1st to Oct 31st 2019" value="VOD103015" />
                 <Picker.Item key="uniqueID11" label="ABO101597 ~ Over head Line works Cluster 1 ~ CLS001 ~ Cluster1 OHL" value="ABO101597" />
-                <Picker.Item key="uniqueID12" label="Client" value="Client" />
+                <Picker.Item key="uniqueID12" label="VOD75860 ~ DN823 Robinsons Transport" value="VOD75860" />
+                <Picker.Item key="uniqueID13" label="Client" value="Client" />
             </Picker>}
         </View>
     </View>

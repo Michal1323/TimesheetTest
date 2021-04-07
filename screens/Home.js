@@ -29,6 +29,7 @@ export default function Home ({ navigation }) {
   const [formatDay, setformatDay] = React.useState('');
   const [visible, setVisible] = React.useState(false);
   const [showAlert, setshowAlert] = React.useState(false);
+  const [IDtimesheet, setIDtimesheet] = React.useState('');
   const [ columns, setColumns ] = React.useState([
     "Project",
     "Site",
@@ -61,7 +62,7 @@ export default function Home ({ navigation }) {
         tint: "#2b49c3",
       }
 
-      const popAlert = (item) => 
+      const popAlert = () => 
       {
           setshowAlert (true);
       }
@@ -71,11 +72,6 @@ export default function Home ({ navigation }) {
           setshowAlert (false);
       };
 
-      const AlertHandler = (item) => 
-      {
-        navigation.navigate('Hour', item)
-      }
-  
      
     const pressHandler = () => 
     {
@@ -315,6 +311,36 @@ const addTimes = (startTime, endTime) => {
 }
 
 
+let deleteEntry = () => {
+  db.transaction((tx) => {
+    tx.executeSql(
+      'DELETE * FROM Timesheet where id_timesheet=?',
+      [IDtimesheet],
+      (tx, results) => {
+        console.log('Results', results.rowsAffected);
+        if (results.rowsAffected > 0) {
+          Alert.alert(
+            'Sucess',
+            'Entry removed from Dataase',
+            [
+              {
+                text: 'Ok',
+                onPress: () =>
+                navigation.replace('Home', {
+                  someParam: 'Param',
+                }),
+              },
+            ],
+            { cancelable: false }
+          );
+        } else {
+          alert('Entry could not be deleted');
+        }
+      }
+    );
+  });
+};
+
 
 
     // const formatTime = (item) => {
@@ -461,6 +487,8 @@ const addTimes = (startTime, endTime) => {
             outputRange: [1, 1, 1, 0]
         })
 
+        {setIDtimesheet(item.id_timesheet)}
+
         return <Animated.View style={{flexDirection: 'row', padding: SPACING, marginBottom: SPACING, backgroundColor: 'rgba(255,255,255,0.8)', borderRadius: 12,
             shadowColor: '#000',
             shadowOffset: {
@@ -492,11 +520,13 @@ const addTimes = (startTime, endTime) => {
           cancelText="Edit"
           confirmButtonColor="#DD6B55"
           onCancelPressed={() => {
-            AlertHandler();
             hideAlert()
+            navigation.navigate('EditSheet', item)
           }}
           onConfirmPressed={() => {
             hideAlert();
+            deleteEntry();
+            
           }}
         />
         </Animated.View>   

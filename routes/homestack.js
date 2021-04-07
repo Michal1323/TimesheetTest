@@ -5,6 +5,7 @@ import Login from '../screens/login';
 import Home from '../screens/Home';
 import Hour from '../screens/Hour';
 import ViewEntry from '../screens/ViewEntry';
+import EditSheet from '../screens/EditSheet';
 import ListView from '../screens/ListView';
 import Header from '../components/Header';
 
@@ -44,6 +45,17 @@ Hour:
     navigationOptions:({ navigation }) => {
     return {
       headerTitle: () => <Header navigation={navigation} title='Enter hours' />,
+      headerLeft: () => null
+          }
+    }
+},
+
+EditSheet:
+  {
+    screen: EditSheet,
+    navigationOptions:({ navigation }) => {
+    return {
+      headerTitle: () => <Header navigation={navigation} title='Edit' />,
       headerLeft: () => null
           }
     }
