@@ -333,12 +333,13 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
       );
     });
   };
+  
 
   let options  = renderUserNames();
 
   const saveDayofWeek = (itemValue, itemIndex) => {
     setDayoftheWeek(itemValue);
-    var next = getNextDay(itemValue);
+    var next = getNextDay(dayoftheWeek);
     //console.log(next.getTime());
     moment.locale('en');
     console.log(moment(next.getTime()).format("L"));
@@ -372,8 +373,8 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
 
   const saveStartingWeek = () => {
     moment.locale('en')
-        console.log("saveStartingWeek - value:", moment(value).format("L"));
-        setselectedWeek(moment(value).format("L"));
+        console.log("saveStartingWeek - value:", moment(value).add(5, "days").format("L"));
+        setselectedWeek(moment(value).add(5, "days").format("L"));
         //setselectedWeek(navigation.getParam('eow'));
         //setselectedWeek(new Date(value).toString());
 
@@ -430,6 +431,7 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
     <View>
       <View style={styles.Weekarrow}>
         <Text style={{fontWeight: 'bold',  color: '#091629'}}>Week Ending: {selectedWeek}</Text>
+        <Text style={{fontWeight: 'bold',  color: '#091629'}}>Week day: {moment(currentDate).format('dddd MMM Do')}</Text>
       </View>
   
       <View style={styles.section}>

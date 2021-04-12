@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StyleSheet, View, Text, Image, StatusBar, Animated, TouchableOpacity} from 'react-native';
+import { StyleSheet, View, Text, Image, StatusBar, Animated, TouchableOpacity, Alert} from 'react-native';
 import { Button, IconButton, Card } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
@@ -10,7 +10,7 @@ import Dialog from "react-native-dialog";
 import { DatabaseConnection } from '../components/database-connection';
 import { colors } from 'react-native-elements';
 import AwesomeAlert from 'react-native-awesome-alerts';
-
+import AsyncStorage from "@react-native-community/async-storage";
 
 const db = DatabaseConnection.getConnection();
 
@@ -75,6 +75,7 @@ export default function Home ({ navigation }) {
      
     const pressHandler = () => 
     {
+      save();
       navigation.navigate('Hour')
     }
 
@@ -118,8 +119,8 @@ export default function Home ({ navigation }) {
 
     const saveWEEK = (value) => {
       moment.locale('en');
-      console.log("saveStartingWeek - value:", moment(value).format('L'));
-        setWeek(moment(value).format('L'));
+      console.log("saveStartingWeek - value:", moment(value).add(5, "days").format('L'));
+        setWeek(moment(value).add(5, "days").format('L'));
     }
 
     /*React.useEffect(() => {
@@ -197,8 +198,39 @@ export default function Home ({ navigation }) {
       return time;  
     }
    
+
+    let Update = () => {
+      save();
+      db.transaction((tx) => {
+     tx.executeSql(
+      'SELECT * FROM Timesheet WHERE date = ?',
+      [currentDate],
+       (tx, results) => {
+         //var temp = [];
+         //for (let i = 0; i < results.rows.length; ++i)
+           //temp.push(results.rows.item(i));
+         //setFlatListItems(temp);
+         var temp = [];
+         var len = results.rows.length;
+
+         console.log('len', len);
+         if(len >= 0 ) {
+          
+           for (let i = 0; i < results.rows.length; ++i) {
+             temp.push(results.rows.item(i));
+           }
+           setFlatListItems(temp);
+ console.log(temp)
+         } else {
+           alert('Cannot Search Entry!');
+         }
+                       }
+                       );
+                      });
+            };
     
     let SearchEntry = () => {
+      save();
       db.transaction((tx) => {
      tx.executeSql(
       'SELECT * FROM Timesheet WHERE date = ?',
@@ -313,8 +345,9 @@ const addTimes = (startTime, endTime) => {
 
 let deleteEntry = () => {
   db.transaction((tx) => {
+    console.log("Sample " + IDtimesheet); 
     tx.executeSql(
-      'DELETE * FROM Timesheet where id_timesheet=?',
+      'DELETE FROM Timesheet WHERE id_timesheet = ?',
       [IDtimesheet],
       (tx, results) => {
         console.log('Results', results.rowsAffected);
@@ -325,11 +358,8 @@ let deleteEntry = () => {
             [
               {
                 text: 'Ok',
-                onPress: () =>
-                navigation.replace('Home', {
-                  someParam: 'Param',
-                }),
-              },
+                onPress: Update()
+              }
             ],
             { cancelable: false }
           );
@@ -341,58 +371,51 @@ let deleteEntry = () => {
   });
 };
 
+ const save = async () => {
+    try{
+      await AsyncStorage.setItem("MyWeekEnding", Week)
+      await AsyncStorage.setItem("MyWeek", currentDate)
+      await AsyncStorage.setItem("MyDays", dayoftheWeek)
+    }
+    catch (err)
+    {
+      alert(err)
+    }
+  };
+
+  const load = async () => {
+    try{
+     let Week = await AsyncStorage.getItem("MyWeekEnding")
+     let currentDate = await AsyncStorage.getItem("MyWeek")
+     let dayoftheWeek = await AsyncStorage.getItem("MyDays")
+
+     if(Week !== null)
+     {
+      setWeek(Week)
+     }
+     
+     if(currentDate !== null)
+     {
+      setCurrentDate(currentDate)
+     }
+
+     if(dayoftheWeek !== null)
+     {
+      setDayoftheWeek(dayoftheWeek)
+     }
+
+    }
+    catch (err){
+      alert(err)
+    }
+  };
+
+  React.useEffect(() => {
+    load();
+  },[])
 
 
-    // const formatTime = (item) => {
-    //   var SHours = moment(item.arrivalHours, 'HH');
-    //   var SMinutes = moment(item.arrivalMinutes, 'mm');
-
-    //   setHours(SHours.format('HH'));
-    //   setMinutes(SMinutes.format('mm'));
-
-    //   var FHours = moment(item.departHours, 'HH');
-    //   var FMinutes = moment(item.departMinutes, 'mm');
-
-    //   setFINHours(FHours.format('HH'));
-    //   setFINMinutes(FMinutes.format('mm'));
-    // }
-
-    // const sortTable  = (column) => {
-    //   const newDirection = direction === "desc" ? "asc" : "desc" 
-    //   const sortedData = _.orderBy(flatListItems, [column],[newDirection]);
-    //   setSelectedColumn(column);
-    //   setDirection(newDirection);
-    //   setFlatListItems(sortedData);
-    // }
-
-    // const tableHeader = () => (
-    //   <View style={styles.tableHeader}>
-    //     {
-    //       columns.map((column, index) => {
-    //         {
-    //           return (
-    //             <TouchableOpacity
-    //               key={index}
-    //               style={styles.columnHeader}
-    //               onPress={() => sortTable(column)}>
-    //               <Text style={styles.columnHeaderTxt}>
-    //                 {column + " "}
-    //                 { selectedColumn === column && <MaterialCommunityIcons 
-    //                   name={direction === "desc" ? "arrow-down-drop-circle" : "arrow-up-drop-circle"} 
-    //                 />
-    //                 }
-    //               </Text>
-
-    //             </TouchableOpacity>
-    //           )
-    //         }
-    //       })
-    //     }
-    //   </View>
-    // )
-  
-  
-   
+    
    
     return (
       <View style={{backgroundColor: colors.white,flex: 1}}>
@@ -464,6 +487,7 @@ let deleteEntry = () => {
         paddingTop: StatusBar.currentHeight
     }}
     renderItem={({item, index}) => {
+      setIDtimesheet(item.id_timesheet)
         const inputRange = [
             -1,
             0,
@@ -487,8 +511,6 @@ let deleteEntry = () => {
             outputRange: [1, 1, 1, 0]
         })
 
-        {setIDtimesheet(item.id_timesheet)}
-
         return <Animated.View style={{flexDirection: 'row', padding: SPACING, marginBottom: SPACING, backgroundColor: 'rgba(255,255,255,0.8)', borderRadius: 12,
             shadowColor: '#000',
             shadowOffset: {
@@ -510,7 +532,7 @@ let deleteEntry = () => {
             <AwesomeAlert
           show={showAlert}
           showProgress={false}
-          title="AwesomeAlert"
+          title= {item.comment}
           message="I have a message for you!"
           closeOnTouchOutside={true}
           closeOnHardwareBackPress={false}
@@ -524,9 +546,9 @@ let deleteEntry = () => {
             navigation.navigate('EditSheet', item)
           }}
           onConfirmPressed={() => {
-            hideAlert();
-            deleteEntry();
-            
+            console.log("Timesheet ID: " + IDtimesheet)  
+            deleteEntry(IDtimesheet);  
+            hideAlert(); 
           }}
         />
         </Animated.View>   
@@ -537,9 +559,6 @@ let deleteEntry = () => {
     <View>
     <Button style icon="plus" onPress={pressHandler}>
             Add
-       </Button>
-       <Button style icon="delete" onPress={deleteHandler}>
-            Delete
        </Button>
         </View>
        

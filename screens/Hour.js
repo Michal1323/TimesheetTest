@@ -472,12 +472,12 @@ const time_clash = () => {
 
   const saveStartingWeek = (value) => {
     moment.locale('en')
-        console.log("saveStartingWeek - value:", moment(value).format("L"));
-        setselectedWeek(moment(value).format("L"));
+        console.log("saveStartingWeek - value:", moment(value).add(5, "days").format("L"));
+        setselectedWeek(moment(value).add(5, "days").format("L"));
         //setselectedWeek(navigation.getParam('eow'));
         //setselectedWeek(new Date(value).toString());
-
-  }
+        }
+  
 
   const getTimefromMins = (mins) => {
     if (mins >= 24 * 60 || mins < 0) {
