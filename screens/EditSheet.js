@@ -21,14 +21,14 @@ const db = DatabaseConnection.getConnection();
 const EditSheet = ({ navigation }) => {
 
   const selectDate = new Date();
-  const [currentDate, setCurrentDate] = React.useState('');
+  const [currentDate, setCurrentDate] = React.useState(navigation.getParam('date'));
   const [toggleCheckBox, setToggleCheckBox] = React.useState(false)
 
   const [modalVisible, setModalVisible] = React.useState(false);
   const [dayoftheWeek, setDayoftheWeek] = React.useState(navigation.getParam('dayoftheweek'));
   const [projNum, setprojNum] = React.useState(navigation.getParam('projNum'));
   const [siteID, setsiteID] = React.useState(navigation.getParam('siteID'))
-  const [Thrs, setThrs] = React.useState(navigation.getParam('Thrs'));
+  const [Thrs, setThrs] = React.useState('');
   const [visible, setVisible] = React.useState(false);
   const [finishvisible, setfinishVisible] = React.useState(false);
   const [Lvisible, setLVisible] = React.useState(false);
@@ -95,7 +95,7 @@ const onFinishConfirm = React.useCallback(
     var Fintimes = FinHrs.format('HH') + ':' + FinMnts.format('mm');
     console.log('Finish Times: ' + Fintimes);
     setfrFinTimes(Fintimes);
-    
+    calcTotalHrs()
   },
   [setfinishVisible]
 );
@@ -281,6 +281,7 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
     });
   };
   let updateUser = () => {
+    console.log( selectedWeek, currentDate, projNum, description, frTimes, frFinTimes, Thrs, siteID, dayoftheWeek);
 
     if (!frTimes) {
       alert('Add Hours for the entry');
@@ -309,8 +310,8 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
 
     db.transaction((tx) => {
       tx.executeSql(
-        'UPDATE Timesheet set arrival = ?, depart = ? , dayoftheweek = ?, projNum = ?, siteID = ?, comment = ?, totalHrs = ?  where id_timesheet=?',
-        [frTimes, frFinTimes, dayoftheWeek, projNum, siteID, description, Thrs,  IDtimesheet],
+        'UPDATE Timesheet set arrival = ?, depart = ? , dayoftheweek = ?, projNum = ?, siteID = ?, comment = ?  where id_timesheet=?',
+        [frTimes, frFinTimes, dayoftheWeek, projNum, siteID, description,  IDtimesheet],
         (tx, results) => {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
@@ -344,7 +345,7 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
     moment.locale('en');
     console.log(moment(next.getTime()).format("L"));
     setCurrentDate(moment(next.getTime()).format("L"));
-    calcTotalHrs();
+    
 
   }
 
@@ -418,13 +419,33 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
      
   //   //Alert.alert(DHrs + 'Hrs');
      setThrs(timetomins);
-     console.log(timetomins);
+     db.transaction((tx) => {
+      tx.executeSql(
+        'UPDATE Timesheet set totalHrs = ?  where id_timesheet=?',
+        [timetomins,  IDtimesheet],
+        (tx, results) => {
+          console.log('Results', results.rowsAffected);
+          if (results.rowsAffected > 0) 
+          {
+           console.log("Sucess " + timetomins)
+          } 
+          else 
+          alert('Erro ao atualizar o usuário');
+        }
+      );
+    });
  }
 
  const finishTime = () => {
   setfinishVisible(true)
  }
 
+ const both  = () => 
+ {
+   calcTotalHrs();
+   updateUser(Thrs);
+
+ }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -471,30 +492,6 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
   </Button>
   
   </View>
-  
-      <View>
-                <Text style={{fontWeight: 'bold', color: '#091629'}}>
-                    Day of the Week 
-                </Text>
-               <Picker style={styles.datefive}
-                selectedValue={dayoftheWeek}
-                onValueChange=
-                {
-                    saveDayofWeek
-                }>
-                        <Picker.Item label="Monday" value="monday" />
-                        <Picker.Item label="Tuesday" value="tuesday" />
-                        <Picker.Item label="Wednesday" value="wednesday" />
-                        <Picker.Item label="Thursday" value="thursday" />
-                        <Picker.Item label="Friday" value="friday" />
-                        <Picker.Item label="Saturday" value="saturday" />
-                        <Picker.Item label="Sunday" value="sunday" />
-                       
-              </Picker>
-      </View>
-  
-  
-  
   
       <View style={styles.btn}>
         <View style={{ flexDirection: 'row' }}>
@@ -545,7 +542,7 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
   
   />
   
-        <Button onPress={updateUser}>
+        <Button onPress={both}>
           Update: {Thrs}
   </Button>
   

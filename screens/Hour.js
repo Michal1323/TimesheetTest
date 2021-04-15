@@ -282,30 +282,6 @@ const time_clash = () => {
   const add_entry = () => { 
     console.log( selectedWeek, currentDate, projNum, description, frTimes, frFinTimes, Thrs, siteID, dayoftheWeek);
   
-  //   db.transaction(function (tx) {
-  //     tx.executeSql(
-  //       'SELECT * FROM Timesheet WHERE date=?',
-  //       [currentDate],
-  //       (tx, results) => {
-  //         var temp = [];
-  //        var len = results.rows.length;
-  
-  //        console.log('len', len);
-  //        if(len >= 0 ) {
-          
-  //          for (let i = 0; i < results.rows.length; ++i) 
-          
-  //          temp.push(results.rows.item(i));
-  //          console.log(temp);
-  //          temp.forEach()
-  // console.log(temp)
-  //        } else {
-  //          alert('Cannot Search Entry!');
-  //        }
-  //       }
-  //     );
-  //   });
-
     if (!selectedWeek) {
       alert('Please select a end of the week');
       return;
@@ -471,6 +447,7 @@ const time_clash = () => {
   }
 
   const saveStartingWeek = (value) => {
+    
     moment.locale('en')
         console.log("saveStartingWeek - value:", moment(value).add(5, "days").format("L"));
         setselectedWeek(moment(value).add(5, "days").format("L"));
@@ -680,7 +657,7 @@ style={styles.input}
   locale={'en'} // optional, default is automically detected by your system
 />
 <Button color="#09253a" style={styles.startTime} icon="clock" onPress={()=> setVisible(true)}>
-  Start: {Hours}:{Minutes}
+  Start: {frTimes}
 </Button>
 
 <TimePickerModal
@@ -696,7 +673,7 @@ style={styles.input}
   locale={'en'} // optional, default is automically detected by your system
 />
 <Button color="#09253a" style={styles.endTime} icon="clock" onPress={()=> setfinishVisible(true)}>
-  Finish: {finishHours}:{finishMinutes}
+  Finish: {frFinTimes}
 </Button>
 
       

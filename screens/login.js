@@ -22,8 +22,8 @@ export default function login({ navigation }) {
           txn.executeSql('DROP TABLE IF EXISTS Timesheet', []);
           txn.executeSql(
             'CREATE TABLE IF NOT EXISTS Timesheet(id_timesheet INTEGER PRIMARY KEY AUTOINCREMENT, user_id BIGINT(20), eow DATE, date DATETIME, projNum VARCHAR(30), comment VARCHAR(250), arrival TIME, depart TIME, totalHrs FLOAT, siteID VARCHAR(45), dayoftheweek VARCHAR(45))',
-            []
-          );
+            [],
+          ); 
         }
       }
     );

@@ -24,6 +24,7 @@ const DOT_SIZE = 40;
 const TICKER_HEIGHT = 40;
 const CIRCLE_SIZE = width * 0.6;
 
+
 const Circle = ({ scrollX }) => {
   return (
     <View style={[StyleSheet.absoluteFillObject, styles.circleContainer]}>

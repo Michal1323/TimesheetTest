@@ -1,10 +1,12 @@
 import * as React from 'react';
-import { StyleSheet, View, Text, Image, StatusBar, Animated, TouchableOpacity, Alert} from 'react-native';
-import { Button, IconButton, Card } from 'react-native-paper';
+import { StyleSheet, View, Text, Image, StatusBar, Animated, TouchableOpacity, Alert, Pressable, Modal} from 'react-native';
+import { Button, IconButton, Card, Colors } from 'react-native-paper';
+import { TimePickerModal } from 'react-native-paper-dates';
 import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
 import WeekSelector from 'react-native-week-selector';
 import { MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
+import CheckBox from '@react-native-community/checkbox';
 import _ from "lodash";
 import Dialog from "react-native-dialog";
 import { DatabaseConnection } from '../components/database-connection';
@@ -18,18 +20,26 @@ const db = DatabaseConnection.getConnection();
 
 export default function Home ({ navigation }) {
 
+  const selectDate = new Date();
   const [flatListItems, setFlatListItems] = React.useState([]);
+  const [modalVisible, setModalVisible] = React.useState(false);
   const [Hours, setHours] = React.useState('');
   const [Minutes, setMinutes] = React.useState('');
+  const [toggleCheckBox, setToggleCheckBox] = React.useState(false)
   const [FINHours, setFINHours] = React.useState('');
   const [FINMinutes, setFINMinutes] = React.useState('');
   const [dayoftheWeek, setDayoftheWeek] = React.useState('');
-  const [Week, setWeek] = React.useState();
+  const [Week, setWeek] = React.useState('');
+  const [finishvisible, setfinishVisible] = React.useState(false);
+  const [finishHours, setfinishHours] = React.useState(selectDate.getHours());
+  const [finishMinutes, setfinishMinutes] = React.useState(selectDate.getMinutes());
   const [currentDate, setCurrentDate] = React.useState('');
   const [formatDay, setformatDay] = React.useState('');
   const [visible, setVisible] = React.useState(false);
   const [showAlert, setshowAlert] = React.useState(false);
   const [IDtimesheet, setIDtimesheet] = React.useState('');
+  const [frTimes, setfrTimes] = React.useState('');
+  const [frFinTimes, setfrFinTimes] = React.useState('');
   const [ columns, setColumns ] = React.useState([
     "Project",
     "Site",
@@ -39,13 +49,115 @@ export default function Home ({ navigation }) {
   const [ direction, setDirection ] = React.useState(null);
   const [ selectedColumn, setSelectedColumn ] = React.useState(null);
   const [totalHrsforday, settotalHrsforday] = React.useState([]);
+  const [selectedWeek, setselectedWeek] = React.useState();
   var timeList = [];
   /*_onPressButton  = () => {
     alert(
       <Text>pop</Text>
         )
       }*/
+      const onDismiss = React.useCallback(() => {
+        setVisible(false)
+      }, [setVisible])
+    
+      const onFinishDismiss = React.useCallback(() => {
+        setfinishVisible(false)
+      }, [setfinishVisible])
+    
+    
+      const onConfirm = React.useCallback(
+        ({ hours, minutes }) => {
+          setVisible(false);
+          console.log({ hours, minutes });
+          var FrHours = moment(hours, 'HH');
+          var FrMinutes = moment(minutes, 'mm');
+          //setTime('{$hours}:${minutes}')
+          hours = setHours(FrHours.format('HH'));
+          minutes = setMinutes(FrMinutes.format('mm'));
+          //setHours(hours.toString());
+          //setMinutes(minutes.toString());
+          var times = FrHours.format('HH') + ':' + FrMinutes.format('mm');
+          console.log('time: ' + times);
+          setfrTimes(times);
+        },
+        [setVisible]
+      );
+    
+      const onFinishConfirm = React.useCallback(
+        ({ hours, minutes }) => {
+          setfinishVisible(false);
+          console.log({ hours, minutes });
+          var FinHrs = moment(hours, 'HH');
+          var FinMnts = moment(minutes, 'mm');
+          hours = setfinishHours(FinHrs.format('HH'));
+          minutes = setfinishMinutes(FinMnts.format('mm'));
+          var Fintimes = FinHrs.format('HH') + ':' + FinMnts.format('mm');
+          console.log('Finish Times: ' + Fintimes);
+          setfrFinTimes(Fintimes);
+          
+        },
+        [setfinishVisible]
+      );
 
+      const saveStartingWeek = (value) => {
+    
+        moment.locale('en')
+            console.log("saveStartingWeek - value:", moment(value).add(5, "days").format("L"));
+            setselectedWeek(moment(value).add(5, "days").format("L"));
+            //setselectedWeek(navigation.getParam('eow'));
+            //setselectedWeek(new Date(value).toString());
+            }
+      
+    
+      const getTimefromMins = (mins) => {
+        if (mins >= 24 * 60 || mins < 0) {
+          Alert.alert("Valid input should be greater than or equal to 0 and less than 1440.");
+        }
+        var h = mins / 60 | 0;
+        var m = mins % 60 | 0;
+    
+        return moment.utc().hours(h).minutes(m).format("HH:mm");
+      }
+    
+      // const splitTime = (time) => {  //function to split time in hours and minutes seperatly
+      //   var today = new Date();
+      //   var _t = time.split(";");
+      //   today.setHours(_t[0], _t[1], 0, 0);
+      //   return today;
+      // }
+    
+      // const validate = (sTime, eTime) => {
+      //   if(+splitTime(sTime) < +splitTime(eTime)) {
+      //     var len = timeList.length;
+      //     return len>0?(+splitTime(timeList[len - 1].e))
+      //   }
+      // }
+    
+       const calcTotalHrs = () => {
+        //setfinishVisible(true)
+         var StrtTime = moment(frTimes, "HH:mm");
+         var endTime = moment(frFinTimes, "HH:mm");
+    
+         var duration = moment.duration(StrtTime.diff(endTime));
+         var DHrs = parseInt(duration.asHours());
+        var Dmins = parseInt(duration.asMinutes())-DHrs* 60;
+         var Tot  = endTime.diff(StrtTime, 'minutes');
+         var timetomins = getTimefromMins(Tot);
+         //setThrs(Tot);
+         
+      //   //Alert.alert(DHrs + 'Hrs');
+         setThrs(timetomins);
+         console.log(timetomins);
+     }
+    
+     const finishTime = () => {
+      setfinishVisible(true)
+     }
+    
+    
+     
+      
+    
       const BG_IMG = 'https://www.solidbackgrounds.com/images/950x350/950x350-snow-solid-color-background.jpg';
 
       const SPACING = 20;
@@ -77,7 +189,13 @@ export default function Home ({ navigation }) {
     {
       save();
       navigation.navigate('Hour')
-    }
+    };
+
+    const lunchHandler = () => 
+    {
+      save();
+      navigation.navigate('Lunch')
+    };
 
     const deleteHandler = () => 
     {
@@ -371,6 +489,79 @@ let deleteEntry = () => {
   });
 };
 
+const add_lunch = () => {
+  console.log( selectedWeek, currentDate, projNum, description, frTimes, frFinTimes, Thrs, siteID, dayoftheWeek);
+
+  if(toggleCheckBox == false)
+{
+
+  db.transaction(function (tx) {
+    tx.executeSql(
+      'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?)',
+      [1, selectedWeek, currentDate, 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek],
+      (tx, results) => {
+        console.log('Results', results.rowsAffected);
+        if (results.rowsAffected > 0) {
+          Alert.alert(
+            'Sucess',
+            'Entry added succesfully to DB !!!',
+            [
+              {
+                text: 'Ok',
+                onPress: () =>
+                navigation.replace('Home', {
+                  someParam: 'Param',
+                }),
+              },
+            ],
+            { cancelable: false }
+          );
+        } else alert('Error Entry unsuccesfull !!!');
+      }
+    );
+    //save()
+  });
+}
+
+else
+{
+db.transaction(function (tx) {
+  tx.executeSql(
+    'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?)',
+    [1, selectedWeek, moment(selectedWeek).day("Monday").format('dddd, MMMM Do YYYY'), "Lunch", 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek , 
+    1, selectedWeek, moment(selectedWeek).day("Tuesday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes,  Thrs, 'Lunch', dayoftheWeek , 
+    1, selectedWeek, moment(selectedWeek).day("Wednesday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes,  Thrs, 'Lunch', dayoftheWeek ,
+    1, selectedWeek, moment(selectedWeek).day("Thursday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek ,
+    1, selectedWeek, moment(selectedWeek).day("Friday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek ],
+    (tx, results) => {
+      console.log('Results', results.rowsAffected);
+      if (results.rowsAffected > 0) {
+        Alert.alert(
+          'Sucess',
+          'Entry added succesfully to DB !!!',
+          [
+            {
+              text: 'Ok',
+              onPress: () =>
+              navigation.replace('Home', {
+                someParam: 'Param',
+              }),
+            },
+          ],
+          { cancelable: false }
+        );
+      } else alert('Error Entry unsuccesfull !!!');
+    }
+  ); 
+  //save()
+});
+
+}
+
+
+};
+
+
  const save = async () => {
     try{
       await AsyncStorage.setItem("MyWeekEnding", Week)
@@ -556,11 +747,128 @@ let deleteEntry = () => {
     }}
     />
     
+    <View style={styles.centeredView}>
+<Modal
+  animationType="slide"
+  transparent={true}
+  visible={modalVisible}
+  onRequestClose={() => {
+    setModalVisible(!modalVisible);
+  }}
+  
+>
+<View style={styles.centeredView}>
+<View style={styles.modalView}>
+    <View style={styles.Weekarrow}>
+      <Text style={{fontWeight: 'bold',  color: '#091629'}}>Week Ending: {selectedWeek}{navigation.getParam('eow')}</Text>
+  <WeekSelector
+      dateContainerStyle={styles.date}
+      whitelistRange={[new Date(2021, 1, 9), new Date()]}
+      weekStartsOn={6}
+      onWeekChanged={saveStartingWeek}
+    />
+    </View>
+<Text>Lunch Entry</Text>
+
+<TimePickerModal
+  visible={visible}
+  onDismiss={onDismiss}
+  onConfirm={onConfirm}
+  hours={12} // default: current hours
+  minutes={14} // default: current minutes
+  label="Select time" // optional, default 'Select time'
+  cancelLabel="Cancel" // optional, default: 'Cancel'
+  confirmLabel="Ok" // optional, default: 'Ok'
+  animationType="fade" // optional, default is 'none'
+  locale={'en'} // optional, default is automically detected by your system
+/>
+<Button color="#09253a" style={styles.startTime} icon="clock" onPress={()=> setVisible(true)}>
+  Start: {frTimes}
+</Button>
+
+<TimePickerModal
+  visible={finishvisible}
+  onDismiss={onFinishDismiss}
+  onConfirm={onFinishConfirm}
+  hours={12} // default: current hours
+  minutes={14} // default: current minutes
+  label="Select time" // optional, default 'Select time'
+  cancelLabel="Cancel" // optional, default: 'Cancel'
+  confirmLabel="Ok" // optional, default: 'Ok'
+  animationType="fade" // optional, default is 'none'
+  locale={'en'} // optional, default is automically detected by your system
+/>
+<Button color="#09253a" style={styles.endTime} icon="clock" onPress={()=> setfinishVisible(true)}>
+  Finish: {frFinTimes}
+</Button>
+
+      
+<CheckBox style={styles.check}
+disabled={false}
+value={toggleCheckBox}
+onValueChange={(newValue) => setToggleCheckBox(newValue)}
+/>
+
+  
+
+    <Text style={styles.sameWeek}>Same for the week</Text>
+
     <View>
+              <Text style={{fontWeight: 'bold', color: '#091629', width: 250}}>
+                  Day of the Week 
+              </Text>
+             <Picker style={styles.datefive}
+              selectedValue={dayoftheWeek}
+              onValueChange=
+              {
+                  saveDayofWeek
+              }>
+                      <Picker.Item label="Monday" value="monday" />
+                      <Picker.Item label="Tuesday" value="tuesday" />
+                      <Picker.Item label="Wednesday" value="wednesday" />
+                      <Picker.Item label="Thursday" value="thursday" />
+                      <Picker.Item label="Friday" value="friday" />
+                      <Picker.Item label="Saturday" value="saturday" />
+                      <Picker.Item label="Sunday" value="sunday" />
+                     
+            </Picker>
+    </View>
+    
+
+    <Button color="#09253a" onPress={add_lunch} style={styles.addButton}>
+                Add
+        </Button>
+
+              <Pressable 
+                style={[styles.button, styles.buttonClose]}
+                onPress={() => setModalVisible(!modalVisible)}
+              >
+              <Text style={styles.textStyle}>Hide Modal</Text>
+                
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
+         <IconButton icon="food"  color={Colors.white} size={35} style={{marginLeft: 330, marginTop: -65, position: 'absolute', backgroundColor: '#091629', borderWidth: 3, borderColor: 'white'}} onPress={() => setModalVisible(true)}/>
+      </View>
+    
+    <View>
+    <IconButton icon="plus"  color={Colors.red200} size={35} style={{marginLeft: 20, marginTop: -65, position: 'absolute', backgroundColor: '#e00000', borderWidth: 3, borderColor: 'white'}} onPress={pressHandler}/>
+     
+  </View>
+
+    {/* <View>
     <Button style icon="plus" onPress={pressHandler}>
             Add
+       </Button> 
+       
+       <Button style icon="food" onPress={deleteHandler}>
+            Lunch
        </Button>
-        </View>
+        </View> */}
+      
+     
+
        
   </View>
         
@@ -694,8 +1002,79 @@ let deleteEntry = () => {
             columnRowTxt: {
               width:"20%",
               textAlign:"center",
+            },
+            startTime:{
+              marginLeft: -200,
+              width: 140
+             },
+  
+             endTime:{
+              marginLeft: 200,
+              marginTop: -38,
+              width: 140
+             },
+
+            modalView: {
+              margin: 20,
+              backgroundColor: "white",
+              borderRadius: 20,
+              padding: 35,
+              alignItems: "center",
+              shadowColor: "#000",
+              shadowOffset: {
+                width: 0,
+                height: 2
+              },
+              shadowOpacity: 0.25,
+              shadowRadius: 4,
+              elevation: 5
+            },
+            button: {
+              backgroundColor: '#091629',
+              borderRadius: 20,
+              padding: 10,
+              elevation: 2
               
-            }
+            },
+            buttonOpen: {
+              backgroundColor: "#091629",
+            },
+            buttonClose: {
+              backgroundColor: "#2196F3",
+            },
+            sameWeek: {
+              marginTop: -25,
+              marginLeft: 20,
+              marginBottom: 20,
+              color: 'black'
+            },
+      
+            check: {
+              marginLeft: -150,
+               marginTop: 15,
+              color: 'black'
+            },
+      
+            textStyle: {
+              backgroundColor: '#091629',
+              color: "white",
+              fontWeight: "bold",
+              textAlign: "center"
+            },
+            modalText: {
+              marginBottom: 15,
+              textAlign: "center"
+            },
+
+            Weekarrow:{
+              height: 100,
+              width:350,
+              marginTop:-37,
+              marginBottom: 10,
+              backgroundColor: '#e1ecf2',
+              borderRadius: 20,
+              fontWeight: 'bold'
+             },
      });
      
     /*<DataTable 
