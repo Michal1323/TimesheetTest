@@ -43,7 +43,7 @@ const db = DatabaseConnection.getConnection();
   const [frTimes, setfrTimes] = React.useState('');
   const [frFinTimes, setfrFinTimes] = React.useState('');
   const [description, setDescription] = React.useState('');
-  const [selectedWeek, setselectedWeek] = React.useState();
+  const [selectedWeek, setselectedWeek] = React.useState(moment().day(5).format("L"));
   var timeList  = []; //array that stores entry details
 
   const onDismiss = React.useCallback(() => {

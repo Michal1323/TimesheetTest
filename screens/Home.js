@@ -26,14 +26,17 @@ export default function Home ({ navigation }) {
   const [Hours, setHours] = React.useState('');
   const [Minutes, setMinutes] = React.useState('');
   const [toggleCheckBox, setToggleCheckBox] = React.useState(false)
+  const [projNum, setprojNum] = React.useState('');
+  const [siteID, setsiteID] = React.useState('')
   const [FINHours, setFINHours] = React.useState('');
+  const [Thrs, setThrs] = React.useState('');
   const [FINMinutes, setFINMinutes] = React.useState('');
   const [dayoftheWeek, setDayoftheWeek] = React.useState('');
-  const [Week, setWeek] = React.useState('');
+  const [Week, setWeek] = React.useState(moment().day(5).format("L"));
   const [finishvisible, setfinishVisible] = React.useState(false);
   const [finishHours, setfinishHours] = React.useState(selectDate.getHours());
   const [finishMinutes, setfinishMinutes] = React.useState(selectDate.getMinutes());
-  const [currentDate, setCurrentDate] = React.useState('');
+  const [currentDate, setCurrentDate] = React.useState(moment().format("L"));
   const [formatDay, setformatDay] = React.useState('');
   const [visible, setVisible] = React.useState(false);
   const [showAlert, setshowAlert] = React.useState(false);
@@ -49,7 +52,7 @@ export default function Home ({ navigation }) {
   const [ direction, setDirection ] = React.useState(null);
   const [ selectedColumn, setSelectedColumn ] = React.useState(null);
   const [totalHrsforday, settotalHrsforday] = React.useState([]);
-  const [selectedWeek, setselectedWeek] = React.useState();
+  const [selectedWeek, setselectedWeek] = React.useState(moment().day(5).format("L"));
   var timeList = [];
   /*_onPressButton  = () => {
     alert(
@@ -133,7 +136,7 @@ export default function Home ({ navigation }) {
       //   }
       // }
     
-       const calcTotalHrs = () => {
+      const calcTotalHrs = () => {
         //setfinishVisible(true)
          var StrtTime = moment(frTimes, "HH:mm");
          var endTime = moment(frFinTimes, "HH:mm");
@@ -147,15 +150,31 @@ export default function Home ({ navigation }) {
          
       //   //Alert.alert(DHrs + 'Hrs');
          setThrs(timetomins);
-         console.log(timetomins);
+         db.transaction((tx) => {
+          tx.executeSql(
+            'UPDATE Timesheet set totalHrs = ?  where id_timesheet=?',
+            [timetomins,  IDtimesheet],
+            (tx, results) => {
+              console.log('Results', results.rowsAffected);
+              if (results.rowsAffected > 0) 
+              {
+               console.log("Sucess " + timetomins)
+              } 
+              else 
+              alert('ErrorS');
+            }
+          );
+        });
      }
     
-     const finishTime = () => {
-      setfinishVisible(true)
+    
+     const both  = () => 
+     {
+       calcTotalHrs();
+       add_lunch(Thrs);
+    
      }
     
-    
-     
       
     
       const BG_IMG = 'https://www.solidbackgrounds.com/images/950x350/950x350-snow-solid-color-background.jpg';
@@ -490,8 +509,6 @@ let deleteEntry = () => {
 };
 
 const add_lunch = () => {
-  console.log( selectedWeek, currentDate, projNum, description, frTimes, frFinTimes, Thrs, siteID, dayoftheWeek);
-
   if(toggleCheckBox == false)
 {
 
@@ -523,42 +540,39 @@ const add_lunch = () => {
   });
 }
 
-else
-{
-db.transaction(function (tx) {
-  tx.executeSql(
-    'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?)',
-    [1, selectedWeek, moment(selectedWeek).day("Monday").format('dddd, MMMM Do YYYY'), "Lunch", 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek , 
-    1, selectedWeek, moment(selectedWeek).day("Tuesday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes,  Thrs, 'Lunch', dayoftheWeek , 
-    1, selectedWeek, moment(selectedWeek).day("Wednesday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes,  Thrs, 'Lunch', dayoftheWeek ,
-    1, selectedWeek, moment(selectedWeek).day("Thursday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek ,
-    1, selectedWeek, moment(selectedWeek).day("Friday").format('dddd, MMMM Do YYYY'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek ],
-    (tx, results) => {
-      console.log('Results', results.rowsAffected);
-      if (results.rowsAffected > 0) {
-        Alert.alert(
-          'Sucess',
-          'Entry added succesfully to DB !!!',
-          [
-            {
-              text: 'Ok',
-              onPress: () =>
-              navigation.replace('Home', {
-                someParam: 'Param',
-              }),
-            },
-          ],
-          { cancelable: false }
-        );
-      } else alert('Error Entry unsuccesfull !!!');
-    }
-  ); 
-  //save()
-});
-
+else if(toggleCheckBox == true)
+ {
+  db.transaction(function (tx) {
+    tx.executeSql(
+      'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?)',
+      [1, selectedWeek, moment(selectedWeek).day("Monday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek,
+       1, selectedWeek, moment(selectedWeek).day("Tuesday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek,
+       1, selectedWeek, moment(selectedWeek).day("Wednesday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek,
+       1, selectedWeek, moment(selectedWeek).day("Thursday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek,
+       1, selectedWeek, moment(selectedWeek).day("Friday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek, ],
+      (tx, results) => {
+        console.log('Results', results.rowsAffected);
+        if (results.rowsAffected > 0) {
+          Alert.alert(
+            'Sucess',
+            'Entry added succesfully to DB !!!',
+            [
+              {
+                text: 'Ok',
+                onPress: () =>
+                navigation.replace('Home', {
+                  someParam: 'Param',
+                }),
+              },
+            ],
+            { cancelable: false }
+          );
+        } else alert('Error Entry unsuccesfull !!!');
+      }
+    );
+    //save()
+  });
 }
-
-
 };
 
 
@@ -639,7 +653,7 @@ db.transaction(function (tx) {
       </View>
 
         
-        <Picker style={{width: 135, height: 44, backgroundColor: '#f2fbff', borderColor: 'white', marginTop: -73, marginLeft: 190 }}
+        <Picker style={{width: 135, height: 44, backgroundColor: '#f2fbff', borderColor: '#000000', marginTop: -73, marginLeft: 190 }}
                 selectedValue={dayoftheWeek}
                 itemStyle={{fontWeight: 'bold'}}
                 onValueChange=
@@ -731,6 +745,7 @@ db.transaction(function (tx) {
           showConfirmButton={true}
           confirmText="Delete"
           cancelText="Edit"
+          cancelButtonColor="#eed202"
           confirmButtonColor="#DD6B55"
           onCancelPressed={() => {
             hideAlert()
@@ -759,6 +774,8 @@ db.transaction(function (tx) {
 >
 <View style={styles.centeredView}>
 <View style={styles.modalView}>
+<IconButton icon="close"  color={Colors.red200} size={22} style={{marginLeft: -50, marginTop:-8, position: 'absolute', backgroundColor: '#e00000', borderWidth: 3, borderColor: 'white'}} onPress={() => setModalVisible(!modalVisible)}/>
+     
     <View style={styles.Weekarrow}>
       <Text style={{fontWeight: 'bold',  color: '#091629'}}>Week Ending: {selectedWeek}{navigation.getParam('eow')}</Text>
   <WeekSelector
@@ -835,17 +852,12 @@ onValueChange={(newValue) => setToggleCheckBox(newValue)}
     </View>
     
 
-    <Button color="#09253a" onPress={add_lunch} style={styles.addButton}>
+    <Button color="#09253a" onPress={both} style={styles.addButton}>
                 Add
         </Button>
 
-              <Pressable 
-                style={[styles.button, styles.buttonClose]}
-                onPress={() => setModalVisible(!modalVisible)}
-              >
-              <Text style={styles.textStyle}>Hide Modal</Text>
-                
-              </Pressable>
+        <IconButton icon="close"  color={Colors.red200} size={22} style={{marginLeft: -50, marginTop:-8, position: 'absolute', backgroundColor: '#e00000', borderWidth: 3, borderColor: 'white'}} onPress={() => setModalVisible(!modalVisible)}/>
+     
             </View>
           </View>
         </Modal>
