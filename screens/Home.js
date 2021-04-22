@@ -26,10 +26,7 @@ export default function Home ({ navigation }) {
   const [Hours, setHours] = React.useState('');
   const [Minutes, setMinutes] = React.useState('');
   const [toggleCheckBox, setToggleCheckBox] = React.useState(false)
-  const [projNum, setprojNum] = React.useState('');
-  const [siteID, setsiteID] = React.useState('')
   const [FINHours, setFINHours] = React.useState('');
-  const [Thrs, setThrs] = React.useState('');
   const [FINMinutes, setFINMinutes] = React.useState('');
   const [dayoftheWeek, setDayoftheWeek] = React.useState('');
   const [Week, setWeek] = React.useState(moment().day(5).format("L"));
@@ -53,6 +50,8 @@ export default function Home ({ navigation }) {
   const [ selectedColumn, setSelectedColumn ] = React.useState(null);
   const [totalHrsforday, settotalHrsforday] = React.useState([]);
   const [selectedWeek, setselectedWeek] = React.useState(moment().day(5).format("L"));
+  const [Thrs, setThrs] = React.useState('');
+
   var timeList = [];
   /*_onPressButton  = () => {
     alert(
@@ -122,21 +121,55 @@ export default function Home ({ navigation }) {
         return moment.utc().hours(h).minutes(m).format("HH:mm");
       }
     
-      // const splitTime = (time) => {  //function to split time in hours and minutes seperatly
-      //   var today = new Date();
-      //   var _t = time.split(";");
-      //   today.setHours(_t[0], _t[1], 0, 0);
-      //   return today;
-      // }
+      let updateUser = () => {
+        console.log( selectedWeek, currentDate, frTimes, frFinTimes, Thrs, dayoftheWeek);
     
-      // const validate = (sTime, eTime) => {
-      //   if(+splitTime(sTime) < +splitTime(eTime)) {
-      //     var len = timeList.length;
-      //     return len>0?(+splitTime(timeList[len - 1].e))
-      //   }
-      // }
+        if (!frTimes) {
+          alert('Add Hours for the entry');
+          return;
+        }
+        
+        if (!frFinTimes) {
+          alert('Add End Hours for the entry');
+          return;
+        }  
+        
+        if (!dayoftheWeek) {
+          alert('Please select a day of the week');
+          return;
+        }
+        
     
-      const calcTotalHrs = () => {
+    
+        db.transaction((tx) => {
+          tx.executeSql(
+            'UPDATE Timesheet set arrival = ?, depart = ? , dayoftheweek = ?, projNum = ?, siteID = ?, comment = ?, date = ?  where id_timesheet=?',
+            [frTimes, frFinTimes, dayoftheWeek, 'Lunch', 'Lunch', 'Lunch', currentDate,  IDtimesheet],
+            (tx, results) => {
+              console.log('Results', results.rowsAffected);
+              if (results.rowsAffected > 0) {
+                Alert.alert(
+                  'Sucesso',
+                  'Usuário atualizado com sucesso !!',
+                  [
+                    {
+                      text: 'Ok',
+                      onPress: () =>
+                      navigation.replace('Home', {
+                        someParam: 'Param',
+                      }),
+                    },
+                  ],
+                  { cancelable: false }
+                );
+              } else alert('Erro ao atualizar o usuário');
+            }
+          );
+        });
+      };
+      
+    
+       const calcTotalHrs = () => {
         //setfinishVisible(true)
          var StrtTime = moment(frTimes, "HH:mm");
          var endTime = moment(frFinTimes, "HH:mm");
@@ -146,35 +179,37 @@ export default function Home ({ navigation }) {
         var Dmins = parseInt(duration.asMinutes())-DHrs* 60;
          var Tot  = endTime.diff(StrtTime, 'minutes');
          var timetomins = getTimefromMins(Tot);
-         //setThrs(Tot);
+
          
-      //   //Alert.alert(DHrs + 'Hrs');
          setThrs(timetomins);
-         db.transaction((tx) => {
-          tx.executeSql(
-            'UPDATE Timesheet set totalHrs = ?  where id_timesheet=?',
-            [timetomins,  IDtimesheet],
-            (tx, results) => {
-              console.log('Results', results.rowsAffected);
-              if (results.rowsAffected > 0) 
-              {
-               console.log("Sucess " + timetomins)
-              } 
-              else 
-              alert('ErrorS');
-            }
-          );
-        });
+         console.log("CalcTot: " + timetomins);
+        //  db.transaction((tx) => {
+        //   tx.executeSql(
+        //     'UPDATE Timesheet set totalHrs = ?  where id_timesheet = ?',
+        //     [timetomins,  IDtimesheet],
+        //     (tx, results) => {
+        //       console.log('Results', results.rowsAffected);
+        //       if (results.rowsAffected > 0) 
+        //       {
+        //        console.log("Sucess: " + timetomins)
+        //       } 
+        //       else 
+        //       alert('Error in calculating total hours');
+        //     }
+        //   );
+        // });
      }
     
+     const finishTime = () => {
+      setfinishVisible(true)
+     }
     
      const both  = () => 
      {
        calcTotalHrs();
-       add_lunch(Thrs);
-    
+       add_lunch();
      }
-    
+     
       
     
       const BG_IMG = 'https://www.solidbackgrounds.com/images/950x350/950x350-snow-solid-color-background.jpg';
@@ -229,6 +264,7 @@ export default function Home ({ navigation }) {
       console.log(moment(next.getTime()).format('L'));
       setCurrentDate(moment(next.getTime()).format('L'));
       setformatDay(moment(next.getTime()).format('MMM Do'));
+      calcTotalHrs();
     }
   
     const getNextDay = (dayName) => {
@@ -508,14 +544,21 @@ let deleteEntry = () => {
   });
 };
 
+const setCheckBox = (newValue) => {
+  setToggleCheckBox(newValue);
+  calcTotalHrs();
+}
+
 const add_lunch = () => {
+  console.log( 1, selectedWeek, currentDate, 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek);
+
   if(toggleCheckBox == false)
 {
 
   db.transaction(function (tx) {
     tx.executeSql(
-      'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?)',
-      [1, selectedWeek, currentDate, 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek],
+      'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, siteID, totalHrs, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?)',
+      [1, selectedWeek, currentDate, 'Lunch', 'Lunch', frTimes, frFinTimes, 'Lunch', Thrs, dayoftheWeek],
       (tx, results) => {
         console.log('Results', results.rowsAffected);
         if (results.rowsAffected > 0) {
@@ -540,39 +583,42 @@ const add_lunch = () => {
   });
 }
 
-else if(toggleCheckBox == true)
- {
-  db.transaction(function (tx) {
-    tx.executeSql(
-      'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?)',
-      [1, selectedWeek, moment(selectedWeek).day("Monday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek,
-       1, selectedWeek, moment(selectedWeek).day("Tuesday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek,
-       1, selectedWeek, moment(selectedWeek).day("Wednesday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek,
-       1, selectedWeek, moment(selectedWeek).day("Thursday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek,
-       1, selectedWeek, moment(selectedWeek).day("Friday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek, ],
-      (tx, results) => {
-        console.log('Results', results.rowsAffected);
-        if (results.rowsAffected > 0) {
-          Alert.alert(
-            'Sucess',
-            'Entry added succesfully to DB !!!',
-            [
-              {
-                text: 'Ok',
-                onPress: () =>
-                navigation.replace('Home', {
-                  someParam: 'Param',
-                }),
-              },
-            ],
-            { cancelable: false }
-          );
-        } else alert('Error Entry unsuccesfull !!!');
-      }
-    );
-    //save()
-  });
+else if (toggleCheckBox == true)
+{
+db.transaction(function (tx) {
+  tx.executeSql(
+    'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?)',
+    [1, selectedWeek, moment(selectedWeek).day("Monday").format('L'), "Lunch", 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek , 
+    1, selectedWeek, moment(selectedWeek).day("Tuesday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes,  Thrs, 'Lunch', dayoftheWeek , 
+    1, selectedWeek, moment(selectedWeek).day("Wednesday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes,  Thrs, 'Lunch', dayoftheWeek ,
+    1, selectedWeek, moment(selectedWeek).day("Thursday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek ,
+    1, selectedWeek, moment(selectedWeek).day("Friday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek ],
+    (tx, results) => {
+      console.log('Results', results.rowsAffected);
+      if (results.rowsAffected > 0) {
+        Alert.alert(
+          'Sucess',
+          'Entry added succesfully to DB !!!',
+          [
+            {
+              text: 'Ok',
+              onPress: () =>
+              navigation.replace('Home', {
+                someParam: 'Param',
+              }),
+            },
+          ],
+          { cancelable: false }
+        );
+      } else alert('Error Entry unsuccesfull !!!');
+    }
+  ); 
+  //save()
+});
+
 }
+
+
 };
 
 
@@ -653,7 +699,7 @@ else if(toggleCheckBox == true)
       </View>
 
         
-        <Picker style={{width: 135, height: 44, backgroundColor: '#f2fbff', borderColor: '#000000', marginTop: -73, marginLeft: 190 }}
+        <Picker style={{width: 135, height: 44, backgroundColor: '#d8e0c3', marginTop: -73, marginLeft: 190, borderWidth: 2, borderColor: 'black', borderStyle: 'dashed' }}
                 selectedValue={dayoftheWeek}
                 itemStyle={{fontWeight: 'bold'}}
                 onValueChange=
@@ -732,20 +778,17 @@ else if(toggleCheckBox == true)
             <Text style={{fontWeight: '700', fontSize: 24, color: '#091629'}}>{item.projNum}  </Text> 
                   <Text style={{opacity: .7, fontSize: 15}}>  {item.projNum} - {item.siteID}</Text>
                 <Text style={{fontWeight: '700', fontSize: 14, color: '#091629'}}>  {item.arrival} - {item.depart}     Duration : {item.totalHrs}</Text>
-           </View>
-            </TouchableOpacity>  
-            <AwesomeAlert
+          
+           <AwesomeAlert
           show={showAlert}
           showProgress={false}
           title= {item.comment}
-          message="I have a message for you!"
           closeOnTouchOutside={true}
           closeOnHardwareBackPress={false}
           showCancelButton={true}
           showConfirmButton={true}
           confirmText="Delete"
           cancelText="Edit"
-          cancelButtonColor="#eed202"
           confirmButtonColor="#DD6B55"
           onCancelPressed={() => {
             hideAlert()
@@ -757,6 +800,10 @@ else if(toggleCheckBox == true)
             hideAlert(); 
           }}
         />
+          
+           </View>
+            </TouchableOpacity>  
+           
         </Animated.View>   
         
     }}
@@ -774,8 +821,6 @@ else if(toggleCheckBox == true)
 >
 <View style={styles.centeredView}>
 <View style={styles.modalView}>
-<IconButton icon="close"  color={Colors.red200} size={22} style={{marginLeft: -50, marginTop:-8, position: 'absolute', backgroundColor: '#e00000', borderWidth: 3, borderColor: 'white'}} onPress={() => setModalVisible(!modalVisible)}/>
-     
     <View style={styles.Weekarrow}>
       <Text style={{fontWeight: 'bold',  color: '#091629'}}>Week Ending: {selectedWeek}{navigation.getParam('eow')}</Text>
   <WeekSelector
@@ -823,7 +868,7 @@ else if(toggleCheckBox == true)
 <CheckBox style={styles.check}
 disabled={false}
 value={toggleCheckBox}
-onValueChange={(newValue) => setToggleCheckBox(newValue)}
+onValueChange={setCheckBox}
 />
 
   
@@ -840,6 +885,7 @@ onValueChange={(newValue) => setToggleCheckBox(newValue)}
               {
                   saveDayofWeek
               }>
+                      <Picker.Item key="uniqueID9" label="Please Select a Day" value="" />
                       <Picker.Item label="Monday" value="monday" />
                       <Picker.Item label="Tuesday" value="tuesday" />
                       <Picker.Item label="Wednesday" value="wednesday" />
@@ -852,12 +898,17 @@ onValueChange={(newValue) => setToggleCheckBox(newValue)}
     </View>
     
 
-    <Button color="#09253a" onPress={both} style={styles.addButton}>
-                Add
+    <Button color="#09253a" onPress={add_lunch} style={styles.addButton}>
+                Add Lunch
         </Button>
 
-        <IconButton icon="close"  color={Colors.red200} size={22} style={{marginLeft: -50, marginTop:-8, position: 'absolute', backgroundColor: '#e00000', borderWidth: 3, borderColor: 'white'}} onPress={() => setModalVisible(!modalVisible)}/>
-     
+              <Pressable 
+                style={[styles.button, styles.buttonClose]}
+                onPress={() => setModalVisible(!modalVisible)}
+              >
+              <Text style={styles.textStyle}>Hide Modal</Text>
+                
+              </Pressable>
             </View>
           </View>
         </Modal>
@@ -865,7 +916,7 @@ onValueChange={(newValue) => setToggleCheckBox(newValue)}
       </View>
     
     <View>
-    <IconButton icon="plus"  color={Colors.red200} size={35} style={{marginLeft: 20, marginTop: -65, position: 'absolute', backgroundColor: '#e00000', borderWidth: 3, borderColor: 'white'}} onPress={pressHandler}/>
+    <IconButton icon="plus"  color={Colors.white} size={35} style={{marginLeft: 20, marginTop: -65, position: 'absolute', backgroundColor: '#e00000', borderWidth: 3, borderColor: 'white'}} onPress={pressHandler}/>
      
   </View>
 
@@ -1088,20 +1139,3 @@ onValueChange={(newValue) => setToggleCheckBox(newValue)}
               fontWeight: 'bold'
              },
      });
-     
-    /*<DataTable 
-          style={{ marginTop: 20 }}
-          contentContainerStyle={{ paddingHorizontal: 20 }}
-        data={tableItems}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={( item ) => entryTable(item)}
-        />
-        
-        <FlatList
-            style={{ marginTop: 20 }}
-            contentContainerStyle={{ paddingHorizontal: 20 }}
-            data={flatListItems}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => listItemView(item)}  
-          />
-        */
