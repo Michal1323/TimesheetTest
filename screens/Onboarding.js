@@ -1,10 +1,3 @@
-/*
-Inspiration: https://dribbble.com/shots/3894781-Urbanears-Headphones
-Twitter: http://twitter.com/mironcatalin
-GitHub: http://github.com/catalinmiron
-Video Tutorial: https://youtu.be/cGTD4yYgEHc
-*/
-
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import {
@@ -15,7 +8,8 @@ import {
   Dimensions,
   Animated,
 } from 'react-native';
-import data from './data';
+import { Button } from 'react-native-paper';
+import data from '../data';
 
 const { width, height } = Dimensions.get('window');
 const LOGO_WIDTH = 220;
@@ -180,8 +174,13 @@ const Pagination = ({ scrollX }) => {
   );
 };
 
-export default function Onboarding() {
+export default function Onboarding({ navigation }) {
   const scrollX = React.useRef(new Animated.Value(0)).current;
+
+  const pressHandler = () => 
+ {
+   navigation.navigate('Login')
+ }
 
   return (
     <View style={styles.container}>
@@ -204,10 +203,11 @@ export default function Onboarding() {
       />
       <Image
         style={styles.logo}
-        source={require('./assets/obelisks.png')}
+        source={require('../assets/obelisks.png')}
       />
       <Pagination scrollX={scrollX} />
       <Ticker scrollX={scrollX} />
+      <Button onPress={pressHandler}>Continue</Button>
     </View>
   );
 }
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '800',
     letterSpacing: 2,
-    marginBottom: 5,
+    marginBottom: -5,
   },
   description: {
     color: '#ccc',

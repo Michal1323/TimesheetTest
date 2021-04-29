@@ -10,7 +10,6 @@ import "intl";
 import "intl/locale-data/jsonp/en";
 import { DatabaseConnection } from '../components/database-connection';
 import moment from 'moment';
-import { extendMoment } from 'moment-range';
 
 import Mytext from '../components/Mytext';
 import Mytextinput from '../components/MyTextInput';
@@ -316,20 +315,18 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
             Alert.alert(
-              'Sucesso',
-              'Usuário atualizado com sucesso !!',
+              'Sucess',
+              'Entry edited Succesfully!!!',
               [
                 {
                   text: 'Ok',
                   onPress: () =>
-                  navigation.replace('Home', {
-                    someParam: 'Param',
-                  }),
+                  navigation.navigate('Home'), 
                 },
               ],
               { cancelable: false }
             );
-          } else alert('Erro ao atualizar o usuário');
+          } else alert('Error editing the entry!');
         }
       );
     });
@@ -383,7 +380,7 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
 
   const getTimefromMins = (mins) => {
     if (mins >= 24 * 60 || mins < 0) {
-      Alert.alert("Valid input should be greater than or equal to 0 and less than 1440.");
+      Alert.alert("Any Given Entry Should be less than 12 Hours");
     }
     var h = mins / 60 | 0;
     var m = mins % 60 | 0;

@@ -1,16 +1,23 @@
 import React from 'react';
 import { createStackNavigator } from 'react-navigation-stack';
-
 import Login from '../screens/login';
 import Home from '../screens/Home';
 import Hour from '../screens/Hour';
-import ViewEntry from '../screens/ViewEntry';
 import EditSheet from '../screens/EditSheet';
+import ViewEntry from '../screens/ViewEntry';
 import ListView from '../screens/ListView';
 import Header from '../components/Header';
+import Onboarding from '../screens/Onboarding';
 
 
 const screens = {
+  Onboarding: {
+    screen: Onboarding,
+      navigationOptions:
+      {
+        title: null,
+      }
+},
   Login: {
     screen: Login,
       navigationOptions:
@@ -49,8 +56,6 @@ Hour:
           }
     }
 },
-
-
 EditSheet:
   {
     screen: EditSheet,

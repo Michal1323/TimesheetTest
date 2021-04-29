@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StyleSheet, View, Text, Image, StatusBar, Animated, TouchableOpacity, Alert, Pressable, Modal} from 'react-native';
+import { StyleSheet, View, Text, Image, StatusBar, Animated, TouchableOpacity, Alert, Pressable, Modal, TouchableHighlight} from 'react-native';
 import { Button, IconButton, Card, Colors } from 'react-native-paper';
 import { TimePickerModal } from 'react-native-paper-dates';
 import { Picker } from '@react-native-picker/picker';
@@ -8,7 +8,7 @@ import WeekSelector from 'react-native-week-selector';
 import { MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import CheckBox from '@react-native-community/checkbox';
 import _ from "lodash";
-import Dialog from "react-native-dialog";
+import Swipeout from 'react-native-swipeout';
 import { DatabaseConnection } from '../components/database-connection';
 import { colors } from 'react-native-elements';
 import AwesomeAlert from 'react-native-awesome-alerts';
@@ -21,63 +21,43 @@ const db = DatabaseConnection.getConnection();
 export default function Home ({ navigation }) {
 
   const selectDate = new Date();
-  const [flatListItems, setFlatListItems] = React.useState([]);
-  const [modalVisible, setModalVisible] = React.useState(false);
-  const [Hours, setHours] = React.useState('');
-  const [Minutes, setMinutes] = React.useState('');
-  const [toggleCheckBox, setToggleCheckBox] = React.useState(false)
-  const [FINHours, setFINHours] = React.useState('');
-  const [FINMinutes, setFINMinutes] = React.useState('');
-  const [dayoftheWeek, setDayoftheWeek] = React.useState('');
-  const [Week, setWeek] = React.useState(moment().day(5).format("L"));
-  const [finishvisible, setfinishVisible] = React.useState(false);
-  const [finishHours, setfinishHours] = React.useState(selectDate.getHours());
-  const [finishMinutes, setfinishMinutes] = React.useState(selectDate.getMinutes());
-  const [currentDate, setCurrentDate] = React.useState(moment().format("L"));
-  const [formatDay, setformatDay] = React.useState('');
-  const [visible, setVisible] = React.useState(false);
-  const [showAlert, setshowAlert] = React.useState(false);
-  const [IDtimesheet, setIDtimesheet] = React.useState('');
-  const [frTimes, setfrTimes] = React.useState('');
-  const [frFinTimes, setfrFinTimes] = React.useState('');
-  const [ columns, setColumns ] = React.useState([
-    "Project",
-    "Site",
-    "Start/End",
-    "Total"
-  ])
-  const [ direction, setDirection ] = React.useState(null);
-  const [ selectedColumn, setSelectedColumn ] = React.useState(null);
-  const [totalHrsforday, settotalHrsforday] = React.useState([]);
+  const [flatListItems, setFlatListItems] = React.useState([]);            //variable for storing entries into the FlatList
+  const [modalVisible, setModalVisible] = React.useState(false);           //Flag Variable for Modal Pop-Up   
+  const [Hours, setHours] = React.useState('');                            //Variable for Hours from TimePicker
+  const [Minutes, setMinutes] = React.useState('');                        //Variable for Minutes from TimePicker
+  const [toggleCheckBox, setToggleCheckBox] = React.useState(false)        //Flag Variable for Lunch for week CheckBox  
+  const [dayoftheWeek, setDayoftheWeek] = React.useState('');              //variable for DOW
+  const [Week, setWeek] = React.useState(moment().day(5).format("L"));     //variable for EOW
+  const [finishvisible, setfinishVisible] = React.useState(false);         //Flag variable for Finish Time TimePicker
+  const [finishHours, setfinishHours] = React.useState(selectDate.getHours());              //Variable for Finish Hours from TimePicker
+  const [finishMinutes, setfinishMinutes] = React.useState(selectDate.getMinutes());        //Variable for Finish Minutes from TimePicker
+  const [currentDate, setCurrentDate] = React.useState(moment().format("L"));               //variable for current Date
+  const [visible, setVisible] = React.useState(false);                                      //Flag variable for Start Time TimePicker
+  const [showAlert, setshowAlert] = React.useState(false);                                  //Flag variable for Alert 
+  const [IDtimesheet, setIDtimesheet] = React.useState('');                                 //variable for id_timesheet
+  const [frTimes, setfrTimes] = React.useState('');                                         //variabe to store formatted Start Times
+  const [frFinTimes, setfrFinTimes] = React.useState('');                                   //variabe to store formatted Finish Times
+  const [totalHrsforday, settotalHrsforday] = React.useState([]);                           //variable to store total Hours for a given day
   const [selectedWeek, setselectedWeek] = React.useState(moment().day(5).format("L"));
   const [Thrs, setThrs] = React.useState('');
-
-  var timeList = [];
-  /*_onPressButton  = () => {
-    alert(
-      <Text>pop</Text>
-        )
-      }*/
-      const onDismiss = React.useCallback(() => {
+  const [selectedItem, setSelectedItem] = React.useState('');
+      const onDismiss = React.useCallback(() => {    // function for closing Start TimePicker
         setVisible(false)
       }, [setVisible])
     
-      const onFinishDismiss = React.useCallback(() => {
+      const onFinishDismiss = React.useCallback(() => {   // function for closing Finish TimePicker
         setfinishVisible(false)
       }, [setfinishVisible])
     
     
-      const onConfirm = React.useCallback(
+      const onConfirm = React.useCallback(      // function to display Start TimePicker
         ({ hours, minutes }) => {
           setVisible(false);
           console.log({ hours, minutes });
           var FrHours = moment(hours, 'HH');
           var FrMinutes = moment(minutes, 'mm');
-          //setTime('{$hours}:${minutes}')
           hours = setHours(FrHours.format('HH'));
           minutes = setMinutes(FrMinutes.format('mm'));
-          //setHours(hours.toString());
-          //setMinutes(minutes.toString());
           var times = FrHours.format('HH') + ':' + FrMinutes.format('mm');
           console.log('time: ' + times);
           setfrTimes(times);
@@ -85,7 +65,7 @@ export default function Home ({ navigation }) {
         [setVisible]
       );
     
-      const onFinishConfirm = React.useCallback(
+      const onFinishConfirm = React.useCallback(   // function to display Finish TimePicker
         ({ hours, minutes }) => {
           setfinishVisible(false);
           console.log({ hours, minutes });
@@ -101,17 +81,14 @@ export default function Home ({ navigation }) {
         [setfinishVisible]
       );
 
-      const saveStartingWeek = (value) => {
-    
-        moment.locale('en')
+      const saveStartingWeek = (value) => {   // function to save Week Selected by User
+            moment.locale('en')
             console.log("saveStartingWeek - value:", moment(value).add(5, "days").format("L"));
             setselectedWeek(moment(value).add(5, "days").format("L"));
-            //setselectedWeek(navigation.getParam('eow'));
-            //setselectedWeek(new Date(value).toString());
             }
       
     
-      const getTimefromMins = (mins) => {
+      const getTimefromMins = (mins) => {  // Function to help convert Minutes in 100 to Minutes in 60 
         if (mins >= 24 * 60 || mins < 0) {
           Alert.alert("Valid input should be greater than or equal to 0 and less than 1440.");
         }
@@ -120,56 +97,8 @@ export default function Home ({ navigation }) {
     
         return moment.utc().hours(h).minutes(m).format("HH:mm");
       }
-    
-      let updateUser = () => {
-        console.log( selectedWeek, currentDate, frTimes, frFinTimes, Thrs, dayoftheWeek);
-    
-        if (!frTimes) {
-          alert('Add Hours for the entry');
-          return;
-        }
-        
-        if (!frFinTimes) {
-          alert('Add End Hours for the entry');
-          return;
-        }  
-        
-        if (!dayoftheWeek) {
-          alert('Please select a day of the week');
-          return;
-        }
-        
-    
-    
-        db.transaction((tx) => {
-          tx.executeSql(
-            'UPDATE Timesheet set arrival = ?, depart = ? , dayoftheweek = ?, projNum = ?, siteID = ?, comment = ?, date = ?  where id_timesheet=?',
-            [frTimes, frFinTimes, dayoftheWeek, 'Lunch', 'Lunch', 'Lunch', currentDate,  IDtimesheet],
-            (tx, results) => {
-              console.log('Results', results.rowsAffected);
-              if (results.rowsAffected > 0) {
-                Alert.alert(
-                  'Sucesso',
-                  'Usuário atualizado com sucesso !!',
-                  [
-                    {
-                      text: 'Ok',
-                      onPress: () =>
-                      navigation.replace('Home', {
-                        someParam: 'Param',
-                      }),
-                    },
-                  ],
-                  { cancelable: false }
-                );
-              } else alert('Erro ao atualizar o usuário');
-            }
-          );
-        });
-      };
-      
-    
-       const calcTotalHrs = () => {
+       
+       const calcTotalHrs = () => {   // function to calculate total Hours
         //setfinishVisible(true)
          var StrtTime = moment(frTimes, "HH:mm");
          var endTime = moment(frFinTimes, "HH:mm");
@@ -210,6 +139,7 @@ export default function Home ({ navigation }) {
        add_lunch();
      }
      
+     
       
     
       const BG_IMG = 'https://www.solidbackgrounds.com/images/950x350/950x350-snow-solid-color-background.jpg';
@@ -228,14 +158,23 @@ export default function Home ({ navigation }) {
         tint: "#2b49c3",
       }
 
-      const popAlert = () => 
+      const popAlert = (IDtimesheet) => 
       {
           setshowAlert (true);
+          console.log('ID: ' + IDtimesheet)
+          //navigation.navigate('EditSheet', IDtimesheet)
+      }
+      const pAlert = (IDtimesheet) => 
+      {
+          setIDtimesheet(IDtimesheet)
+          console.log('ID: ' + IDtimesheet)
+          //navigation.navigate('EditSheet', IDtimesheet)
       }
      
-      const hideAlert = () => 
+      const hideAlert = (item) => 
       {
           setshowAlert (false);
+          navigation.navigate('EditSheet', item)
       };
 
      
@@ -263,7 +202,6 @@ export default function Home ({ navigation }) {
       //console.log(next.getTime());
       console.log(moment(next.getTime()).format('L'));
       setCurrentDate(moment(next.getTime()).format('L'));
-      setformatDay(moment(next.getTime()).format('MMM Do'));
       calcTotalHrs();
     }
   
@@ -406,7 +344,7 @@ export default function Home ({ navigation }) {
       save();
       db.transaction((tx) => {
      tx.executeSql(
-      'SELECT * FROM Timesheet WHERE date = ?',
+      'SELECT * FROM Timesheet WHERE date = ? ORDER BY arrival',
       [currentDate],
        (tx, results) => {
          //var temp = [];
@@ -516,7 +454,7 @@ const addTimes = (startTime, endTime) => {
 }
 
 
-let deleteEntry = () => {
+let deleteEntry = (IDtimesheet) => {
   db.transaction((tx) => {
     console.log("Sample " + IDtimesheet); 
     tx.executeSql(
@@ -531,7 +469,7 @@ let deleteEntry = () => {
             [
               {
                 text: 'Ok',
-                onPress: Update()
+                onPress: SearchEntry()
               }
             ],
             { cancelable: false }
@@ -548,6 +486,38 @@ const setCheckBox = (newValue) => {
   setToggleCheckBox(newValue);
   calcTotalHrs();
 }
+
+const time_clash = () => {
+  db.transaction(function (tx) {
+    tx.executeSql(
+      'SELECT * FROM Timesheet WHERE ? < depart AND ? > arrival AND date=?',
+      [frTimes, frFinTimes ,currentDate],
+      (tx, results) => {
+        var temp = [];
+       var len = results.rows.length;
+       console.log('len', len);
+       if(len >= 0 ) {
+         for (let i = 0; i < results.rows.length; ++i) 
+         temp.push(results.rows.item(i));
+         if(len <= 0)
+         {
+            console.log("Time Slot Available " + temp);
+            add_lunch();
+         }
+         else{
+            console.log("Error")
+            alert('There is a timesheet conflict, select a different time');
+         }
+       } 
+       else {
+         alert('Cannot Search Entry!');
+       }
+      }
+    );
+  });
+}
+
+
 
 const add_lunch = () => {
   console.log( 1, selectedWeek, currentDate, 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek);
@@ -568,10 +538,7 @@ const add_lunch = () => {
             [
               {
                 text: 'Ok',
-                onPress: () =>
-                navigation.replace('Home', {
-                  someParam: 'Param',
-                }),
+                onPress: SearchEntry()
               },
             ],
             { cancelable: false }
@@ -602,10 +569,7 @@ db.transaction(function (tx) {
           [
             {
               text: 'Ok',
-              onPress: () =>
-              navigation.replace('Home', {
-                someParam: 'Param',
-              }),
+              onPress: SearchEntry()
             },
           ],
           { cancelable: false }
@@ -617,8 +581,6 @@ db.transaction(function (tx) {
 });
 
 }
-
-
 };
 
 
@@ -665,8 +627,31 @@ db.transaction(function (tx) {
     load();
   },[])
 
+  const onDelte = (IDtimesheet) => {
+    deleteEntry(IDtimesheet);
+  }
 
-    
+  const onEdit = (item) => {
+    navigation.navigate('EditSheet', item)
+  }
+
+  let swipeBtns = (item) => [
+    {
+      text: 'Delete',
+      backgroundColor: 'red',
+      underlayColor: 'rgba(0, 0, 0, 1, 0.6)',
+      onPress: () => {  onDelte(item.id_timesheet) }
+   },
+    {
+      text: 'Edit',
+      backgroundColor: '#eed202',
+      underlayColor: 'rgba(0, 0, 0, 1, 0.6)',
+      onPress: () => { onEdit(item) }
+   }
+  ];
+
+  
+  
    
     return (
       <View style={{backgroundColor: colors.white,flex: 1}}>
@@ -685,8 +670,10 @@ db.transaction(function (tx) {
         marginLeft: 8,
         borderWidth: 3,
         borderColor: 'white',
-        backgroundColor: '#e1ecf2',
+        backgroundColor: '#34c0eb',
         borderRadius: 20,
+        borderWidth: 3,
+          borderColor: 'black',
       }}>
       
         <WeekSelector
@@ -699,14 +686,14 @@ db.transaction(function (tx) {
       </View>
 
         
-        <Picker style={{width: 135, height: 44, backgroundColor: '#d8e0c3', marginTop: -73, marginLeft: 190, borderWidth: 2, borderColor: 'black', borderStyle: 'dashed' }}
+        <Picker style={{width: 135, height: 44, backgroundColor: '#e1ecf2', marginTop: -73, marginLeft: 190, borderWidth: 2, borderColor: 'black', borderStyle: 'dashed' }}
                 selectedValue={dayoftheWeek}
                 itemStyle={{fontWeight: 'bold'}}
                 onValueChange=
                 {
                     saveDayofWeek
                 }>
-                  
+
                         <Picker.Item label={'Monday' + ' ' +  moment(Week).day("Monday").format('MMM Do')} value="monday" />
                         <Picker.Item label={'Tuesday' + ' ' +  moment(Week).day("Tuesday").format('MMM Do')} value="tuesday" />
                         <Picker.Item label={'Wednesday' + ' ' +  moment(Week).day("Wednesday").format('MMM Do')} value="wednesday" />
@@ -729,16 +716,18 @@ db.transaction(function (tx) {
     onScroll={
         Animated.event(
             [{nativeEvent: {contentOffset: {y: scrollY}}}],
-            [{ useNativeDriver: true}]
+            { useNativeDriver: true}
         )
     }
-    keyExtractor={item => item.key}
+    keyExtractor={(item) => item.id_timesheet}
     contentContainerStyle={{
         padding: SPACING,
         paddingTop: StatusBar.currentHeight
     }}
+     
     renderItem={({item, index}) => {
-      setIDtimesheet(item.id_timesheet)
+      
+      const isSelected = (selectedItem === item.id_timesheet);
         const inputRange = [
             -1,
             0,
@@ -762,7 +751,10 @@ db.transaction(function (tx) {
             outputRange: [1, 1, 1, 0]
         })
 
-        return <Animated.View style={{flexDirection: 'row', padding: SPACING, marginBottom: SPACING, backgroundColor: 'rgba(255,255,255,0.8)', borderRadius: 12,
+        return  <Swipeout right={swipeBtns(item)}
+            autoClose='true'
+            backgroundColor= 'transparent'>
+            <Animated.View style={{flexDirection: 'row', padding: SPACING, marginBottom: SPACING, backgroundColor: 'rgba(255,255,255,0.8)', borderRadius: 12,
             shadowColor: '#000',
             shadowOffset: {
                 width: 0,
@@ -772,44 +764,25 @@ db.transaction(function (tx) {
             shadowRadius: 20,
             opacity,
             transform: [{scale}]
-        }}>
-            <TouchableOpacity onPress={popAlert}>
+            
+        }}
+        >
+           
             <View>
             <Text style={{fontWeight: '700', fontSize: 24, color: '#091629'}}>{item.projNum}  </Text> 
-                  <Text style={{opacity: .7, fontSize: 15}}>  {item.projNum} - {item.siteID}</Text>
-                <Text style={{fontWeight: '700', fontSize: 14, color: '#091629'}}>  {item.arrival} - {item.depart}     Duration : {item.totalHrs}</Text>
-          
-           <AwesomeAlert
-          show={showAlert}
-          showProgress={false}
-          title= {item.comment}
-          closeOnTouchOutside={true}
-          closeOnHardwareBackPress={false}
-          showCancelButton={true}
-          showConfirmButton={true}
-          confirmText="Delete"
-          cancelText="Edit"
-          confirmButtonColor="#DD6B55"
-          onCancelPressed={() => {
-            hideAlert()
-            navigation.navigate('EditSheet', item)
-          }}
-          onConfirmPressed={() => {
-            console.log("Timesheet ID: " + IDtimesheet)  
-            deleteEntry(IDtimesheet);  
-            hideAlert(); 
-          }}
-        />
-          
-           </View>
-            </TouchableOpacity>  
-           
+            <Text style={{opacity: .7, fontSize: 15}}>  {item.projNum} - {item.siteID}</Text>
+            <Text style={{fontWeight: '700', fontSize: 14, color: '#091629'}}>  {item.arrival} - {item.depart}     Duration : {item.totalHrs}</Text>  
+        </View>        
         </Animated.View>   
-        
+        </Swipeout>
     }}
+    
     />
+
+ 
     
     <View style={styles.centeredView}>
+      
 <Modal
   animationType="slide"
   transparent={true}
@@ -822,6 +795,7 @@ db.transaction(function (tx) {
 <View style={styles.centeredView}>
 <View style={styles.modalView}>
     <View style={styles.Weekarrow}>
+    <IconButton icon="close"  color={Colors.white} size={29} style={{marginLeft: 322, marginTop: 0, position: 'absolute', backgroundColor: '#e00000', borderWidth: 3, borderColor: 'white'}} onPress={() => setModalVisible(!modalVisible)}/>
       <Text style={{fontWeight: 'bold',  color: '#091629'}}>Week Ending: {selectedWeek}{navigation.getParam('eow')}</Text>
   <WeekSelector
       dateContainerStyle={styles.date}
@@ -898,17 +872,11 @@ onValueChange={setCheckBox}
     </View>
     
 
-    <Button color="#09253a" onPress={add_lunch} style={styles.addButton}>
+    <Button color="#09253a" onPress={time_clash} style={styles.addButton}>
                 Add Lunch
         </Button>
 
-              <Pressable 
-                style={[styles.button, styles.buttonClose]}
-                onPress={() => setModalVisible(!modalVisible)}
-              >
-              <Text style={styles.textStyle}>Hide Modal</Text>
-                
-              </Pressable>
+              
             </View>
           </View>
         </Modal>
@@ -916,8 +884,9 @@ onValueChange={setCheckBox}
       </View>
     
     <View>
-    <IconButton icon="plus"  color={Colors.white} size={35} style={{marginLeft: 20, marginTop: -65, position: 'absolute', backgroundColor: '#e00000', borderWidth: 3, borderColor: 'white'}} onPress={pressHandler}/>
-     
+    <IconButton icon="plus"  color={Colors.white} size={35} style={{marginLeft: 20, marginTop: -65, position: 'absolute', backgroundColor: '#34c0eb', borderWidth: 3, borderColor: 'white'}} onPress={pressHandler}/>
+    <IconButton icon="check"  color={Colors.white} size={35} style={{marginLeft: 170, marginTop: -65, position: 'absolute', backgroundColor: '#52f549', borderWidth: 3, borderColor: 'white'}} />
+
   </View>
 
     {/* <View>
@@ -960,6 +929,16 @@ onValueChange={setCheckBox}
            marginTop:20,
            justifyContent: 'center'
            },
+           listItem: {
+            flexDirection: 'row',
+            marginTop: 5,
+        },
+    
+        SelectedlistItem: {
+            flexDirection: 'row',
+            marginTop: 5,
+            backgroundColor:"grey",
+        },
    
        icons:{
            alignItems: 'center',
@@ -1134,8 +1113,25 @@ onValueChange={setCheckBox}
               width:350,
               marginTop:-37,
               marginBottom: 10,
-              backgroundColor: '#e1ecf2',
+              backgroundColor: '#7affbd',
               borderRadius: 20,
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              borderWidth: 3,
+          borderColor: 'white',
              },
+             delstyle:{
+               backgroundColor: '#037272',
+               padding: 10,
+               borderRadius: 8,
+               fontWeight: 'bold',
+               color: '#fff'
+             },
+             edtbtn:{
+               flexDirection: 'column',
+               
+              backgroundColor: '#eb864b',
+              padding: 10,
+              borderRadius: 8,
+              fontWeight: 'bold'
+             }
      });
