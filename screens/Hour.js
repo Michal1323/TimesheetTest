@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, SafeAreaView, TextInput, Alert, Pressable, Moda
 import AsyncStorage from "@react-native-community/async-storage";
 import { Button, IconButton, Card, Colors } from 'react-native-paper';
 import { TimePickerModal } from 'react-native-paper-dates';
+import { ActivityIndicator, FlatList} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import CheckBox from '@react-native-community/checkbox';
 import WeekSelector from 'react-native-week-selector';
@@ -41,6 +42,9 @@ const db = DatabaseConnection.getConnection();
   const [description, setDescription] = React.useState('');
   const [selectedWeek, setselectedWeek] = React.useState(moment().day(5).format("L"));
   var timeList  = []; //array that stores entry details
+
+  const [isLoading, setLoading] = React.useState(true);
+  const [data, setData] = React.useState([]);
 
   const onDismiss = React.useCallback(() => {
     setVisible(false)
@@ -119,6 +123,14 @@ const db = DatabaseConnection.getConnection();
        }
 
   }
+  React.useEffect(() => {
+    fetch('https://jsonplaceholder.typicode.com/todos/1')
+      .then((response) => response.json())
+      .then((json) => setData(json.movies))
+      .catch((error) => console.error(error))
+      .finally(() => setLoading(false));
+  }, []);
+
 
   React.useEffect(() => {
     var tdate = new Date(); //Current Date

@@ -885,7 +885,7 @@ onValueChange={setCheckBox}
     
     <View>
     <IconButton icon="plus"  color={Colors.white} size={35} style={{marginLeft: 20, marginTop: -65, position: 'absolute', backgroundColor: '#34c0eb', borderWidth: 3, borderColor: 'white'}} onPress={pressHandler}/>
-    <IconButton icon="check"  color={Colors.white} size={35} style={{marginLeft: 170, marginTop: -65, position: 'absolute', backgroundColor: '#52f549', borderWidth: 3, borderColor: 'white'}} />
+    <IconButton icon="check"  color={Colors.white} size={35} style={{marginLeft: 170, marginTop: -65, position: 'absolute', backgroundColor: '#52f549', borderWidth: 3, borderColor: 'white'}} onPress={deleteHandler}/>
 
   </View>
 

@@ -20,10 +20,11 @@ const screens = {
 },
   Login: {
     screen: Login,
-      navigationOptions:
-      {
-        title: null,
-      }
+    navigationOptions:
+    {
+      title: null,
+      header: () => null
+    }
 },
 
 ListView:
@@ -70,11 +71,10 @@ EditSheet:
 ViewEntry:
   {
     screen: ViewEntry,
-    navigationOptions:({ navigation }) => {
-    return {
-      headerTitle: () => <Header navigation={navigation} title='Delete Entry' />,
-      headerLeft: () => null
-          }
+    navigationOptions:
+    {
+      title: null,
+      header: () => null
     }
 }
 
