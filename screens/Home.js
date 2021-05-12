@@ -488,6 +488,7 @@ const setCheckBox = (newValue) => {
 }
 
 const time_clash = () => {
+  setModalVisible(!modalVisible);
   db.transaction(function (tx) {
     tx.executeSql(
       'SELECT * FROM Timesheet WHERE ? < depart AND ? > arrival AND date=?',
@@ -778,6 +779,13 @@ db.transaction(function (tx) {
     }}
     
     />
+
+ 
+
+
+
+
+
 
  
     
@@ -1113,7 +1121,7 @@ onValueChange={setCheckBox}
               width:350,
               marginTop:-37,
               marginBottom: 10,
-              backgroundColor: '#7affbd',
+              backgroundColor: '#34c0eb',
               borderRadius: 20,
               fontWeight: 'bold',
               borderWidth: 3,

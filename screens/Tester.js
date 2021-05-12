@@ -5,6 +5,7 @@ import { TimePickerModal } from 'react-native-paper-dates';
 import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
 import WeekSelector from 'react-native-week-selector';
+import Swipeout from 'react-native-swipeout';
 import { MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import CheckBox from '@react-native-community/checkbox';
 import _ from "lodash";
@@ -212,7 +213,7 @@ export default function Home ({ navigation }) {
      
       
     
-      const BG_IMG = 'https://www.solidbackgrounds.com/images/7680x4320/7680x4320-oxford-blue-solid-color-background.jpg';
+     const BG_IMG = 'https://www.solidbackgrounds.com/images/950x350/950x350-snow-solid-color-background.jpg';
 
       const SPACING = 20;
       const AVATAR_SIZE = 30;
@@ -665,6 +666,28 @@ db.transaction(function (tx) {
     load();
   },[])
 
+  const onDelte = (IDtimesheet) => {
+    deleteEntry(IDtimesheet);
+  }
+
+  const onEdit = (item) => {
+    navigation.navigate('EditSheet', item)
+  }
+
+  let swipeBtns = (item) => [
+    {
+      text: 'Delete',
+      backgroundColor: 'red',
+      underlayColor: 'rgba(0, 0, 0, 1, 0.6)',
+      onPress: () => {  onDelte(item.id_timesheet) }
+   },
+    {
+      text: 'Edit',
+      backgroundColor: '#eed202',
+      underlayColor: 'rgba(0, 0, 0, 1, 0.6)',
+      onPress: () => { onEdit(item) }
+   }
+  ];
 
     
    
@@ -738,7 +761,10 @@ db.transaction(function (tx) {
             outputRange: [1, 1, 1, 0]
         })
 
-        return <Animated.View style={{flexDirection: 'row', padding: SPACING, marginBottom: SPACING, backgroundColor: 'rgba(255,255,255,0.8)', borderRadius: 12,
+        return <Swipeout right={swipeBtns(item)}
+            autoClose='true'
+            backgroundColor= 'transparent'>
+        <Animated.View style={{flexDirection: 'row', padding: SPACING, marginBottom: SPACING, backgroundColor: 'rgba(255,255,255,0.8)', borderRadius: 12,
             shadowColor: '#000',
             shadowOffset: {
                 width: 0,
@@ -749,38 +775,16 @@ db.transaction(function (tx) {
             opacity,
             transform: [{scale}]
         }}>
-            <TouchableOpacity onPress={popAlert}>
             <View>
             <Text style={{fontWeight: '700', fontSize: 24, color: '#091629'}}>{item.projNum}  </Text> 
                   <Text style={{opacity: .7, fontSize: 15}}>  {item.projNum} - {item.siteID}</Text>
                 <Text style={{fontWeight: '700', fontSize: 14, color: '#091629'}}>  {item.arrival} - {item.depart}     Duration : {item.totalHrs}</Text>
-          
-           <AwesomeAlert
-          show={showAlert}
-          showProgress={false}
-          title= {item.comment}
-          closeOnTouchOutside={true}
-          closeOnHardwareBackPress={false}
-          showCancelButton={true}
-          showConfirmButton={true}
-          confirmText="Delete"
-          cancelText="Edit"
-          confirmButtonColor="#DD6B55"
-          onCancelPressed={() => {
-            hideAlert()
-            navigation.navigate('EditSheet', item)
-          }}
-          onConfirmPressed={() => {
-            console.log("Timesheet ID: " + IDtimesheet)  
-            deleteEntry(IDtimesheet);  
-            hideAlert(); 
-          }}
-        />
+        
           
            </View>
-            </TouchableOpacity>  
            
         </Animated.View>   
+        </Swipeout>
         
     }}
     />

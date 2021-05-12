@@ -281,9 +281,7 @@ const time_clash = () => {
                 {
                   text: 'Ok',
                   onPress: () =>
-                  navigation.replace('Home', {
-                    someParam: 'Param',
-                  }),
+                  navigation.navigate('Home'),
                 }
               ],
               { cancelable: false }
@@ -490,10 +488,11 @@ const time_clash = () => {
   <SafeAreaView style={styles.container}>
   <View>
     <View style={{
-        marginTop:0,
+        marginTop:-60,
         height: 100,
         width:380,
         marginLeft: 8,
+        marginBottom:20,
         borderWidth: 3,
         borderColor: 'white',
         backgroundColor: '#34c0eb',
@@ -549,7 +548,7 @@ const time_clash = () => {
 </View>
 
     <View>
-              <Text style={{fontWeight: 'bold', color: '#091629'}}>
+              <Text style={{fontWeight: 'bold', color: '#091629', marginBottom: -20, marginLeft: 20, marginTop: 20}}>
                   Day of the Week 
               </Text>
              <Picker 
@@ -622,12 +621,25 @@ placeholder="  Description"
 onChangeText={description => setDescription(description)} 
 defaultValue={description}
 style={styles.input}
-
 />
 
       <Button color="#09253a" onPress={time_clash}>
         Add : {Thrs}
 </Button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       <View style={styles.centeredView}>
 <Modal
@@ -829,8 +841,8 @@ style={styles.input}
              },
              
              input: {
-              margin: 15,
-              height: 40,
+              margin: 25,
+              height: 50,
               width: 340,
               borderColor: "#09253a",
               borderWidth: 2,
@@ -839,6 +851,7 @@ style={styles.input}
            titleStyle: {
             marginLeft:20,
             marginTop:10,
+            marginBottom:60,
             padding:-10,
             fontWeight:'bold',
             color: '#091629'
@@ -860,7 +873,9 @@ style={styles.input}
               marginTop:35,
               marginRight: -40,
               },
-        
+        datefive:{
+          margin:20,
+        },
               
               modalView: {
                 margin: 20,

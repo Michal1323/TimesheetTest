@@ -23,6 +23,7 @@
     "@react-native-community/datetimepicker": "^3.0.9",
     "@react-native-picker/picker": "^1.9.11",
     "accordion-collapse-react-native": "^1.0.0",
+    "axios": "^0.21.1",
     "expo": "~40.0.0",
     "expo-app-loading": "^1.0.1",
     "expo-asset": "~8.2.1",

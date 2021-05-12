@@ -163,13 +163,13 @@ class MusicApp extends Component {
           <Animated.View
             style={{
               ...styles.button,
-              backgroundColor: '#2E71DC',
+              backgroundColor: '#d90909',
               opacity: this.buttonOpacity,
               transform: [{ translateY: this.buttonY }]
             }}
           >
             <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>
-              SIGN IN WITH FACEBOOK
+              FORGOT PASSWORD?
             </Text>
           </Animated.View>
           <Animated.View style={{
