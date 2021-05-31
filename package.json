@@ -44,6 +44,7 @@
     "react-native-awesome-alerts": "^1.4.2",
     "react-native-dialog": "^6.2.0",
     "react-native-elements": "^3.2.0",
+    "react-native-floating-action": "^1.21.0",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-inline-timepicker": "^1.2.0",
     "react-native-localize": "^2.0.2",

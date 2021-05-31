@@ -16,6 +16,7 @@ const screens = {
       navigationOptions:
       {
         title: null,
+        header: () => null
       }
 },
   Login: {

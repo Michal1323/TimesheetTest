@@ -5,6 +5,9 @@ import AppLoading  from 'expo-app-loading';
 import Navigator from './routes/drawer';
 import { isAndroid } from "@freakycoder/react-native-helpers";
 import AnimatedSplash from "react-native-animated-splash-screen";
+import { LogBox } from 'react-native';
+
+LogBox.ignoreAllLogs();
 
 const getFonts = () => Font.loadAsync({
 'nunito-regular': require('./assets/fonts/Nunito-Regular.ttf'),

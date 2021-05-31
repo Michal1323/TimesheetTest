@@ -248,6 +248,7 @@ const styles = StyleSheet.create({
    marginHorizontal:20,
    paddingLeft:10,
    marginVertical:5,
-   borderColor:'rgba(0,0,0,0.2)'
+   borderColor:'rgba(0,0,0,0.2)',
+   backgroundColor: '#fcfdff'
   }
 });

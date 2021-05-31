@@ -624,7 +624,7 @@ style={styles.input}
 />
 
       <Button color="#09253a" onPress={time_clash}>
-        Add : {Thrs}
+        Add
 </Button>
 
 

@@ -13,6 +13,7 @@ import { DatabaseConnection } from '../components/database-connection';
 import { colors } from 'react-native-elements';
 import AwesomeAlert from 'react-native-awesome-alerts';
 import AsyncStorage from "@react-native-community/async-storage";
+import { FloatingAction } from "react-native-floating-action";
 
 const db = DatabaseConnection.getConnection();
 
@@ -40,7 +41,32 @@ export default function Home ({ navigation }) {
   const [totalHrsforday, settotalHrsforday] = React.useState([]);                           //variable to store total Hours for a given day
   const [selectedWeek, setselectedWeek] = React.useState(moment().day(5).format("L"));
   const [Thrs, setThrs] = React.useState('');
-  const [selectedItem, setSelectedItem] = React.useState('');
+  const [selectedItem, setSelectedItem] = React.useState('');  
+  const actions = [
+      {
+        text: "Add Entry",
+        icon: <IconButton icon="plus"  color={Colors.white} onPress={pressHandler}/>
+        ,
+        name: "bt_language",
+        position: 1,
+        onPressItem: {pressHandler}
+      },
+      {
+        text: "Lunch",
+        icon: <IconButton icon="food"  color={Colors.white} />
+        ,
+        name: "bt_room",
+        position: 2
+      },
+      {
+        text: "Submit",
+        icon: <IconButton icon="check"  color={Colors.white}  />
+  ,
+        name: "bt_videocam",
+        position: 3
+      }
+    ];
+
       const onDismiss = React.useCallback(() => {    // function for closing Start TimePicker
         setVisible(false)
       }, [setVisible])
@@ -139,7 +165,8 @@ export default function Home ({ navigation }) {
        add_lunch();
      }
      
-     
+   
+  
       
     
       const BG_IMG = 'https://www.solidbackgrounds.com/images/950x350/950x350-snow-solid-color-background.jpg';
@@ -191,8 +218,16 @@ export default function Home ({ navigation }) {
     };
 
     const deleteHandler = () => 
-    {
-      navigation.navigate('ViewEntry')
+    { 
+      if (moment(Week).day("Wednesday").format('MMM Do') == moment().format('MMM Do') || moment(Week).day("Monday").format('MMM Do') == moment().format('MMM Do')) 
+      {
+      navigation.navigate('ViewEntry');
+      } 
+    
+      else 
+      {
+      alert('Its not Friday or Monday Yet!');
+      }
     }
 
     const saveDayofWeek = (itemValue, itemIndex) => {
@@ -888,13 +923,15 @@ onValueChange={setCheckBox}
             </View>
           </View>
         </Modal>
-         <IconButton icon="food"  color={Colors.white} size={35} style={{marginLeft: 330, marginTop: -65, position: 'absolute', backgroundColor: '#091629', borderWidth: 3, borderColor: 'white'}} onPress={() => setModalVisible(true)}/>
       </View>
     
     <View>
-    <IconButton icon="plus"  color={Colors.white} size={35} style={{marginLeft: 20, marginTop: -65, position: 'absolute', backgroundColor: '#34c0eb', borderWidth: 3, borderColor: 'white'}} onPress={pressHandler}/>
-    <IconButton icon="check"  color={Colors.white} size={35} style={{marginLeft: 170, marginTop: -65, position: 'absolute', backgroundColor: '#52f549', borderWidth: 3, borderColor: 'white'}} onPress={deleteHandler}/>
-
+   <View style={styles.float}>
+    <FloatingAction
+      actions={actions}
+      onPressItem={pressHandler}
+    />
+  </View>
   </View>
 
     {/* <View>
@@ -1141,5 +1178,14 @@ onValueChange={setCheckBox}
               padding: 10,
               borderRadius: 8,
               fontWeight: 'bold'
+             },
+             float: {
+              backgroundColor: '#ffffff',
+              alignItems: 'center',
+                justifyContent: 'center',
+                flex: 1,
+                marginTop:50,
+                paddingBottom: 500
              }
+
      });
