@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StyleSheet, View, Text, Image, StatusBar, Animated, TouchableOpacity, Alert, Pressable, Modal, TouchableHighlight} from 'react-native';
+import { StyleSheet, View, Text, Image, StatusBar, Animated, TouchableOpacity, Alert} from 'react-native';
 import { Button, IconButton, Card, Colors } from 'react-native-paper';
 import { TimePickerModal } from 'react-native-paper-dates';
 import { Picker } from '@react-native-picker/picker';
@@ -11,9 +11,10 @@ import _ from "lodash";
 import Swipeout from 'react-native-swipeout';
 import { DatabaseConnection } from '../components/database-connection';
 import { colors } from 'react-native-elements';
-import AwesomeAlert from 'react-native-awesome-alerts';
 import AsyncStorage from "@react-native-community/async-storage";
-import { FloatingAction } from "react-native-floating-action";
+import ActionButton from 'react-native-action-button';
+import Icon from 'react-native-vector-icons/Ionicons';
+import Modal from 'react-native-modal';
 
 const db = DatabaseConnection.getConnection();
 
@@ -41,31 +42,9 @@ export default function Home ({ navigation }) {
   const [totalHrsforday, settotalHrsforday] = React.useState([]);                           //variable to store total Hours for a given day
   const [selectedWeek, setselectedWeek] = React.useState(moment().day(5).format("L"));
   const [Thrs, setThrs] = React.useState('');
-  const [selectedItem, setSelectedItem] = React.useState('');  
-  const actions = [
-      {
-        text: "Add Entry",
-        icon: <IconButton icon="plus"  color={Colors.white} onPress={pressHandler}/>
-        ,
-        name: "bt_language",
-        position: 1,
-        onPressItem: {pressHandler}
-      },
-      {
-        text: "Lunch",
-        icon: <IconButton icon="food"  color={Colors.white} />
-        ,
-        name: "bt_room",
-        position: 2
-      },
-      {
-        text: "Submit",
-        icon: <IconButton icon="check"  color={Colors.white}  />
-  ,
-        name: "bt_videocam",
-        position: 3
-      }
-    ];
+  const [selectedItem, setSelectedItem] = React.useState('');
+
+  
 
       const onDismiss = React.useCallback(() => {    // function for closing Start TimePicker
         setVisible(false)
@@ -165,8 +144,7 @@ export default function Home ({ navigation }) {
        add_lunch();
      }
      
-   
-  
+     
       
     
       const BG_IMG = 'https://www.solidbackgrounds.com/images/950x350/950x350-snow-solid-color-background.jpg';
@@ -218,15 +196,11 @@ export default function Home ({ navigation }) {
     };
 
     const deleteHandler = () => 
-    { 
-      if (moment(Week).day("Wednesday").format('MMM Do') == moment().format('MMM Do') || moment(Week).day("Monday").format('MMM Do') == moment().format('MMM Do')) 
-      {
-      navigation.navigate('ViewEntry');
-      } 
-    
-      else 
-      {
-      alert('Its not Friday or Monday Yet!');
+    {
+      if (moment(Week).day("Tuesday").format('MMM Do') == moment().format('MMM Do') || moment(Week).day("Monday").format('MMM Do') == moment().format('MMM Do')) {
+        navigation.navigate('ViewEntry');
+      } else {
+        alert('Its not Friday or Monday Yet!');
       }
     }
 
@@ -522,8 +496,43 @@ const setCheckBox = (newValue) => {
   calcTotalHrs();
 }
 
+const sow_lunch = () => {
+  if (moment(Week).day("Monday").format('MMM Do') == moment().format('MMM Do') || moment(Week).day("Tuesday").format('MMM Do') == moment().format('MMM Do') || moment(Week).day("Wednesday").format('MMM Do') == moment().format('MMM Do') || moment(Week).day("Thursday").format('MMM Do') == moment().format('MMM Do') || moment(Week).day("Friday").format('MMM Do') == moment().format('MMM Do')) {
+    setModalVisible(true);
+  } else {
+    setModalVisible(false);
+  }
+}
+
+const find_lunch = () => {
+  db.transaction(function (tx) {
+    tx.executeSql(
+      'SELECT * FROM Timesheet WHERE projNum = "Lunch"',
+      [],
+      (tx, results) => {
+        var temp = [];
+       var len = results.rows.length;
+       console.log('len', len);
+       if(len > 0 ) {
+         for (let i = 0; i < results.rows.length; ++i) 
+         temp.push(results.rows.item(i));
+         if(len <= 0)
+         {
+            console.log('Lunch check!')
+         }
+         else{
+            console.log("There is a Lunch already");
+         }
+       } 
+       else {
+        sow_lunch();
+       }
+      }
+    );
+  });
+}
+
 const time_clash = () => {
-  setModalVisible(!modalVisible);
   db.transaction(function (tx) {
     tx.executeSql(
       'SELECT * FROM Timesheet WHERE ? < depart AND ? > arrival AND date=?',
@@ -553,6 +562,11 @@ const time_clash = () => {
   });
 }
 
+const hide_LModal = () => {
+  SearchEntry();
+  setModalVisible(false);
+}
+
 
 
 const add_lunch = () => {
@@ -574,7 +588,7 @@ const add_lunch = () => {
             [
               {
                 text: 'Ok',
-                onPress: SearchEntry()
+                onPress: hide_LModal,
               },
             ],
             { cancelable: false }
@@ -605,7 +619,7 @@ db.transaction(function (tx) {
           [
             {
               text: 'Ok',
-              onPress: SearchEntry()
+              onPress: hide_LModal,
             },
           ],
           { cancelable: false }
@@ -636,8 +650,7 @@ db.transaction(function (tx) {
     try{
      let Week = await AsyncStorage.getItem("MyWeekEnding")
      let currentDate = await AsyncStorage.getItem("MyWeek")
-     let dayoftheWeek = await AsyncStorage.getItem("MyDays")
-
+    
      if(Week !== null)
      {
       setWeek(Week)
@@ -646,11 +659,6 @@ db.transaction(function (tx) {
      if(currentDate !== null)
      {
       setCurrentDate(currentDate)
-     }
-
-     if(dayoftheWeek !== null)
-     {
-      setDayoftheWeek(dayoftheWeek)
      }
 
     }
@@ -692,24 +700,23 @@ db.transaction(function (tx) {
     return (
       <View style={{backgroundColor: colors.white,flex: 1}}>
          <Image 
-    source={{uri: BG_IMG}}
+    source={require('../assets/Untitled.png')}
     style={StyleSheet.absoluteFillObject}
-    blurRadius={80}
+    blurRadius={30}
+    onLoad={find_lunch}
     />
-<Text style={{marginLeft: 18, marginTop: 20, fontSize: 16, color: '#091629', fontWeight: 'bold'}}>Week Ending                     Day of the Week</Text>
+<Text style={{marginLeft: 18, marginTop: 20, fontSize: 20, color: '#091629', fontWeight: 'bold'}}>Week Ending            Day of the Week</Text>
 
 
       <View style={{
-        marginTop:0,
+        marginTop: 10,
         height: 100,
         width:380,
         marginLeft: 8,
-        borderWidth: 3,
-        borderColor: 'white',
+        borderWidth: 4,
+        borderColor: 'black',
         backgroundColor: '#34c0eb',
-        borderRadius: 20,
-        borderWidth: 3,
-          borderColor: 'black',
+        borderRadius: 20,        
       }}>
       
         <WeekSelector
@@ -722,7 +729,7 @@ db.transaction(function (tx) {
       </View>
 
         
-        <Picker style={{width: 135, height: 44, backgroundColor: '#e1ecf2', marginTop: -73, marginLeft: 190, borderWidth: 2, borderColor: 'black', borderStyle: 'dashed' }}
+        <Picker style={{width: 145, height: 44, backgroundColor: '#e1ecf2', marginTop: -73, marginLeft: 190, borderWidth: 2, borderColor: 'black', borderStyle: 'dashed' }}
                 selectedValue={dayoftheWeek}
                 itemStyle={{fontWeight: 'bold'}}
                 onValueChange=
@@ -814,32 +821,22 @@ db.transaction(function (tx) {
     }}
     
     />
-
  
-
-
-
-
-
-
- 
-    
     <View style={styles.centeredView}>
       
 <Modal
-  animationType="slide"
-  transparent={true}
-  visible={modalVisible}
-  onRequestClose={() => {
+  isVisible={modalVisible}
+  onSwipeComplete={() => {
     setModalVisible(!modalVisible);
   }}
-  
+  swipeDirection={['up', 'left', 'right', 'down']}
+  style={styles.modst}
 >
 <View style={styles.centeredView}>
 <View style={styles.modalView}>
     <View style={styles.Weekarrow}>
-    <IconButton icon="close"  color={Colors.white} size={29} style={{marginLeft: 322, marginTop: 0, position: 'absolute', backgroundColor: '#e00000', borderWidth: 3, borderColor: 'white'}} onPress={() => setModalVisible(!modalVisible)}/>
-      <Text style={{fontWeight: 'bold',  color: '#091629'}}>Week Ending: {selectedWeek}{navigation.getParam('eow')}</Text>
+    <Text style={{marginLeft: 65, marginTop:-35, color: '#ffffff', position: 'absolute'}}> Swipe the Lunch Tab if not in use </Text>
+      <Text style={{fontWeight: 'bold',  color: '#091629', paddingTop: 10, fontSize: 15}}>                       Week Ending: {selectedWeek}{navigation.getParam('eow')}</Text>
   <WeekSelector
       dateContainerStyle={styles.date}
       whitelistRange={[new Date(2021, 1, 9), new Date()]}
@@ -854,7 +851,7 @@ db.transaction(function (tx) {
   onDismiss={onDismiss}
   onConfirm={onConfirm}
   hours={12} // default: current hours
-  minutes={14} // default: current minutes
+  minutes={0} // default: current minutes
   label="Select time" // optional, default 'Select time'
   cancelLabel="Cancel" // optional, default: 'Cancel'
   confirmLabel="Ok" // optional, default: 'Ok'
@@ -870,7 +867,7 @@ db.transaction(function (tx) {
   onDismiss={onFinishDismiss}
   onConfirm={onFinishConfirm}
   hours={12} // default: current hours
-  minutes={14} // default: current minutes
+  minutes={0} // default: current minutes
   label="Select time" // optional, default 'Select time'
   cancelLabel="Cancel" // optional, default: 'Cancel'
   confirmLabel="Ok" // optional, default: 'Ok'
@@ -892,7 +889,8 @@ onValueChange={setCheckBox}
 
     <Text style={styles.sameWeek}>Same for the week</Text>
 
-    <View>
+    {toggleCheckBox ? (<Text></Text>): (  
+  <View>
               <Text style={{fontWeight: 'bold', color: '#091629', width: 250}}>
                   Day of the Week 
               </Text>
@@ -913,8 +911,8 @@ onValueChange={setCheckBox}
                      
             </Picker>
     </View>
+    )}
     
-
     <Button color="#09253a" onPress={time_clash} style={styles.addButton}>
                 Add Lunch
         </Button>
@@ -924,29 +922,21 @@ onValueChange={setCheckBox}
           </View>
         </Modal>
       </View>
-    
+     <ActionButton buttonColor="rgba(231,76,60,1)">
+          <ActionButton.Item buttonColor='#9b59b6' title="Lunch" onPress={() => setModalVisible(true)}>
+            <Icon name="fast-food" style={styles.actionButtonIcon} />
+          </ActionButton.Item>
+          <ActionButton.Item buttonColor='#3498db' title="Submit" onPress={deleteHandler}>
+            <Icon name="checkmark-sharp" style={styles.actionButtonIcon} />
+          </ActionButton.Item>
+          <ActionButton.Item buttonColor='#1abc9c' title="Add Entry" onPress={pressHandler}>
+            <Icon name="add" style={styles.actionButtonIcon} />
+          </ActionButton.Item>
+        </ActionButton>
     <View>
-   <View style={styles.float}>
-    <FloatingAction
-      actions={actions}
-      onPressItem={pressHandler}
-    />
-  </View>
-  </View>
-
-    {/* <View>
-    <Button style icon="plus" onPress={pressHandler}>
-            Add
-       </Button> 
-       
-       <Button style icon="food" onPress={deleteHandler}>
-            Lunch
-       </Button>
-        </View> */}
-      
-     
-
-       
+    
+   
+  </View>   
   </View>
         
 );
@@ -968,7 +958,15 @@ onValueChange={setCheckBox}
            flex: 1,
            paddingBottom: 150
            },
-           
+           actionButtonIcon: {
+            fontSize: 20,
+            height: 22,
+            color: 'white',
+          },
+          modst: {
+            justifyContent: 'flex-end',
+            margin: 0,
+          },
          text:{
            alignItems: 'center',
            marginTop:20,
@@ -1158,10 +1156,10 @@ onValueChange={setCheckBox}
               width:350,
               marginTop:-37,
               marginBottom: 10,
-              backgroundColor: '#34c0eb',
+              backgroundColor: '#7affbd',
               borderRadius: 20,
               fontWeight: 'bold',
-              borderWidth: 3,
+              borderWidth: 0,
           borderColor: 'white',
              },
              delstyle:{
@@ -1178,14 +1176,6 @@ onValueChange={setCheckBox}
               padding: 10,
               borderRadius: 8,
               fontWeight: 'bold'
-             },
-             float: {
-              backgroundColor: '#ffffff',
-              alignItems: 'center',
-                justifyContent: 'center',
-                flex: 1,
-                marginTop:50,
-                paddingBottom: 500
              }
-
      });
+     

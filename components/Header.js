@@ -9,7 +9,8 @@ navigation.openDrawer();
 }
 
     return(
-    <View style={styles.head}>
+        <View style={{marginBottom: 30}}>
+             <View style={styles.head}>
             <MaterialIcons name='menu' size={35} onPress={openmenu} style={styles.icon} />
         <View>
                 <Text style={styles.headText}>{title}</Text>
@@ -18,6 +19,8 @@ navigation.openDrawer();
         </View>
 
  </View>
+        </View>
+   
 
 
 
@@ -26,21 +29,20 @@ navigation.openDrawer();
 
 const styles = StyleSheet.create({
 head: {
-padding:2,
+padding:0,
 marginLeft:-20,
-marginTop:-1,
+marginTop:1,
 width: '110%',
-height:'160%',
+height:'140%',
 flexDirection: 'row',
 alignItems: 'center',
 justifyContent: 'center',
-backgroundColor: '#091629',
+backgroundColor: '#09253a',
 },
 
 headText: {
 fontWeight: 'bold',
 fontSize: 20,
-fontStyle:'normal',
 color: 'whitesmoke',
 letterSpacing: 1,
 

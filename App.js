@@ -5,6 +5,7 @@ import AppLoading  from 'expo-app-loading';
 import Navigator from './routes/drawer';
 import { isAndroid } from "@freakycoder/react-native-helpers";
 import AnimatedSplash from "react-native-animated-splash-screen";
+import AsyncStorage from "@react-native-community/async-storage";
 import { LogBox } from 'react-native';
 
 LogBox.ignoreAllLogs();
@@ -16,10 +17,22 @@ const getFonts = () => Font.loadAsync({
 
 
 export default function App(){
+  const [isFirstLanched, setIsFirstLaunched] = React.useState(null);
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
-  
+
   React.useEffect(() => {
+    AsyncStorage.getItem('alreadyLauched').then(value => {
+      if (value ==null)
+      {
+        AsyncStorage.setItem('alreadyLaunched', 'true');
+        setIsFirstLaunched(true);
+      } else
+      {
+        setIsFirstLaunched(false);
+      }
+    });
+
     StatusBar.setBarStyle("dark-content");
     if (isAndroid) {
       StatusBar.setBackgroundColor("rgba(0,0,0,0)");
@@ -30,7 +43,12 @@ export default function App(){
     }, 2050);
   }, []);
 
-
+  if(isFirstLanched == null)
+  {
+    return null ;
+  }
+  else if( isFirstLanched == true)
+  {
   if(fontsLoaded)
   {
     return (
@@ -59,5 +77,9 @@ onError={console.warn}
 
  }
     
+}else {
+ return <Login/>
 }
+} 
+
 
