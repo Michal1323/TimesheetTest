@@ -2,7 +2,8 @@ import React, {useState} from 'react';
 import * as Font from 'expo-font';
 import { StatusBar } from "react-native";
 import AppLoading  from 'expo-app-loading';
-import Navigator from './routes/drawer';
+import OBNavigator from './routes/drawer';
+import Navigator from './routes/drawer2';
 import { isAndroid } from "@freakycoder/react-native-helpers";
 import AnimatedSplash from "react-native-animated-splash-screen";
 import AsyncStorage from "@react-native-community/async-storage";
@@ -25,11 +26,11 @@ export default function App(){
     AsyncStorage.getItem('alreadyLauched').then(value => {
       if (value ==null)
       {
+        setIsFirstLaunched(false);
         AsyncStorage.setItem('alreadyLaunched', 'true');
-        setIsFirstLaunched(true);
       } else
       {
-        setIsFirstLaunched(false);
+        setIsFirstLaunched(true);
       }
     });
 
@@ -39,15 +40,12 @@ export default function App(){
       StatusBar.setTranslucent(true);
     }
     setTimeout(() => {
+    
       setIsLoaded(true);
     }, 2050);
   }, []);
 
-  if(isFirstLanched == null)
-  {
-    return null ;
-  }
-  else if( isFirstLanched == true)
+  if( isFirstLanched == false)
   {
   if(fontsLoaded)
   {
@@ -60,7 +58,8 @@ export default function App(){
       backgroundColor={null}
       imageBackgroundResizeMode="cover"
     >
-      <Navigator/>
+    
+      <OBNavigator/>
       </AnimatedSplash>
     );
   }
@@ -77,8 +76,9 @@ onError={console.warn}
 
  }
     
-}else {
- return <Login/>
+}
+else {
+ return <Navigator/>
 }
 } 
 

@@ -19,40 +19,40 @@ const db = DatabaseConnection.getConnection();
 
 const EditSheet = ({ navigation }) => {
 
-  const selectDate = new Date();
-  const [currentDate, setCurrentDate] = React.useState(navigation.getParam('date'));
-  const [toggleCheckBox, setToggleCheckBox] = React.useState(false)
+  const selectDate = new Date();    //var to get date
+  const [currentDate, setCurrentDate] = React.useState(navigation.getParam('date')); //var to set selected date
+  const [toggleCheckBox, setToggleCheckBox] = React.useState(false) // var for Lunch checkbox (i.e. same Lunch for week)
 
   const [modalVisible, setModalVisible] = React.useState(false);
-  const [dayoftheWeek, setDayoftheWeek] = React.useState(navigation.getParam('dayoftheweek'));
-  const [projNum, setprojNum] = React.useState(navigation.getParam('projNum'));
-  const [siteID, setsiteID] = React.useState(navigation.getParam('siteID'))
-  const [Thrs, setThrs] = React.useState('');
-  const [visible, setVisible] = React.useState(false);
-  const [finishvisible, setfinishVisible] = React.useState(false);
+  const [dayoftheWeek, setDayoftheWeek] = React.useState(navigation.getParam('dayoftheweek')); // var to set selected DOW
+  const [projNum, setprojNum] = React.useState(navigation.getParam('projNum')); //var to set selected ProjNum
+  const [siteID, setsiteID] = React.useState(navigation.getParam('siteID')) //var to set selected SiteID
+  const [Thrs, setThrs] = React.useState('');      //var to set Total Hours
+  const [visible, setVisible] = React.useState(false);  //Flag var to show  & hide Start Timepicker
+  const [finishvisible, setfinishVisible] = React.useState(false);  //Flag var to show  & hide Finish Timepicker
   const [Lvisible, setLVisible] = React.useState(false);
   const [Lfinishvisible, setLfinishVisible] = React.useState(false);
 
   const [IDtimesheet, setIDtimesheet] = React.useState(navigation.getParam('id_timesheet'));
-  const [Hours, setHours] = React.useState('');
-  const [Minutes, setMinutes] = React.useState('');
-  const [finishHours, setfinishHours] = React.useState(selectDate.getHours());
-  const [finishMinutes, setfinishMinutes] = React.useState(selectDate.getMinutes());
+  const [Hours, setHours] = React.useState('');    //var to set selected Hour from Start TimePicker
+  const [Minutes, setMinutes] = React.useState('');  //var to set selected Minutes from Start TimePicker
+  const [finishHours, setfinishHours] = React.useState(selectDate.getHours());  //var to set selected Hour from Finish TimePicker
+  const [finishMinutes, setfinishMinutes] = React.useState(selectDate.getMinutes()); //var to set selected Minutes from Start TimePicker
   const [LunchHours, setLunchHours] = React.useState(selectDate.getHours());
   const [LunchMinutes, setLunchMinutes] = React.useState(selectDate.getMinutes());
   const [finishLunchHours, setfinishLunchHours] = React.useState(selectDate.getHours());
   const [finishLunchMinutes, setfinishLunchMinutes] = React.useState(selectDate.getMinutes());
   
-  const [frTimes, setfrTimes] = React.useState(navigation.getParam('arrival'));
-  const [frFinTimes, setfrFinTimes] = React.useState(navigation.getParam('depart'));
-  const [selectedWeek, setselectedWeek] = React.useState(navigation.getParam('eow'));
-const [description, setDescription] = React.useState(navigation.getParam('comment'));
+  const [frTimes, setfrTimes] = React.useState(navigation.getParam('arrival'));   //var to format the selected Start Time from TimePicker
+  const [frFinTimes, setfrFinTimes] = React.useState(navigation.getParam('depart'));   //var to format the selected Finish Time from TimePicker
+  const [selectedWeek, setselectedWeek] = React.useState(navigation.getParam('eow')); //var to set selected EOW
+const [description, setDescription] = React.useState(navigation.getParam('comment')); //var to set Description value
 
-const onDismiss = React.useCallback(() => {
+const onDismiss = React.useCallback(() => { //Function to close Start TimePicker Modal when user clicks Cancel/Dismiss
   setVisible(false)
 }, [setVisible])
 
-const onFinishDismiss = React.useCallback(() => {
+const onFinishDismiss = React.useCallback(() => { 
   setfinishVisible(false)
 }, [setfinishVisible])
 
@@ -65,7 +65,7 @@ const onLFinishDismiss = React.useCallback(() => {
 }, [setLfinishVisible])
 
 
-const onConfirm = React.useCallback(
+const onConfirm = React.useCallback( //Function to open Start TimePicker Modal and set the selected formatted times 
   ({ hours, minutes }) => {
     setVisible(false);
     console.log({ hours, minutes });
@@ -76,14 +76,14 @@ const onConfirm = React.useCallback(
     minutes = setMinutes(FrMinutes.format('mm'));
     //setHours(hours.toString());
     //setMinutes(minutes.toString());
-    var times = FrHours.format('HH') + ':' + FrMinutes.format('mm');
+    var times = FrHours.format('HH') + ':' + FrMinutes.format('mm'); //var to combine Hours and Minute into HH:mm format
     console.log('time: ' + times);
     setfrTimes(times);
   },
   [setVisible]
 );
 
-const onFinishConfirm = React.useCallback(
+const onFinishConfirm = React.useCallback(  //Function to open Finish TimePicker Modal and set the selected formatted times 
   ({ hours, minutes }) => {
     setfinishVisible(false);
     console.log({ hours, minutes });
@@ -175,8 +175,8 @@ const onLFinishConfirm = React.useCallback(
 
 
 
-const renderUserNames = () => {
-  if(projNum=='VOD103015'){
+const renderUserNames = () => { //Function for rendering SiteID based on the ProjNum selected (i.e. Logic for Hierarchial Picker Component)
+  if(projNum=='VOD103015'){   //if projNum(VOD103015) is selected , down below are site ID's available for this specific ProjNum
     return [<Picker.Item key="uniqueID8" label="CE005 ~ Woodcock Hill" value="CE005 ~ Woodcock Hill" />,
            <Picker.Item key="uniqueID7" label="CE006 ~ Crusheen knocknamucky" value="CE006 ~ Crusheen knocknamucky" />,
           <Picker.Item key="uniqueID6" label="CE007 ~ Lack West" value="CE007 ~ Lack West" />,
@@ -184,12 +184,12 @@ const renderUserNames = () => {
           <Picker.Item key="uniqueID4" label="CE009 ~ Glenagall" value="CE009 ~ Glenagall" />]
    }
  
-   else if(projNum=='ABO101597'){
+   else if(projNum=='ABO101597'){ //if projNum(ABO101597) is selected , down below are site ID's available for this specific ProjNum
      return [<Picker.Item key="uniqueID3" label="CLS001 ~ Cluster 1 OHL" value="CLS001 ~ Cluster 1 OHL" />
            ]
     }
  
-    else if(projNum=='VOD75860'){
+    else if(projNum=='VOD75860'){ //if projNum(VOD75860) is selected , down below are site ID's available for this specific ProjNum
       return [<Picker.Item key="uniqueID4" label="DN823 Robinson Transport -  Bolts removed from fenc - DN823 Robinsons Transport" value="DN823 Robinson Transport -  Bolts removed from fenc - DN823 Robinsons Transport" />
             ]
      }
@@ -254,8 +254,10 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
   let updateAllStates = (name, contact, address) => {
     setUserName(name);
     setUserContact(contact);
-    setUserAddress(address);
+    setserAddress(address);
   };
+
+// SEARCH USER
 
   let searchUser = () => {
     db.transaction((tx) => {
@@ -282,8 +284,9 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
   let updateUser = () => {
     console.log( selectedWeek, currentDate, projNum, description, frTimes, frFinTimes, Thrs, siteID, dayoftheWeek);
 
+    //The if statements below are to check for any errors in the users' input 
     if (!frTimes) {
-      alert('Add Hours for the entry');
+      alert('Add Hours for the entry'); 
       return;
     }
     
@@ -306,6 +309,7 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
       return;
     }
 
+    //UPDATE SQL STATEMENT
 
     db.transaction((tx) => {
       tx.executeSql(
@@ -402,6 +406,8 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
   //   }
   // }
 
+  // Calculate Total Hrs
+  
    const calcTotalHrs = () => {
     //setfinishVisible(true)
      var StrtTime = moment(frTimes, "HH:mm");

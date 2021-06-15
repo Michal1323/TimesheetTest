@@ -637,7 +637,6 @@ db.transaction(function (tx) {
  const save = async () => {
     try{
       await AsyncStorage.setItem("MyWeekEnding", Week)
-      await AsyncStorage.setItem("MyWeek", currentDate)
       await AsyncStorage.setItem("MyDays", dayoftheWeek)
     }
     catch (err)

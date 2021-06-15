@@ -1,13 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  Dimensions,
-  Animated,
-} from 'react-native';
+import {StyleSheet,Text,View,Image,Dimensions,Animated} from 'react-native';
 import { Button } from 'react-native-paper';
 import data from '../data';
 import { DatabaseConnection } from '../components/database-connection';
@@ -21,7 +14,7 @@ const DOT_SIZE = 40;
 const TICKER_HEIGHT = 40;
 const CIRCLE_SIZE = width * 0.63;
 
-
+//The Animated Circle that fades in and out
 const Circle = ({ scrollX }) => {
   return (
     <View style={[StyleSheet.absoluteFillObject, styles.circleContainer]}>
@@ -79,6 +72,7 @@ const Ticker = ({ scrollX }) => {
   );
 };
 
+//The image also fades in and out on the app
 const Item = ({ imageUri, heading, description, index, scrollX }) => {
   const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
   const inputRangeOpacity = [
@@ -103,6 +97,7 @@ const Item = ({ imageUri, heading, description, index, scrollX }) => {
     outputRange: [0, 1, 0],
   });
 
+  //componnents shown on the app
   return (
     <View style={styles.itemStyle}>
       <Animated.Image
@@ -146,6 +141,7 @@ const Item = ({ imageUri, heading, description, index, scrollX }) => {
   );
 };
 
+//The page that are scrollable on the onboaring screan 
 const Pagination = ({ scrollX }) => {
   const inputRange = [-width, 0, width];
   const translateX = scrollX.interpolate({
@@ -177,6 +173,7 @@ const Pagination = ({ scrollX }) => {
   );
 };
 
+//The database being established and created/reused once the app is opened
 export default function Onboarding({ navigation }) {
 
   React.useEffect(() => {
