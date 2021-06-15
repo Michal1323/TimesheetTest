@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import * as React from 'react';
 import { StyleSheet, View, Text, Image, StatusBar, Animated, TouchableOpacity, Alert, Pressable, Modal} from 'react-native';
+=======
+import React, {useEffect, useState,useRef} from 'react';
+import { StyleSheet, View, Text, Image, StatusBar, Animated, TouchableOpacity, Alert, SafeAreaView, TouchableHighlight, ImageBackground} from 'react-native';
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
 import { Button, IconButton, Card, Colors } from 'react-native-paper';
 import { TimePickerModal } from 'react-native-paper-dates';
 import { Picker } from '@react-native-picker/picker';
@@ -14,6 +19,22 @@ import { DatabaseConnection } from '../components/database-connection';
 import { colors } from 'react-native-elements';
 import AwesomeAlert from 'react-native-awesome-alerts';
 import AsyncStorage from "@react-native-community/async-storage";
+<<<<<<< HEAD
+=======
+import profile from '../assets/profile.png';
+// Tab ICons...
+import home from '../assets/home.png';
+import search from '../assets/clock.png';
+import notifications from '../assets/calendar.png';
+import settings from '../assets/settings.png';
+import logout from '../assets/logout.png';
+// Menu
+import menu from '../assets/menu.png';
+import close from '../assets/close.png';
+
+// Photo
+import photo from '../assets/photo.jpg';
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
 
 const db = DatabaseConnection.getConnection();
 
@@ -52,6 +73,7 @@ export default function Home ({ navigation }) {
   const [totalHrsforday, settotalHrsforday] = React.useState([]);
   const [selectedWeek, setselectedWeek] = React.useState(moment().day(5).format("L"));
   const [Thrs, setThrs] = React.useState('');
+<<<<<<< HEAD
 
   var timeList = [];
   /*_onPressButton  = () => {
@@ -59,6 +81,68 @@ export default function Home ({ navigation }) {
       <Text>pop</Text>
         )
       }*/
+=======
+  const [selectedItem, setSelectedItem] = React.useState('');
+  const [currentTab, setCurrentTab] = useState("TS Review");
+  // To get the curretn Status of menu ...
+  const [showMenu, setShowMenu] = useState(false);
+
+  // Animated Properties...
+
+  const offsetValue = useRef(new Animated.Value(0)).current;
+  // Scale Intially must be One...
+  const scaleValue = useRef(new Animated.Value(1)).current;
+  const closeButtonOffset = useRef(new Animated.Value(0)).current;
+
+  
+  // For multiple Buttons...
+const TabButton = (currentTab, setCurrentTab, title, image) => {
+  return (
+
+    <TouchableOpacity onPress={() => {
+      if (title == "LogOut") {
+        navigation.navigate("Login")
+      } if (title == "Hour") { 
+        navigation.navigate("Hour")
+      }  if (title == "TS Review") { //TS Review
+        navigation.navigate("Test")
+      } if (title == "Home") { 
+        navigation.navigate("Home")
+      } 
+      else {
+        setCurrentTab(title)
+      }
+    }}>
+      <View style={{
+        flexDirection: "row",
+        alignItems: 'center',
+        paddingVertical: 8,
+        backgroundColor: currentTab == title ? 'white' : 'transparent',
+        paddingLeft: 13,
+        paddingRight: 35,
+        borderRadius: 8,
+        marginTop: 15
+      }}>
+
+        <Image source={image} style={{
+          width: 25, height: 25,
+          tintColor: currentTab == title ? "#5359D1" : "white"
+        }}></Image>
+
+        <Text style={{
+          fontSize: 15,
+          fontWeight: 'bold',
+          paddingLeft: 15,
+          color: currentTab == title ? "#5359D1" : "white"
+        }}>{title}</Text>
+
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
       const onDismiss = React.useCallback(() => {
         setVisible(false)
       }, [setVisible])
@@ -216,9 +300,15 @@ export default function Home ({ navigation }) {
      const BG_IMG = 'https://www.solidbackgrounds.com/images/950x350/950x350-snow-solid-color-background.jpg';
 
       const SPACING = 20;
+<<<<<<< HEAD
       const AVATAR_SIZE = 30;
       const ITEM_SIZE = AVATAR_SIZE + SPACING *3;
       const scrollY = React.useRef(new Animated.Value(0)).current;         
+=======
+      const AVATAR_SIZE = 10;
+      const ITEM_SIZE = AVATAR_SIZE + SPACING *3;
+      const scrollY = React.useRef(new Animated.Value(10)).current;         
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
 
 
       const colors = {
@@ -692,6 +782,7 @@ db.transaction(function (tx) {
     
    
     return (
+<<<<<<< HEAD
       <View style={{flex: 1, backgroundColor: '#fff', paddingTop: 30}}>
       <Image 
       source={{uri: BG_IMG}}
@@ -707,6 +798,143 @@ db.transaction(function (tx) {
           borderWidth: 3,
           borderColor: 'white',
           backgroundColor: '#FFF0E0',
+=======
+      
+     
+
+      <SafeAreaView style={styles.container1}>
+        <View style={{ justifyContent: 'flex-start', padding: 15 }}>
+        <Image source={profile} style={{
+          width: 60,
+          height: 60,
+          borderRadius: 10,
+          marginTop: 12
+        }}></Image>
+
+        <Text style={{
+          fontSize: 20,
+          fontWeight: 'bold',
+          color: 'white',
+          marginTop: 20
+        }}>John Doe</Text>
+
+        <TouchableOpacity>
+          <Text style={{
+            marginTop: 6,
+            color: 'white'
+          }}>View Profile</Text>
+        </TouchableOpacity>
+
+        <View style={{ flexGrow: 1, marginTop: 50 }}>
+          {
+            // Tab Bar Buttons....
+          }
+
+          {TabButton(currentTab, setCurrentTab, "Home", home)}
+          {TabButton(currentTab, setCurrentTab, "Hour", search)}
+          {TabButton(currentTab, setCurrentTab, "TS Review", notifications)}
+          {TabButton(currentTab, setCurrentTab, "Settings", settings)}
+
+        </View>
+
+        <View>
+          {TabButton(currentTab, setCurrentTab, "LogOut", logout)}
+        </View>
+
+      </View>
+      {
+        // Over lay View...
+      }
+       <Animated.View style={{
+        flexGrow: 1,
+        backgroundColor: 'white',
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        paddingHorizontal: 15,
+        paddingVertical: 20,
+        borderRadius: showMenu ? 15 : 0,
+        // Transforming View...
+        transform: [
+          { scale: scaleValue },
+          { translateX: offsetValue }
+        ]
+      }}>
+
+        {
+          // Menu Button...
+        }
+
+      <Animated.View style={{
+          transform: [{
+            translateY: closeButtonOffset
+          }]
+        }}>
+
+<TouchableHighlight onPress={() => {
+            // Do Actions Here....
+            // Scaling the view...
+            Animated.timing(scaleValue, {
+              toValue: showMenu ? 1 : 0.88,
+              duration: 300,
+              useNativeDriver: true
+            })
+              .start()
+
+            Animated.timing(offsetValue, {
+              // YOur Random Value...
+              toValue: showMenu ? 0 : 230,
+              duration: 300,
+              useNativeDriver: true
+            })
+              .start()
+
+            Animated.timing(closeButtonOffset, {
+              // YOur Random Value...
+              toValue: !showMenu ? -30 : 0,
+              duration: 300,
+              useNativeDriver: true
+            })
+              .start()
+
+            setShowMenu(!showMenu);
+          }}>
+ 
+ 
+ <View >
+             <View style={styles.head}>
+           <Image source={showMenu ? close : menu} style={{
+              width: 20,
+              height: 20,
+              tintColor: 'white',
+              marginTop: 20,
+              marginLeft: -135
+
+            }}></Image>
+        <View>
+                <Text style={styles.headText}>                   TS Review</Text>
+        
+
+        </View>
+
+ </View>
+        </View>
+
+            
+
+          </TouchableHighlight>
+
+         
+      <IconButton icon="magnify" size={45} style={{marginLeft: 310, marginTop: 85, position: 'absolute', backgroundColor: '#e6c877',  backgroundColor: '#e6c877', borderWidth: 3, borderColor: 'white'}} onPress={SearchEntry} />
+      <View style={{
+          marginTop: 25,
+          height: 100,
+          width:300,
+          marginLeft: 0,
+          backgroundColor: '#87CEEB',
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
           borderRadius: 20,
           elevation: 10,
           shadowColor: '#fff',
@@ -714,7 +942,11 @@ db.transaction(function (tx) {
           shadowOpacity: 0.5,
           shadowRadius: 5, 
       }}>
+<<<<<<< HEAD
           <Text style={{fontWeight: '700', fontSize: 20, marginBottom: 12, color: 'black'}}>  Week Ending: {moment(selectedWeek).format('MMM Do')}</Text>
+=======
+          <Text style={{fontWeight: '700', fontSize: 20, marginBottom: 5, color: 'black'}}>  Week Ending: {moment(selectedWeek).format('MMM Do')}</Text>
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
       <WeekSelector
           whitelistRange={[new Date(2021, 1, 9), new Date()]}
           weekStartsOn={6}
@@ -722,7 +954,11 @@ db.transaction(function (tx) {
         />
         </View>
 
+<<<<<<< HEAD
 <Text style={{backgroundColor: "#091629", borderColor: 'black', paddingHorizontal: 25, paddingTop: 5, borderRadius: 10, height: 40, fontSize: 20, fontWeight: 'bold', color: '#f2fbff' ,width: 300, marginTop: 5, marginLeft: 60, borderWidth: 3}}>Day Total Hours: {totalHrsforday}</Text>
+=======
+<Text style={{backgroundColor: "#091629", borderColor: 'black', paddingHorizontal: 25, paddingTop: 5, borderRadius: 10, height: 40, fontSize: 20, fontWeight: 'bold', color: '#f2fbff' ,width: 300, marginTop: 5, marginLeft: 0, borderWidth: 3}}>Week Total Hours: {totalHrsforday}</Text>
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
           <Animated.FlatList 
     data={flatListItems}
     onScroll={
@@ -737,7 +973,11 @@ db.transaction(function (tx) {
         paddingTop: StatusBar.currentHeight
     }}
     renderItem={({item, index}) => {
+<<<<<<< HEAD
       setIDtimesheet(item.id_timesheet)
+=======
+      const isSelected = (selectedItem === item.id_timesheet);
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
         const inputRange = [
             -1,
             0,
@@ -763,7 +1003,12 @@ db.transaction(function (tx) {
 
         return <Swipeout right={swipeBtns(item)}
             autoClose='true'
+<<<<<<< HEAD
             backgroundColor= 'transparent'>
+=======
+            backgroundColor= 'transparent'
+            style={styles.swipe}>
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
         <Animated.View style={{flexDirection: 'row', padding: SPACING, marginBottom: SPACING, backgroundColor: 'rgba(255,255,255,0.8)', borderRadius: 12,
             shadowColor: '#000',
             shadowOffset: {
@@ -775,6 +1020,7 @@ db.transaction(function (tx) {
             opacity,
             transform: [{scale}]
         }}>
+<<<<<<< HEAD
             <View>
             <Text style={{fontWeight: '700', fontSize: 24, color: '#091629'}}>{item.projNum}  </Text> 
                   <Text style={{opacity: .7, fontSize: 15}}>  {item.projNum} - {item.siteID}</Text>
@@ -785,11 +1031,30 @@ db.transaction(function (tx) {
            
         </Animated.View>   
         </Swipeout>
+=======
+          
+            <View>
+            <Text style={{fontWeight: '700', fontSize: 24, color: '#091629'}}>{item.projNum}  </Text> 
+                  <Text style={{opacity: .7, fontSize: 15}}>  {item.projNum} - {item.siteID}</Text>
+                <Text style={{fontWeight: '700', fontSize: 14, color: '#091629'}}>  {item.arrival} - {item.depart}                      Duration : {item.totalHrs}</Text>
+        
+          
+           </View>
+            
+        </Animated.View>   
+       </Swipeout>
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
         
     }}
     />
  
+<<<<<<< HEAD
   </View>
+=======
+ </Animated.View>
+ </Animated.View>
+</SafeAreaView>
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
 
 
       
@@ -816,6 +1081,16 @@ db.transaction(function (tx) {
            flex: 1,
            paddingBottom: 150
            },
+<<<<<<< HEAD
+=======
+           container1:{
+            flex: 1,
+            backgroundColor: '#091629',
+            alignItems: 'flex-start',
+            justifyContent: 'flex-start',
+              },
+           
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
            
          text:{
            alignItems: 'center',
@@ -1000,4 +1275,27 @@ db.transaction(function (tx) {
               borderRadius: 20,
               fontWeight: 'bold'
              },
+<<<<<<< HEAD
+=======
+             head: {
+              padding:0,
+              marginLeft:-15.5,
+              marginTop: -20,
+              width: 400,
+              height: 70,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#091629',
+              borderTopLeftRadius: 10
+              },
+              
+              headText: {
+              fontWeight: 'bold',
+              fontSize: 20,
+              color: 'whitesmoke',
+              letterSpacing: 1,
+              marginBottom:-18
+              },
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
      });

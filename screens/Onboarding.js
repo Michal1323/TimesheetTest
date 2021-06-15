@@ -1,6 +1,17 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
+<<<<<<< HEAD
 import {StyleSheet,Text,View,Image,Dimensions,Animated} from 'react-native';
+=======
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Dimensions,
+  Animated,
+} from 'react-native';
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
 import { Button } from 'react-native-paper';
 import data from '../data';
 import { DatabaseConnection } from '../components/database-connection';
@@ -14,6 +25,7 @@ const DOT_SIZE = 40;
 const TICKER_HEIGHT = 40;
 const CIRCLE_SIZE = width * 0.63;
 
+<<<<<<< HEAD
 //The Animated Circle that fades in and out
 const Circle = ({ scrollX }) => {
   return (
@@ -68,10 +80,46 @@ const Ticker = ({ scrollX }) => {
           );
         })}
       </Animated.View>
+=======
+
+const Circle = ({ scrollX }) => {
+  return (
+    <View style={[StyleSheet.absoluteFillObject, styles.circleContainer]}>
+      {data.map(({ color }, index) => {
+        const inputRange = [
+          (index - 0.55) * width,
+          index * width,
+          (index + 0.55) * width,
+        ];
+        const scale = scrollX.interpolate({
+          inputRange,
+          outputRange: [0, 1, 0],
+          extrapolate: 'clamp',
+        });
+        const opacity = scrollX.interpolate({
+          inputRange,
+          outputRange: [0, 0.2, 0],
+        });
+        return (
+          <Animated.View
+            key={index}
+            style={[
+              styles.circle,
+              {
+                backgroundColor: color,
+                opacity,
+                transform: [{ scale }],
+              },
+            ]}
+          />
+        );
+      })}
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
     </View>
   );
 };
 
+<<<<<<< HEAD
 //The image also fades in and out on the app
 const Item = ({ imageUri, heading, description, index, scrollX }) => {
   const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
@@ -84,6 +132,40 @@ const Item = ({ imageUri, heading, description, index, scrollX }) => {
     inputRange,
     outputRange: [0, 1, 0],
   });
+=======
+const Ticker = ({ scrollX }) => {
+  const inputRange = [-width, 0, width];
+  const translateY = scrollX.interpolate({
+    inputRange,
+    outputRange: [TICKER_HEIGHT, 0, -TICKER_HEIGHT],
+  });
+  return (
+    <View style={styles.tickerContainer}>
+      <Animated.View style={{ transform: [{ translateY }] }}>
+        {data.map(({ type }, index) => {
+          return (
+            <Text key={index} style={styles.tickerText}>
+              {type}
+            </Text>
+          );
+        })}
+      </Animated.View>
+    </View>
+  );
+};
+
+const Item = ({ imageUri, heading, description, index, scrollX }) => {
+  const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
+  const inputRangeOpacity = [
+    (index - 0.3) * width,
+    index * width,
+    (index + 0.3) * width,
+  ];
+  const scale = scrollX.interpolate({
+    inputRange,
+    outputRange: [0, 1, 0],
+  });
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
   const translateXHeading = scrollX.interpolate({
     inputRange,
     outputRange: [width * 0.1, 0, -width * 0.1],
@@ -141,7 +223,10 @@ const Item = ({ imageUri, heading, description, index, scrollX }) => {
   );
 };
 
+<<<<<<< HEAD
 //The page that are scrollable on the onboaring screan 
+=======
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
 const Pagination = ({ scrollX }) => {
   const inputRange = [-width, 0, width];
   const translateX = scrollX.interpolate({
@@ -173,7 +258,10 @@ const Pagination = ({ scrollX }) => {
   );
 };
 
+<<<<<<< HEAD
 //The database being established and created/reused once the app is opened
+=======
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
 export default function Onboarding({ navigation }) {
 
   React.useEffect(() => {
@@ -250,6 +338,7 @@ const styles = StyleSheet.create({
     height: width * 0.75,
     resizeMode: 'contain',
     flex: 1,
+<<<<<<< HEAD
   },
   textContainer: {
     marginTop:10,
@@ -257,6 +346,15 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     flex: 0.5, 
   },
+=======
+  },
+  textContainer: {
+    marginTop:10,
+    alignItems: 'flex-start',
+    alignSelf: 'flex-end',
+    flex: 0.5, 
+  },
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
   heading: {
     color: '#444',
     textTransform: 'uppercase',
@@ -264,6 +362,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 2,
     marginBottom: 3,
+<<<<<<< HEAD
   },
   description: {
     color: '#ccc',
@@ -274,6 +373,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 16 * 1.5,
   },
+=======
+  },
+  description: {
+    color: '#ccc',
+    fontWeight: '600',
+    textAlign: 'left',
+    width: width * 0.75,
+    marginRight: 10,
+    fontSize: 16,
+    lineHeight: 16 * 1.5,
+  },
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
   logo: {
     opacity: 0.9,
     height: LOGO_HEIGHT,

@@ -22,4 +22,8 @@ const DrawerStack = createStackNavigator(screens);
 
 
 
+<<<<<<< HEAD
 export default DrawerStack;
+=======
+export default DrawerStack;
+>>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc

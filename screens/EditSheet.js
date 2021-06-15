@@ -1,5 +1,6 @@
-import * as React from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TextInput, Alert, Pressable, Modal} from 'react-native';
+
+import React, {useEffect, useState,useRef} from 'react';
+import { StyleSheet, Text, Image, View, SafeAreaView, TextInput, Alert, StatusBar, Animated, TouchableOpacity, TouchableHighlight} from 'react-native';
 import AsyncStorage from "@react-native-community/async-storage";
 import { Button } from 'react-native-paper';
 import { TimePickerModal } from 'react-native-paper-dates';
@@ -10,49 +11,115 @@ import "intl";
 import "intl/locale-data/jsonp/en";
 import { DatabaseConnection } from '../components/database-connection';
 import moment from 'moment';
+import profile from '../assets/profile.png';
+// Tab ICons...
+import home from '../assets/home.png';
+import search from '../assets/clock.png';
+import notifications from '../assets/calendar.png';
+import settings from '../assets/settings.png';
+import logout from '../assets/logout.png'
+// Menu
+import menu from '../assets/menu.png';
+import close from '../assets/close.png';
 
-import Mytext from '../components/Mytext';
-import Mytextinput from '../components/MyTextInput';
-import Mybutton from '../components/Mybutton';
+// Photo
+import photo from '../assets/photo.jpg';
 
 const db = DatabaseConnection.getConnection();
 
 const EditSheet = ({ navigation }) => {
 
-  const selectDate = new Date();    //var to get date
-  const [currentDate, setCurrentDate] = React.useState(navigation.getParam('date')); //var to set selected date
-  const [toggleCheckBox, setToggleCheckBox] = React.useState(false) // var for Lunch checkbox (i.e. same Lunch for week)
+  const selectDate = new Date();
+  const [currentDate, setCurrentDate] = React.useState(navigation.getParam('date'));
+  const [toggleCheckBox, setToggleCheckBox] = React.useState(false)
 
   const [modalVisible, setModalVisible] = React.useState(false);
-  const [dayoftheWeek, setDayoftheWeek] = React.useState(navigation.getParam('dayoftheweek')); // var to set selected DOW
-  const [projNum, setprojNum] = React.useState(navigation.getParam('projNum')); //var to set selected ProjNum
-  const [siteID, setsiteID] = React.useState(navigation.getParam('siteID')) //var to set selected SiteID
-  const [Thrs, setThrs] = React.useState('');      //var to set Total Hours
-  const [visible, setVisible] = React.useState(false);  //Flag var to show  & hide Start Timepicker
-  const [finishvisible, setfinishVisible] = React.useState(false);  //Flag var to show  & hide Finish Timepicker
+  const [dayoftheWeek, setDayoftheWeek] = React.useState(navigation.getParam('dayoftheweek'));
+  const [projNum, setprojNum] = React.useState(navigation.getParam('projNum'));
+  const [siteID, setsiteID] = React.useState(navigation.getParam('siteID'))
+  const [Thrs, setThrs] = React.useState('');
+  const [visible, setVisible] = React.useState(false);
+  const [finishvisible, setfinishVisible] = React.useState(false);
   const [Lvisible, setLVisible] = React.useState(false);
   const [Lfinishvisible, setLfinishVisible] = React.useState(false);
 
   const [IDtimesheet, setIDtimesheet] = React.useState(navigation.getParam('id_timesheet'));
-  const [Hours, setHours] = React.useState('');    //var to set selected Hour from Start TimePicker
-  const [Minutes, setMinutes] = React.useState('');  //var to set selected Minutes from Start TimePicker
-  const [finishHours, setfinishHours] = React.useState(selectDate.getHours());  //var to set selected Hour from Finish TimePicker
-  const [finishMinutes, setfinishMinutes] = React.useState(selectDate.getMinutes()); //var to set selected Minutes from Start TimePicker
+  const [Hours, setHours] = React.useState('');
+  const [Minutes, setMinutes] = React.useState('');
+  const [finishHours, setfinishHours] = React.useState(selectDate.getHours());
+  const [finishMinutes, setfinishMinutes] = React.useState(selectDate.getMinutes());
   const [LunchHours, setLunchHours] = React.useState(selectDate.getHours());
   const [LunchMinutes, setLunchMinutes] = React.useState(selectDate.getMinutes());
   const [finishLunchHours, setfinishLunchHours] = React.useState(selectDate.getHours());
   const [finishLunchMinutes, setfinishLunchMinutes] = React.useState(selectDate.getMinutes());
   
-  const [frTimes, setfrTimes] = React.useState(navigation.getParam('arrival'));   //var to format the selected Start Time from TimePicker
-  const [frFinTimes, setfrFinTimes] = React.useState(navigation.getParam('depart'));   //var to format the selected Finish Time from TimePicker
-  const [selectedWeek, setselectedWeek] = React.useState(navigation.getParam('eow')); //var to set selected EOW
-const [description, setDescription] = React.useState(navigation.getParam('comment')); //var to set Description value
+  const [frTimes, setfrTimes] = React.useState(navigation.getParam('arrival'));
+  const [frFinTimes, setfrFinTimes] = React.useState(navigation.getParam('depart'));
+  const [selectedWeek, setselectedWeek] = React.useState(navigation.getParam('eow'));
+  const [description, setDescription] = React.useState(navigation.getParam('comment'));
+  const [currentTab, setCurrentTab] = useState("");
+  // To get the curretn Status of menu ...
+  const [showMenu, setShowMenu] = useState(false);
 
-const onDismiss = React.useCallback(() => { //Function to close Start TimePicker Modal when user clicks Cancel/Dismiss
+  // Animated Properties...
+
+  const offsetValue = useRef(new Animated.Value(0)).current;
+  // Scale Intially must be One...
+  const scaleValue = useRef(new Animated.Value(1)).current;
+  const closeButtonOffset = useRef(new Animated.Value(0)).current;
+
+   // For multiple Buttons...
+const TabButton = (currentTab, setCurrentTab, title, image) => {
+  return (
+
+    <TouchableOpacity onPress={() => {
+      if (title == "LogOut") {
+        navigation.navigate("Login")
+      } if (title == "Hour") {
+        navigation.navigate("Hour")
+      }  if (title == "TS Review") { //TS Review
+        navigation.navigate("Test")
+      }  if (title == "Home") { 
+        navigation.navigate("Home")
+      } 
+      else {
+        setCurrentTab(title)
+      }
+    }}>
+      <View style={{
+        flexDirection: "row",
+        alignItems: 'center',
+        paddingVertical: 8,
+        backgroundColor: currentTab == title ? 'white' : 'transparent',
+        paddingLeft: 13,
+        paddingRight: 35,
+        borderRadius: 8,
+        marginTop: 15
+      }}>
+
+        <Image source={image} style={{
+          width: 25, height: 25,
+          tintColor: currentTab == title ? "#5359D1" : "white"
+        }}></Image>
+
+        <Text style={{
+          fontSize: 15,
+          fontWeight: 'bold',
+          paddingLeft: 15,
+          color: currentTab == title ? "#5359D1" : "white"
+        }}>{title}</Text>
+
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+
+const onDismiss = React.useCallback(() => {
   setVisible(false)
 }, [setVisible])
 
-const onFinishDismiss = React.useCallback(() => { 
+const onFinishDismiss = React.useCallback(() => {
   setfinishVisible(false)
 }, [setfinishVisible])
 
@@ -65,7 +132,7 @@ const onLFinishDismiss = React.useCallback(() => {
 }, [setLfinishVisible])
 
 
-const onConfirm = React.useCallback( //Function to open Start TimePicker Modal and set the selected formatted times 
+const onConfirm = React.useCallback(
   ({ hours, minutes }) => {
     setVisible(false);
     console.log({ hours, minutes });
@@ -76,14 +143,14 @@ const onConfirm = React.useCallback( //Function to open Start TimePicker Modal a
     minutes = setMinutes(FrMinutes.format('mm'));
     //setHours(hours.toString());
     //setMinutes(minutes.toString());
-    var times = FrHours.format('HH') + ':' + FrMinutes.format('mm'); //var to combine Hours and Minute into HH:mm format
+    var times = FrHours.format('HH') + ':' + FrMinutes.format('mm');
     console.log('time: ' + times);
     setfrTimes(times);
   },
   [setVisible]
 );
 
-const onFinishConfirm = React.useCallback(  //Function to open Finish TimePicker Modal and set the selected formatted times 
+const onFinishConfirm = React.useCallback(
   ({ hours, minutes }) => {
     setfinishVisible(false);
     console.log({ hours, minutes });
@@ -175,8 +242,8 @@ const onLFinishConfirm = React.useCallback(
 
 
 
-const renderUserNames = () => { //Function for rendering SiteID based on the ProjNum selected (i.e. Logic for Hierarchial Picker Component)
-  if(projNum=='VOD103015'){   //if projNum(VOD103015) is selected , down below are site ID's available for this specific ProjNum
+const renderUserNames = () => {
+  if(projNum=='VOD103015'){
     return [<Picker.Item key="uniqueID8" label="CE005 ~ Woodcock Hill" value="CE005 ~ Woodcock Hill" />,
            <Picker.Item key="uniqueID7" label="CE006 ~ Crusheen knocknamucky" value="CE006 ~ Crusheen knocknamucky" />,
           <Picker.Item key="uniqueID6" label="CE007 ~ Lack West" value="CE007 ~ Lack West" />,
@@ -184,12 +251,12 @@ const renderUserNames = () => { //Function for rendering SiteID based on the Pro
           <Picker.Item key="uniqueID4" label="CE009 ~ Glenagall" value="CE009 ~ Glenagall" />]
    }
  
-   else if(projNum=='ABO101597'){ //if projNum(ABO101597) is selected , down below are site ID's available for this specific ProjNum
+   else if(projNum=='ABO101597'){
      return [<Picker.Item key="uniqueID3" label="CLS001 ~ Cluster 1 OHL" value="CLS001 ~ Cluster 1 OHL" />
            ]
     }
  
-    else if(projNum=='VOD75860'){ //if projNum(VOD75860) is selected , down below are site ID's available for this specific ProjNum
+    else if(projNum=='VOD75860'){
       return [<Picker.Item key="uniqueID4" label="DN823 Robinson Transport -  Bolts removed from fenc - DN823 Robinsons Transport" value="DN823 Robinson Transport -  Bolts removed from fenc - DN823 Robinsons Transport" />
             ]
      }
@@ -254,10 +321,8 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
   let updateAllStates = (name, contact, address) => {
     setUserName(name);
     setUserContact(contact);
-    setserAddress(address);
+    setUserAddress(address);
   };
-
-// SEARCH USER
 
   let searchUser = () => {
     db.transaction((tx) => {
@@ -284,9 +349,8 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
   let updateUser = () => {
     console.log( selectedWeek, currentDate, projNum, description, frTimes, frFinTimes, Thrs, siteID, dayoftheWeek);
 
-    //The if statements below are to check for any errors in the users' input 
     if (!frTimes) {
-      alert('Add Hours for the entry'); 
+      alert('Add Hours for the entry');
       return;
     }
     
@@ -309,7 +373,6 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
       return;
     }
 
-    //UPDATE SQL STATEMENT
 
     db.transaction((tx) => {
       tx.executeSql(
@@ -406,8 +469,6 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
   //   }
   // }
 
-  // Calculate Total Hrs
-  
    const calcTotalHrs = () => {
     //setfinishVisible(true)
      var StrtTime = moment(frTimes, "HH:mm");
@@ -452,10 +513,136 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
 
   return (
     <SafeAreaView style={styles.container}>
-    <View>
+      <View style={{ justifyContent: 'flex-start', padding: 15 }}>
+        <Image source={profile} style={{
+          width: 60,
+          height: 60,
+          borderRadius: 10,
+          marginTop: 12
+        }}></Image>
+
+        <Text style={{
+          fontSize: 20,
+          fontWeight: 'bold',
+          color: 'white',
+          marginTop: 20
+        }}>Jenna Ezarik</Text>
+
+        <TouchableOpacity>
+          <Text style={{
+            marginTop: 6,
+            color: 'white'
+          }}>View Profile</Text>
+        </TouchableOpacity>
+
+        <View style={{ flexGrow: 1, marginTop: 50 }}>
+          {
+            // Tab Bar Buttons....
+          }
+
+          {TabButton(currentTab, setCurrentTab, "Home", home)}
+          {TabButton(currentTab, setCurrentTab, "Hour", search)}
+          {TabButton(currentTab, setCurrentTab, "TS Review", notifications)}
+          {TabButton(currentTab, setCurrentTab, "Settings", settings)}
+
+        </View>
+
+        <View>
+          {TabButton(currentTab, setCurrentTab, "LogOut", logout)}
+        </View>
+
+      </View>
+      {
+        // Over lay View...
+      }
+      <Animated.View style={{
+        flexGrow: 1,
+        backgroundColor: 'white',
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        paddingHorizontal: 15,
+        paddingVertical: 20,
+        borderRadius: showMenu ? 15 : 0,
+        // Transforming View...
+        transform: [
+          { scale: scaleValue },
+          { translateX: offsetValue }
+        ]
+      }}>
+
+        {
+          // Menu Button...
+        }
+
+        <Animated.View style={{
+          transform: [{
+            translateY: closeButtonOffset
+          }]
+        }}>
+          <TouchableHighlight onPress={() => {
+            // Do Actions Here....
+            // Scaling the view...
+            Animated.timing(scaleValue, {
+              toValue: showMenu ? 1 : 0.88,
+              duration: 300,
+              useNativeDriver: true
+            })
+              .start()
+
+            Animated.timing(offsetValue, {
+              // YOur Random Value...
+              toValue: showMenu ? 0 : 230,
+              duration: 300,
+              useNativeDriver: true
+            })
+              .start()
+
+            Animated.timing(closeButtonOffset, {
+              // YOur Random Value...
+              toValue: !showMenu ? -30 : 0,
+              duration: 300,
+              useNativeDriver: true
+            })
+              .start()
+
+            setShowMenu(!showMenu);
+          }}>
+ 
+ 
+ <View >
+             <View style={styles.head}>
+           <Image source={showMenu ? close : menu} style={{
+              width: 20,
+              height: 20,
+              tintColor: 'white',
+              marginTop: 20,
+              marginLeft: -135
+
+            }}></Image>
+        <View>
+                <Text style={styles.headText}>                   Edit Entry</Text>
+        
+
+        </View>
+
+ </View>
+        </View>
+
+            
+
+          </TouchableHighlight>
+
+
+
+
+
+    <View style={{marginTop: 110}}>
       <View style={styles.Weekarrow}>
-        <Text style={{fontWeight: 'bold',  color: '#091629'}}>Week Ending: {selectedWeek}</Text>
-        <Text style={{fontWeight: 'bold',  color: '#091629'}}>Week day: {moment(currentDate).format('dddd MMM Do')}</Text>
+        <Text style={{fontWeight: 'bold',  color: '#091629', marginLeft: 10, marginTop: 5, fontSize: 16}}>Week Ending: {selectedWeek} </Text>
+        <Text style={{fontWeight: 'bold',  color: '#091629', marginLeft: 10, fontSize: 16}}>Week day: {moment(currentDate).format('dddd MMM Do')}</Text>
       </View>
   
       <View style={styles.section}>
@@ -515,7 +702,7 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
               </Picker>}
           </View>
       </View>
-      <View style={{ flexDirection: 'row' }}>
+      <View style={{ flexDirection: 'row', marginTop: 20 }}>
           <Text style={styles.titleStyle}>Site ID</Text>
           <View style={styles.pickerStyle2}>
               {<Picker
@@ -545,14 +732,16 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
   
   />
   
-        <Button onPress={both}>
-          Update: {Thrs}
+        <Button onPress={both} style={{marginTop: 40}}>
+          Update
   </Button>
   
 
           
   
       </View>
+      </Animated.View>
+      </Animated.View>
   </SafeAreaView>
      );
      }
@@ -561,9 +750,10 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
      const styles = StyleSheet.create({
          container:{
           flex: 1,
-          padding: 10,
-          justifyContent: 'center',
-          alignItems: 'center',
+            backgroundColor: '#091629',
+            alignItems: 'flex-start',
+            justifyContent: 'flex-start',
+           
              },
              date: {
                flex: 1,
@@ -576,11 +766,11 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
                fontWeight: 'bold',
              },
              Weekarrow:{
-              height: 100,
+              height: 70,
               width:370,
               marginTop:-70,
               marginBottom: 30,
-              backgroundColor: '#e1ecf2',
+              backgroundColor: '#87CEEB',
               borderRadius: 20,
               fontWeight: 'bold'
              },
@@ -641,11 +831,12 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
                
                input: {
                 margin: 15,
-                height: 40,
+                height: 50,
                 width: 340,
                 borderColor: "#09253a",
                 borderWidth: 2,
-                borderRadius: 10
+                borderRadius: 10,
+                marginTop: 50
              },
              titleStyle: {
               marginLeft:20,
@@ -723,7 +914,27 @@ var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
                 modalText: {
                   marginBottom: 15,
                   textAlign: "center"
-                }
+                },
+                head: {
+                 padding:0,
+                 marginLeft:-15.5,
+                 marginTop: -20,
+                 width: 400,
+                 height: 70,
+                 flexDirection: 'row',
+                 alignItems: 'center',
+                 justifyContent: 'center',
+                 backgroundColor: '#091629',
+                 borderTopLeftRadius: 10
+                 },
+                 
+                 headText: {
+                 fontWeight: 'bold',
+                 fontSize: 20,
+                 color: 'whitesmoke',
+                 letterSpacing: 1,
+                 marginBottom:-18
+                 },
               });
        
 export default EditSheet;
