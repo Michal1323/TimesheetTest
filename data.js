@@ -25,8 +25,4 @@ export default [
     color: '#999',
   },
   
-<<<<<<< HEAD
 ];
-=======
-];
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc

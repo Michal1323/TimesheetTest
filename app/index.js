@@ -190,12 +190,14 @@ class MusicApp extends Component {
           <TextInput 
           placeholder='LOGIN'
               style={styles.textInput}
+             // defaultValue={login}
               placeholderTextColor='black'
           />
 
           <TextInput  
               placeholder='PASSWORD'
               style={styles.textInput}
+             // defaultValue={password}
               placeholderTextColor='black'
               />
 
@@ -218,7 +220,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   button: {
-    backgroundColor: '#87CEEB',
+    backgroundColor: '#ffffff',
     height: 70,
     marginHorizontal: 20,
     borderRadius: 35,

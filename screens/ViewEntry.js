@@ -3,6 +3,7 @@ import {View, StyleSheet} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import ActionButton from 'react-native-action-button';
 import Icon from 'react-native-vector-icons/Ionicons';
+import axios from 'axios';
 
 //import axios from axios
 
@@ -11,15 +12,32 @@ export default function DeleteUser ({ navigation })  {
     const [selectedValue, setSelectedValue] = useState(null);
 
     useEffect(() => {
-        fetch('https://aboutreact.herokuapp.com/demosearchables.php')
-        .then(response => response.json())
-        .then(responseJson => {
-            setValues(responseJson.results)
-        })
-        .catch((error) => {
-            console.error(error);
-          });
-      }, []);
+      //   fetch('https://aboutreact.herokuapp.com/demosearchables.php')
+      //   .then(response => response.json())
+      //   .then(responseJson => {
+      //       setValues(responseJson.results)
+      //   })
+      //   .catch((error) => {
+      //       console.error(error);
+      //     });
+      // }, []);s
+
+      axios
+      .get('https:aboutreact.herokuapp.com/demosearchables.php')
+      .then(function (response) {
+        // handle success
+        alert(response);
+          setValues(response)
+      })
+      .catch(function (error) {
+        // handle error
+        alert(error.message);
+      })
+      .finally(function () {
+        // always executed
+        alert('Finally called');
+      });
+  }, []);
 
     return (        
         <View style={{flex: 1,backgroundColor:'white'}}>
@@ -30,6 +48,8 @@ export default function DeleteUser ({ navigation })  {
                     { values.map((value, i) => {
                         return <Picker.Item key={i} value={value.id} label={value.name} />
                     })}
+
+
                 </Picker>
                 <ActionButton buttonColor="rgba(231,76,60,1)">
           <ActionButton.Item buttonColor='#9b59b6' title="New Task" onPress={() => console.log("notes tapped!")}>

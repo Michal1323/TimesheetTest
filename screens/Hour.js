@@ -1,14 +1,7 @@
-<<<<<<< HEAD
-import * as React from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TextInput, Alert, Pressable, Modal} from 'react-native';
-import AsyncStorage from "@react-native-community/async-storage";
-import { Button, IconButton, Card, Colors } from 'react-native-paper';
-=======
 import React, {useEffect, useState,useRef} from 'react';
-import { StyleSheet, Text, View, TextInput, Alert, Image, StatusBar, Animated, TouchableOpacity, SafeAreaView, TouchableHighlight} from 'react-native';
+import { StyleSheet, Text, View, TextInput, Alert, Image, KeyboardAvoidingView, Animated, Platform, TouchableOpacity, SafeAreaView, TouchableHighlight} from 'react-native';
 import AsyncStorage from "@react-native-community/async-storage";
 import { Button } from 'react-native-paper';
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
 import { TimePickerModal } from 'react-native-paper-dates';
 import { ActivityIndicator, FlatList} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
@@ -28,6 +21,7 @@ import logout from '../assets/logout.png'
 // Menu
 import menu from '../assets/menu.png';
 import close from '../assets/close.png';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 
 
@@ -35,36 +29,6 @@ const db = DatabaseConnection.getConnection();
 
  function Hour ({ navigation }) {
 
-<<<<<<< HEAD
-  const selectDate = new Date();
-  const [currentDate, setCurrentDate] = React.useState('');
-  const [toggleCheckBox, setToggleCheckBox] = React.useState(false)
-
-  const [modalVisible, setModalVisible] = React.useState(false);
-  const [dayoftheWeek, setDayoftheWeek] = React.useState(moment().format("L"));
-  const [projNum, setprojNum] = React.useState('');
-  const [siteID, setsiteID] = React.useState('')
-  const [Thrs, setThrs] = React.useState('');
-  const [visible, setVisible] = React.useState(false);
-  const [finishvisible, setfinishVisible] = React.useState(false);
-  const [Lvisible, setLVisible] = React.useState(false);
-  const [Lfinishvisible, setLfinishVisible] = React.useState(false);
-
-  const [Hours, setHours] = React.useState(selectDate.getHours());
-  const [Minutes, setMinutes] = React.useState(selectDate.getMinutes());
-  const [finishHours, setfinishHours] = React.useState(selectDate.getHours());
-  const [finishMinutes, setfinishMinutes] = React.useState(selectDate.getMinutes());
-  
-  
-  const [frTimes, setfrTimes] = React.useState('');
-  const [frFinTimes, setfrFinTimes] = React.useState('');
-  const [description, setDescription] = React.useState('');
-  const [selectedWeek, setselectedWeek] = React.useState(moment().day(5).format("L"));
-  var timeList  = []; //array that stores entry details
-
-  const [isLoading, setLoading] = React.useState(true);
-  const [data, setData] = React.useState([]);
-=======
   const selectDate = new Date();                                    //var to get date
   const [currentDate, setCurrentDate] = React.useState('');         //var to set selected date
   const [toggleCheckBox, setToggleCheckBox] = React.useState(false) // var for Lunch checkbox (i.e. same Lunch for week)
@@ -86,7 +50,8 @@ const db = DatabaseConnection.getConnection();
   const [data, setData] = React.useState([]);
   const [currentTab, setCurrentTab] = useState("Hour");   //var to set current Tab status in side Drawer
   const [showMenu, setShowMenu] = useState(false);        //var to get the curretn Status of menu ...
-
+  const keyboardVerticalOffset = Platform.OS === 'android' ? 100 : 0
+  
   // Animated Properties...
   const offsetValue = useRef(new Animated.Value(0)).current;
   // Scale Intially must be One...
@@ -133,7 +98,6 @@ const db = DatabaseConnection.getConnection();
           paddingLeft: 15,
           color: currentTab == title ? "#5359D1" : "white"
         }}>{title}</Text>
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
 
       </View>
     </TouchableOpacity>
@@ -158,11 +122,6 @@ const db = DatabaseConnection.getConnection();
       var FrMinutes = moment(minutes, 'mm');
       hours = setHours(FrHours.format('HH'));
       minutes = setMinutes(FrMinutes.format('mm'));
-<<<<<<< HEAD
-      //setHours(hours.toString());
-      //setMinutes(minutes.toString());
-=======
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
       var times = FrHours.format('HH') + ':' + FrMinutes.format('mm');
       console.log('time: ' + times);
       setfrTimes(times);
@@ -178,27 +137,20 @@ const db = DatabaseConnection.getConnection();
       var FinMnts = moment(minutes, 'mm');
       hours = setfinishHours(FinHrs.format('HH'));
       minutes = setfinishMinutes(FinMnts.format('mm'));
-<<<<<<< HEAD
-      var Fintimes = FinHrs.format('HH') + ':' + FinMnts.format('mm');
-=======
       var Fintimes = FinHrs.format('HH') + ':' + FinMnts.format('mm'); //var to combine Hours and Minute into HH:mm format
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
       console.log('Finish Times: ' + Fintimes);
       setfrFinTimes(Fintimes);
+      calcTotalHrs(); //Function call to calculate Total Hours for the selected day
+
       
     },
     [setfinishVisible]
   );
  
 
-<<<<<<< HEAD
-  const renderUserNames = () => {
-    if(projNum=='VOD103015'){
-=======
   const renderUserNames = () => { //Function for rendering SiteID based on the ProjNum selected (i.e. Logic for Hierarchial Picker Component)
     
     if(projNum=='VOD103015'){     //if projNum(VOD103015) is selected , down below are site ID's available for this specific ProjNum
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
       return [<Picker.Item key="uniqueID8" label="CE005 ~ Woodcock Hill" value="CE005 ~ Woodcock Hill" />,
              <Picker.Item key="uniqueID7" label="CE006 ~ Crusheen knocknamucky" value="CE006 ~ Crusheen knocknamucky" />,
             <Picker.Item key="uniqueID6" label="CE007 ~ Lack West" value="CE007 ~ Lack West" />,
@@ -206,20 +158,12 @@ const db = DatabaseConnection.getConnection();
             <Picker.Item key="uniqueID4" label="CE009 ~ Glenagall" value="CE009 ~ Glenagall" />]
      }
    
-<<<<<<< HEAD
-     else if(projNum=='ABO101597'){
-=======
      else if(projNum=='ABO101597'){ //if projNum(ABO101597) is selected , down below are site ID's available for this specific ProjNum
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
        return [<Picker.Item key="uniqueID3" label="CLS001 ~ Cluster 1 OHL" value="CLS001 ~ Cluster 1 OHL" />
              ]
       }
    
-<<<<<<< HEAD
-      else if(projNum=='VOD75860'){
-=======
       else if(projNum=='VOD75860'){ //if projNum(VOD75860) is selected , down below are site ID's available for this specific ProjNum
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
         return [<Picker.Item key="uniqueID4" label="DN823 Robinson Transport -  Bolts removed from fenc - DN823 Robinsons Transport" value="DN823 Robinson Transport -  Bolts removed from fenc - DN823 Robinsons Transport" />
               ]
        }
@@ -230,124 +174,6 @@ const db = DatabaseConnection.getConnection();
        }
 
   }
-<<<<<<< HEAD
-  React.useEffect(() => {
-    fetch('https://jsonplaceholder.typicode.com/todos/1')
-      .then((response) => response.json())
-      .then((json) => setData(json.movies))
-      .catch((error) => console.error(error))
-      .finally(() => setLoading(false));
-  }, []);
-
-
-  React.useEffect(() => {
-    var tdate = new Date(); //Current Date
-    var monday = moment().day((1)+1); //shows Monday
-    var friday = moment().day((5)+1); //shows Monday
-    var Tday = tdate.getDay(); //Current Day
-    var month = new Date().getMonth() + 1; //Current Month
-    var year = new Date().getFullYear(); //Current Year
-    var hours = new Date().getHours(); //Current Hours
-    var min = new Date().getMinutes(); //Current Minutes
-    var sec = new Date().getSeconds(); //Current Seconds
-    /*setCurrentDate(
-    
-      //date + '/' + month + '/' + year 
-      //+ ' ' + hours + ':' + min + ':' + sec
-      moment(tdate).format("YYYY-MM-DD")
-  );*/
-  }, []);
-
-  const testClash = (d1, d2) => {     //calculating the weight of the conflict.
-    // d1 and d2 in array format
-// [moment from, moment to]
-var count = 0;
-for (var i = 0, t; t = d1[i]; i++) {
-  // use isBetween exclusion
-  if (t.isBetween(d2[0], d2[1], null, '()')) {
-    count++;
-  }
-}
-
-for (var i = 0, t; t = d2[i]; i++) {
-  // use isBetween exclusion
-  if (t.isBetween(d1[0], d1[1], null, '()')) {
-    count++;
-  }
-}
-
-if (count > 1) {
-  return console.log('completely conflict');
-}
-
-if (count > 0) {
-  return console.log('partial conflict');
-}
-
-return console.log('something else');
-}
-
-var t1 = [moment(frTimes).format('HH:mm'), moment(frTimes).format('HH:mm')]
-
-const time_clash = () => {
-  db.transaction(function (tx) {
-    tx.executeSql(
-      'SELECT * FROM Timesheet WHERE ? < depart AND ? > arrival AND date=?',
-      [frTimes, frFinTimes ,currentDate],
-      (tx, results) => {
-        var temp = [];
-       var len = results.rows.length;
-       console.log('len', len);
-       if(len >= 0 ) {
-         for (let i = 0; i < results.rows.length; ++i) 
-         temp.push(results.rows.item(i));
-         if(len <= 0)
-         {
-            console.log("Time Slot Available " + temp);
-            add_entry();
-         }
-         else{
-            console.log("Error")
-            alert('There is a timesheet conflict, select a different time');
-         }
-       } 
-       else {
-         alert('Cannot Search Entry!');
-       }
-      }
-    );
-  });
-}
-
-
-  const add_entry = () => { 
-    console.log( selectedWeek, currentDate, projNum, description, frTimes, frFinTimes, Thrs, siteID, dayoftheWeek);
-  
-  //   db.transaction(function (tx) {
-  //     tx.executeSql(
-  //       'SELECT * FROM Timesheet WHERE date=?',
-  //       [currentDate],
-  //       (tx, results) => {
-  //         var temp = [];
-  //        var len = results.rows.length;
-  
-  //        console.log('len', len);
-  //        if(len >= 0 ) {
-          
-  //          for (let i = 0; i < results.rows.length; ++i) 
-          
-  //          temp.push(results.rows.item(i));
-  //          console.log(temp);
-  //          temp.forEach()
-  // console.log(temp)
-  //        } else {
-  //          alert('Cannot Search Entry!');
-  //        }
-  //       }
-  //     );
-  //   });
-
-=======
   React.useEffect(() => {
     fetch('https://jsonplaceholder.typicode.com/todos/1')
       .then((response) => response.json())
@@ -396,7 +222,6 @@ const time_clash = () => {     //Function for checking if TimeClashes(2 Entries 
     console.log( selectedWeek, currentDate, projNum, description, frTimes, frFinTimes, Thrs, siteID, dayoftheWeek);
 
     //Validation checking: i.e. Cannot add an entry without selecting a Week, Day, Project, Site, Start Time, Finish Time
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
     if (!selectedWeek) {
       alert('Please select a end of the week');
       return;
@@ -415,57 +240,11 @@ const time_clash = () => {     //Function for checking if TimeClashes(2 Entries 
       return;
     }
 
-<<<<<<< HEAD
-    if (!Hours) {
-=======
     if (!frTimes) {
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
       alert('Add Hours for the entry');
       return;
     }
     
-<<<<<<< HEAD
-    if (!finishHours) {
-      alert('Add End Hours for the entry');
-      return;
-    }
-
-    db.transaction(function (tx) {
-      tx.executeSql(
-        'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?)',
-        [1, selectedWeek, currentDate, projNum, description, frTimes, frFinTimes, Thrs, siteID, dayoftheWeek ],
-        (tx, results) => {
-          console.log('Results', results.rowsAffected);
-          if (results.rowsAffected > 0) {
-            Alert.alert(
-              'Sucess',
-              'Entry added succesfully to DB !!!',
-              [
-                {
-                  text: 'Ok',
-                  onPress: () =>
-                  navigation.navigate('Home'),
-                }
-              ],
-              { cancelable: false }
-            );
-          } else alert('Error Entry unsuccesfull !!!');
-        }
-      );
-      //save()
-    });
-  };
-
-  const add_lunch = () => {
-    console.log( 1, selectedWeek, currentDate, 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek);
-    
-    if (!dayoftheWeek) {
-      alert('Please select a day of the week');
-      return;
-    }
-
-    if(toggleCheckBox == false)
-=======
     if (!frFinTimes) {
       alert('Add End Hours for the entry');
       return;
@@ -507,21 +286,14 @@ const time_clash = () => {     //Function for checking if TimeClashes(2 Entries 
     }
 
     if(toggleCheckBox == false) //if "same lunch for the week" is not selected, then execute the SQL INSERT Statement only once
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
   {
   
     db.transaction(function (tx) {
       tx.executeSql(
-<<<<<<< HEAD
-        'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, siteID, totalHrs, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?)',
-        [1, selectedWeek, currentDate, 'Lunch', 'Lunch', frTimes, frFinTimes, 'Lunch', Thrs, dayoftheWeek],
-        (tx, results) => {
-=======
         //SQL Insert Statement to insert a Lunch entry into Timesheet Table
         'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, siteID, totalHrs, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?)',
         [1, selectedWeek, currentDate, 'Lunch', 'Lunch', frTimes, frFinTimes, 'Lunch', Thrs, dayoftheWeek],
         (tx, results) => {  // ----------------------------------------> getting results back from querying the SQL Statement
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {  //If length to results returned is greater than 0, then the entry is added succesfully
             Alert.alert(
@@ -531,11 +303,7 @@ const time_clash = () => {     //Function for checking if TimeClashes(2 Entries 
                 {
                   text: 'Ok',
                   onPress: () =>
-<<<<<<< HEAD
-                  navigation.navigate('Home'),                 
-=======
                   navigation.navigate('Home'), //When the entry added is successfull, navigate from ADD ENTRY Screen to HOME Screen
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
                 },
               ],
               { cancelable: false }
@@ -547,86 +315,41 @@ const time_clash = () => {     //Function for checking if TimeClashes(2 Entries 
     });
   }
   
-<<<<<<< HEAD
-  else if (toggleCheckBox == true)
-  {
-  db.transaction(function (tx) {
-    tx.executeSql(
-=======
   else if (toggleCheckBox == true)  //if "same lunch for the week" is  selected, then execute the same SQL INSERT Statement 5 times for M-T-W-TH-FR 
   {
   db.transaction(function (tx) {
     tx.executeSql(
       //SQL Insert Statement to insert a Lunch entry into Timesheet Table 5 times for 5 different days of the week
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
       'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?)',
       [1, selectedWeek, moment(selectedWeek).day("Monday").format('L'), "Lunch", 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek , 
       1, selectedWeek, moment(selectedWeek).day("Tuesday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes,  Thrs, 'Lunch', dayoftheWeek , 
       1, selectedWeek, moment(selectedWeek).day("Wednesday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes,  Thrs, 'Lunch', dayoftheWeek ,
       1, selectedWeek, moment(selectedWeek).day("Thursday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek ,
       1, selectedWeek, moment(selectedWeek).day("Friday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek ],
-<<<<<<< HEAD
-      (tx, results) => {
-        console.log('Results', results.rowsAffected);
-        if (results.rowsAffected > 0) {
-=======
       (tx, results) => {  // ----------------------------------------> getting results back from querying the SQL Statement
         console.log('Results', results.rowsAffected);
         if (results.rowsAffected > 0) {  //If length to results returned is greater than 0, then the entry is added succesfully
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
           Alert.alert(
             'Sucess',
             'Entry added succesfully to DB !!!',
             [
               {
                 text: 'Ok',
-<<<<<<< HEAD
-                onPress: SearchEntry()
-=======
                 //When the entry added is succesfull, call SearchEntry() 
                 //which Searches and gives updated list of all entries including the ones we recently added
                 onPress: SearchEntry() 
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
               },
             ],
             { cancelable: false }
           );
-<<<<<<< HEAD
-        } else alert('Error Entry unsuccesfull !!!');
-      }
-    ); 
-    //save()
-=======
         } else alert('Error Entry unsuccesfull !!!');  //If length to results returned is lesser than or equal to 0, then the entry added is unsuccesfull!
       }
     ); 
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
   });
   
   }
   };
 
-<<<<<<< HEAD
-  const Lunch_time_clash = () => {
-    db.transaction(function (tx) {
-      tx.executeSql(
-        'SELECT * FROM Timesheet WHERE ? < depart AND ? > arrival AND date=?',
-        [frTimes, frFinTimes ,currentDate],
-        (tx, results) => {
-          var temp = [];
-         var len = results.rows.length;
-         console.log('len', len);
-         if(len >= 0 ) {
-           for (let i = 0; i < results.rows.length; ++i) 
-           temp.push(results.rows.item(i));
-           if(len <= 0)
-           {
-              console.log("Time Slot Available " + temp);
-              add_lunch();
-           }
-           else{
-              console.log("Error")
-=======
   const Lunch_time_clash = () => { //Function to check if there's any time clash between Lunch Entries
     db.transaction(function (tx) {
       tx.executeSql(
@@ -649,7 +372,6 @@ const time_clash = () => {     //Function for checking if TimeClashes(2 Entries 
            }
            else{                               //if length of result > 0, then TimeClash exists for the selected Time
               console.log("Error")    
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
               alert('There is a timesheet conflict, select a different time');
            }
          } 
@@ -665,21 +387,11 @@ const time_clash = () => {     //Function for checking if TimeClashes(2 Entries 
 
   const saveDayofWeek = (itemValue, itemIndex) => { //Function to save Day of the Week selected from the Picker
     setDayoftheWeek(itemValue);
-<<<<<<< HEAD
-    var next = getNextDay(itemValue);
-=======
     var next = getNextDay(itemValue); 
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
     //console.log(next.getTime());
     moment.locale('en');
     console.log(moment(next.getTime()).format("L"));
     setCurrentDate(moment(next.getTime()).format("L"));
-<<<<<<< HEAD
-    calcTotalHrs();
-
-=======
-    calcTotalHrs(); //Function call to calculate Total Hours for the selected day
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
   }
 
   const getNextDay = (dayName) => { //Function to find next day given current Day and return it DATE Format
@@ -705,19 +417,6 @@ const time_clash = () => {     //Function for checking if TimeClashes(2 Entries 
 
   }
 
-<<<<<<< HEAD
-  const saveStartingWeek = (value) => {
-    moment.locale('en')
-        console.log("saveStartingWeek - value:", moment(value).add(5, "days").format("L"));
-        setselectedWeek(moment(value).add(5, "days").format("L"));
-        console.log("this friday: " + moment().day(5).format("L") + "todays date: " + moment().format("L"))
-        //setselectedWeek(navigation.getParam('eow'));
-        //setselectedWeek(new Date(value).toString());
-        }
-  
-
-  const getTimefromMins = (mins) => {
-=======
   const saveStartingWeek = (value) => { //function for saving selected EOW
     moment.locale('en')
         console.log("saveStartingWeek - value:", moment(value).add(5, "days").format("L"));
@@ -727,7 +426,6 @@ const time_clash = () => {     //Function for checking if TimeClashes(2 Entries 
   
 
   const getTimefromMins = (mins) => { //function to return minutes in HH:mm format ex: 120 mins = 2:00 hrs, and to help convert Minutes in 0-100 to Minutes in 0-60 
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
     if (mins >= 24 * 60 || mins < 0) {
       Alert.alert("Valid input should be greater than or equal to 0 and less than 1440.");
     }
@@ -737,25 +435,7 @@ const time_clash = () => {     //Function for checking if TimeClashes(2 Entries 
     return moment.utc().hours(h).minutes(m).format("HH:mm");
   }
 
-<<<<<<< HEAD
-  // const splitTime = (time) => {  //function to split time in hours and minutes seperatly
-  //   var today = new Date();
-  //   var _t = time.split(";");
-  //   today.setHours(_t[0], _t[1], 0, 0);
-  //   return today;
-  // }
-
-  // const validate = (sTime, eTime) => {
-  //   if(+splitTime(sTime) < +splitTime(eTime)) {
-  //     var len = timeList.length;
-  //     return len>0?(+splitTime(timeList[len - 1].e))
-  //   }
-  // }
-
-   const calcTotalHrs = () => {
-=======
    const calcTotalHrs = () => { //Function to calculate totalHrs given a start time and End Time
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
     //setfinishVisible(true)
      var StrtTime = moment(frTimes, "HH:mm");
      var endTime = moment(frFinTimes, "HH:mm");
@@ -763,259 +443,23 @@ const time_clash = () => {     //Function for checking if TimeClashes(2 Entries 
      var duration = moment.duration(StrtTime.diff(endTime));
      var DHrs = parseInt(duration.asHours());
     var Dmins = parseInt(duration.asMinutes())-DHrs* 60;
-<<<<<<< HEAD
-     var Tot  = endTime.diff(StrtTime, 'minutes');
-     var timetomins = getTimefromMins(Tot);
-     //setThrs(Tot);
-     
-  //   //Alert.alert(DHrs + 'Hrs');
-=======
      var Tot  = endTime.diff(StrtTime, 'minutes'); //calculating the difference between endTime and startTime
      var timetomins = getTimefromMins(Tot);
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
      setThrs(timetomins);
      console.log(timetomins);
  }
 
-<<<<<<< HEAD
- const finishTime = () => {
-  setfinishVisible(true)
+ const both  = () => 
+ {
+   calcTotalHrs();
+   time_clash(Thrs);
+
  }
 
- return (
-  <SafeAreaView style={styles.container}>
-  <View>
-    <View style={{
-        marginTop:-60,
-        height: 100,
-        width:380,
-        marginLeft: 8,
-        marginBottom:20,
-        borderWidth: 3,
-        borderColor: 'white',
-        backgroundColor: '#34c0eb',
-        borderRadius: 20,
-        borderWidth: 3,
-          borderColor: 'black',
-      }}>
-      <Text style={{fontWeight: 'bold',  color: '#091629'}}>Week Ending: {moment(selectedWeek).format('dddd, MMMM Do')}{navigation.getParam('eow')}</Text>
-  <WeekSelector
-      dateContainerStyle={styles.date}
-      whitelistRange={[new Date(2021, 1, 9), new Date()]}
-      weekStartsOn={6}
-      onWeekChanged={saveStartingWeek}
-    />
-    </View>
-
-    <View style={styles.section}>
-      <TimePickerModal style={styles.section}
-  visible={visible}
-  onDismiss={onDismiss}
-  onConfirm={onConfirm}
-  hours={12} // default: current hours
-  minutes={0} // default: current minutes
-  label="Select time" // optional, default 'Select time'
-  cancelLabel="Cancel" // optional, default: 'Cancel'
-  confirmLabel="Ok" // optional, default: 'Ok'
-  animationType="fade" // optional, default is 'none'
-  locale={'en'} // optional, default is automically detected by your system
-
-
-/>
-<Button color="#09253a" style={styles.startTime} icon="walk" onPress={()=> setVisible(true)}>
-  Start: {frTimes}
-</Button>
-
-<TimePickerModal
-  visible={finishvisible}
-  onDismiss={onFinishDismiss}
-  onConfirm={onFinishConfirm}
-  hours={12} // default: current hours
-  minutes={0} // default: current minutes
-  label="Select time" // optional, default 'Select time'
-  cancelLabel="Cancel" // optional, default: 'Cancel'
-  confirmLabel="Ok" // optional, default: 'Ok'
-  animationType="fade" // optional, default is 'none'
-  locale={'en'} // optional, default is automically detected by your system
-
-/>
-<Button color="#09253a" style={styles.endTime} icon="run" onPress={() => setfinishVisible(true)}>
-  Finish: {frFinTimes}
-</Button>
-
-</View>
-
-    <View>
-              <Text style={{fontWeight: 'bold', color: '#091629', marginBottom: -20, marginLeft: 20, marginTop: 20}}>
-                  Day of the Week 
-              </Text>
-             <Picker 
-              mode="dropdown"
-              style={styles.datefive}
-              selectedValue={dayoftheWeek}
-              onValueChange=
-              {
-                  saveDayofWeek
-              }>
-                      <Picker.Item key="uniqueID9" label="Please Select a Day" value="" />
-                      <Picker.Item label={'Monday' + ' ' +  moment(selectedWeek).day("Monday").format('MMM Do')} value="monday" />
-                        <Picker.Item label={'Tuesday' + ' ' +  moment(selectedWeek).day("Tuesday").format('MMM Do')} value="tuesday" />
-                        <Picker.Item label={'Wednesday' + ' ' +  moment(selectedWeek).day("Wednesday").format('MMM Do')} value="wednesday" />
-                        <Picker.Item label={'Thursday' + ' ' +  moment(selectedWeek).day("Thursday").format('MMM Do')} value="thursday" />
-                        <Picker.Item label={'Friday' + ' ' +  moment(selectedWeek).day("Friday").format('MMM Do')} value="friday" />
-                        <Picker.Item label={'Saturday' + ' ' +  moment(selectedWeek).day("Saturday").format('MMM Do')} value="saturday" />
-                        <Picker.Item label={'Sunday' + ' ' +  moment(selectedWeek).day("Sunday").format('MMM Do')} value="sunday" />
-                       
-                     
-            </Picker>
-    </View>
-
-
-
-
-    <View style={styles.btn}>
-      <View style={{ flexDirection: 'row' }}>
-        <Text style={styles.titleStyle}>Project No </Text>
-        <View style={styles.pickerStyle}>
-            {<Picker
-                mode='dropdown'
-                selectedValue={projNum}
-                onValueChange={(itemValue, itemIndex) =>
-                    //this.setState({ projNum: itemValue })
-                    setprojNum(itemValue)
-                }>
-                <Picker.Item key="uniqueID9" label="Please Select Project" value="" />
-                <Picker.Item key="uniqueID10" label="VOD103015 ~ Assure Provide engsupport Oct 1st to Oct 31st 2019" value="VOD103015" />
-                <Picker.Item key="uniqueID11" label="ABO101597 ~ Over head Line works Cluster 1 ~ CLS001 ~ Cluster1 OHL" value="ABO101597" />
-                <Picker.Item key="uniqueID12" label="VOD75860 ~ DN823 Robinsons Transport" value="VOD75860" />
-                <Picker.Item key="uniqueID13" label="Client" value="Client" />
-            </Picker>}
-        </View>
-    </View>
-    <View style={{ flexDirection: 'row' }}>
-        <Text style={styles.titleStyle}>Site ID</Text>
-        <View style={styles.pickerStyle2}>
-            {<Picker
-                mode='dropdown'
-                selectedValue={siteID}
-                onValueChange={(itemValue, itemIndex) =>
-                    //this.setState({ siteID: itemValue })
-                    setsiteID(itemValue)
-                }>
-                <Picker.Item label="Please Select a Site" value="" />
-                     {options}
-
-            </Picker>}
-        </View>
-    </View>
-   </View>
-
-
-   
-
-
-<TextInput 
-placeholder="  Description"
-onChangeText={description => setDescription(description)} 
-defaultValue={description}
-style={styles.input}
-/>
-
-      <Button color="#09253a" onPress={time_clash}>
-        Add
-</Button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <View style={styles.centeredView}>
-<Modal
-  animationType="slide"
-  transparent={true}
-  visible={modalVisible}
-  onRequestClose={() => {
-    Alert.alert("Modal has been closed.");
-    setModalVisible(!modalVisible);
-  }}
-  
->
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-            <View style={styles.Weekarrow}>
-    <IconButton icon="close"  color={Colors.white} size={29} style={{marginLeft: 322, marginTop: 30, position: 'absolute', backgroundColor: '#e00000', borderWidth: 3, borderColor: 'white'}} onPress={() => setModalVisible(!modalVisible)}/>
-      <Text style={{fontWeight: 'bold',  color: '#091629'}}>Week Ending: {selectedWeek}{navigation.getParam('eow')}</Text>
-  <WeekSelector
-      dateContainerStyle={styles.date}
-      whitelistRange={[new Date(2021, 1, 9), new Date()]}
-      weekStartsOn={6}
-      onWeekChanged={saveStartingWeek}
-    />
-    </View>
-            <Text>Lunch Entry</Text>
-        
-            <TimePickerModal
-  visible={visible}
-  onDismiss={onDismiss}
-  onConfirm={onConfirm}
-  hours={12} // default: current hours
-  minutes={0} // default: current minutes
-  label="Select time" // optional, default 'Select time'
-  cancelLabel="Cancel" // optional, default: 'Cancel'
-  confirmLabel="Ok" // optional, default: 'Ok'
-  animationType="fade" // optional, default is 'none'
-  locale={'en'} // optional, default is automically detected by your system
-/>
-<Button color="#09253a" style={styles.startTime} icon="clock" onPress={()=> setVisible(true)}>
-  Start: {frTimes}
-</Button>
-
-<TimePickerModal
-  visible={finishvisible}
-  onDismiss={onFinishDismiss}
-  onConfirm={onFinishConfirm}
-  hours={12} // default: current hours
-  minutes={0} // default: current minutes
-  label="Select time" // optional, default 'Select time'
-  cancelLabel="Cancel" // optional, default: 'Cancel'
-  confirmLabel="Ok" // optional, default: 'Ok'
-  animationType="fade" // optional, default is 'none'
-  locale={'en'} // optional, default is automically detected by your system
-/>
-<Button color="#09253a" style={styles.endTime} icon="clock" onPress={()=> setfinishVisible(true)}>
-  Finish: {frFinTimes}
-</Button>
-
-      
-        <CheckBox style={styles.check}
-      disabled={false}
-      value={toggleCheckBox}
-      onValueChange={(newValue) => setToggleCheckBox(newValue)}
-    />
-
-  
-
-    <Text style={styles.sameWeek}>Same for the week</Text>
-
-    <View>
-              <Text style={{fontWeight: 'bold', color: '#091629', width: 250}}>
-                  Day of the Week 
-              </Text>
-             <Picker style={styles.datefive}
-=======
 
  return (
   <SafeAreaView style={styles.container}>
+  
        <View style={{ justifyContent: 'flex-start', padding: 15 }}>
         <Image source={profile} style={{
           width: 60, 
@@ -1141,7 +585,8 @@ style={styles.input}
        
     
   <View>
-  <Text style={{fontWeight: 'bold',  fontSize: 20, color: '#091629', marginLeft: 10, marginTop: 10}}>Week Ending                {moment(selectedWeek).format('dddd, MMMM Do')}{navigation.getParam('eow')}</Text>
+  <KeyboardAvoidingView behavior='position' keyboardVerticalOffset={keyboardVerticalOffset}>
+  <Text style={{fontWeight: 'bold',  fontSize: 20, color: '#091629', marginLeft: 10, marginTop: 30}}>Week Ending                {moment(selectedWeek).format('dddd, MMMM Do')}{navigation.getParam('eow')}</Text>
     <View style={{
         marginTop:20,
         height: 70,
@@ -1207,47 +652,12 @@ style={styles.input}
              <Picker 
               mode="dropdown"
               style={styles.datefive}
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
               selectedValue={dayoftheWeek}
               onValueChange=
               {
                   saveDayofWeek
               }>
                       <Picker.Item key="uniqueID9" label="Please Select a Day" value="" />
-<<<<<<< HEAD
-                      <Picker.Item label="Monday" value="monday" />
-                      <Picker.Item label="Tuesday" value="tuesday" />
-                      <Picker.Item label="Wednesday" value="wednesday" />
-                      <Picker.Item label="Thursday" value="thursday" />
-                      <Picker.Item label="Friday" value="friday" />
-                      <Picker.Item label="Saturday" value="saturday" />
-                      <Picker.Item label="Sunday" value="sunday" />
-                     
-            </Picker>
-    </View>
-    
-
-    <Button color="#09253a" onPress={Lunch_time_clash} style={styles.addButton}>
-                Add
-        </Button>
-
-              <Pressable 
-                style={[styles.button, styles.buttonClose]}
-                onPress={() => setModalVisible(!modalVisible)}
-              >
-              <Text style={styles.textStyle}>Hide Modal</Text>
-                
-              </Pressable>
-            </View>
-          </View>
-        </Modal>
-        
-        <IconButton icon="food"  color={Colors.white} size={35} style={{marginLeft: 320, marginTop: 15, position: 'absolute', backgroundColor: '#091629', borderWidth: 3, borderColor: 'white'}} onPress={() => setModalVisible(true)}/>
-      </View>
-        
-
-    </View>
-=======
                       <Picker.Item label={'Monday' + ' ' +  moment(selectedWeek).day("Monday").format('MMM Do')} value="monday" />
                         <Picker.Item label={'Tuesday' + ' ' +  moment(selectedWeek).day("Tuesday").format('MMM Do')} value="tuesday" />
                         <Picker.Item label={'Wednesday' + ' ' +  moment(selectedWeek).day("Wednesday").format('MMM Do')} value="wednesday" />
@@ -1288,11 +698,12 @@ style={styles.input}
             {<Picker
                 mode='dropdown'
                 selectedValue={siteID}
+              //   enabled={false}
+              // prompt="Choose Language"
                 onValueChange={(itemValue, itemIndex) =>
                     //this.setState({ siteID: itemValue })
                     setsiteID(itemValue)
                 }>
-                <Picker.Item label="Please Select a Site" value="" />
                      {options}
 
             </Picker>}
@@ -1300,8 +711,6 @@ style={styles.input}
     </View>
    </View>
 
-
-   
 
 
 <TextInput 
@@ -1312,6 +721,9 @@ style={styles.input}
 />
 
 
+<Button onPress={both} style={{marginTop: 40}}>
+          Update
+  </Button>
 <TouchableHighlight style={{ alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
@@ -1332,10 +744,11 @@ style={styles.input}
     color: 'black',
     }}> Add </Text>
 </TouchableHighlight>
+</KeyboardAvoidingView>
     </View>
     </Animated.View>
     </Animated.View>
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
+    
 </SafeAreaView>
    );
    }
@@ -1430,12 +843,8 @@ style={styles.input}
               width: 340,
               borderColor: "#09253a",
               borderWidth: 2,
-<<<<<<< HEAD
-              borderRadius: 10
-=======
               borderRadius: 10,
               marginLeft: 8
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
            },
            titleStyle: {
             marginLeft:20,
@@ -1516,9 +925,6 @@ style={styles.input}
               modalText: {
                 marginBottom: 15,
                 textAlign: "center"
-<<<<<<< HEAD
-              }
-=======
               },
               head: {
                 padding:0,
@@ -1541,7 +947,6 @@ style={styles.input}
                 marginBottom:-18
                 
                 },
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
             });
      
      export default Hour;

@@ -25,15 +25,9 @@
     "@react-native-picker/picker": "^1.9.11",
     "@react-navigation/bottom-tabs": "^5.11.10",
     "accordion-collapse-react-native": "^1.0.0",
-<<<<<<< HEAD
     "axios": "^0.21.1",
-    "expo": "~40.0.0",
-    "expo-app-loading": "^1.0.1",
-    "expo-asset": "~8.2.1",
-=======
     "expo": "^40.0.1",
     "expo-app-loading": "^1.0.3",
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
     "expo-constants": "^10.0.1",
     "expo-font": "~8.4.0",
     "expo-status-bar": "^1.0.3",
@@ -48,32 +42,22 @@
     "react-dom": "16.13.1",
     "react-native": "https://github.com/expo/react-native/archive/sdk-40.0.1.tar.gz",
     "react-native-action-button": "^2.8.5",
-<<<<<<< HEAD
-    "react-native-alert-pro": "^1.1.2",
-    "react-native-animated-splash-screen": "^2.0.5",
-    "react-native-awesome-alerts": "^1.4.2",
-    "react-native-dialog": "^6.2.0",
-=======
     "react-native-androw": "0.0.34",
     "react-native-animated-splash-screen": "^2.0.5",
     "react-native-awesome-alerts": "^1.4.2",
+    "react-native-axios": "^0.17.1",
     "react-native-circular-card-view": "^0.1.2",
     "react-native-dialog": "^6.2.0",
     "react-native-dynamic-vector-icons": "^1.1.4",
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
     "react-native-elements": "^3.2.0",
     "react-native-floating-action": "^1.21.0",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-inline-timepicker": "^1.2.0",
+    "react-native-keyboard-aware-scroll-view": "^0.9.4",
     "react-native-linear-gradient": "^2.5.6",
     "react-native-localize": "^2.0.2",
-<<<<<<< HEAD
-    "react-native-modal": "^11.10.0",
-    "react-native-modals": "^0.22.3",
-=======
     "react-native-material-ripple": "^0.9.1",
     "react-native-modal": "^11.10.0",
->>>>>>> 9d1e7feafd00653e9b0caea18faef42089afc9bc
     "react-native-paper": "^4.7.2",
     "react-native-paper-dates": "^0.3.0",
     "react-native-really-awesome-button": "^1.6.0",
