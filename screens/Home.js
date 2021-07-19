@@ -45,7 +45,7 @@ export default function Home ({ navigation }) {
   const [finishvisible, setfinishVisible] = React.useState(false);         //Flag variable for Finish Time TimePicker
   const [finishHours, setfinishHours] = React.useState(selectDate.getHours());              //Variable for Finish Hours from TimePicker
   const [finishMinutes, setfinishMinutes] = React.useState(selectDate.getMinutes());        //Variable for Finish Minutes from TimePicker
-  const [currentDate, setCurrentDate] = React.useState("Select a Day");               //variable for current Date
+  const [currentDate, setCurrentDate] = React.useState(selectDate);               //variable for current Date
   const [visible, setVisible] = React.useState(false);                                      //Flag variable for Start Time TimePicker
   const [showAlert, setshowAlert] = React.useState(false);                                  //Flag variable for Alert 
   const [IDtimesheet, setIDtimesheet] = React.useState('');                                 //variable for id_timesheet
@@ -205,7 +205,7 @@ export default function Home ({ navigation }) {
 
     const deleteHandler = () => //Submit Button: Onclicking this will Submit entries only when it "Friday" or "Monday"
     {
-      if (moment(Week).day("Friday").format('MMM Do') == moment().format('MMM Do') || moment(Week).day("Wednesday").format('MMM Do') == moment().format('MMM Do')) {
+      if (moment(Week).day("Monday").format('MMM Do') == moment().format('MMM Do') || moment(Week).day("Friday").format('MMM Do') == moment().format('MMM Do')) {
         navigation.navigate('ViewEntry');
       } else {
         alert('Its not Friday or Monday Yet!');
@@ -403,6 +403,37 @@ let deleteEntry = (IDtimesheet) => { //function to delete an entry from DB
     );
   });
 };
+
+let DOWEntry = () => { //function to delete an entry from DB 
+  console.log(moment(selectedWeek).day("Monday").format('L'))
+  db.transaction((tx) => {
+    tx.executeSql(
+      //SQL Insert Statement to insert a Lunch entry into Timesheet Table 5 times for 5 different days of the week
+      'SELECT * FROM Timesheet WHERE date = ?',
+      [moment(selectedWeek).day("Monday").format('L'),],
+      (tx, results) => {  // ----------------------------------------> getting results back from querying the SQL Statement
+        console.log('Results', results.rows.length);
+        if (results.rows.length > 0) {  //If length to results returned is greater than 0, then the entry is added succesfully
+          Alert.alert(
+            'Sucess',
+            'Entry added succesfully to DB !!!',
+            [
+              {
+                text: 'Ok',
+                //When the entry added is succesfull, call SearchEntry() 
+                //which Searches and gives updated list of all entries including the ones we recently added
+                onPress: deleteHandler() 
+              },
+            ],
+            { cancelable: false }
+          );
+        } else alert('No Entry Has been added for Monday');  //If length to results returned is lesser than or equal to 0, then the entry added is unsuccesfull!
+      }
+    ); 
+  });
+  
+  };
+
 
 const setCheckBox = (newValue) => {
   setToggleCheckBox(newValue);
@@ -766,6 +797,7 @@ db.transaction(function (tx) {
                 {
                     saveDayofWeek
                 }>
+                        <Picker.Item label={'Please select a day'} value="" />
                         <Picker.Item label={'Monday' + ' ' +  moment(Week).day("Monday").format('MMM Do')} value="monday" />
                         <Picker.Item label={'Tuesday' + ' ' +  moment(Week).day("Tuesday").format('MMM Do')} value="tuesday" />
                         <Picker.Item label={'Wednesday' + ' ' +  moment(Week).day("Wednesday").format('MMM Do')} value="wednesday" />
@@ -780,10 +812,12 @@ db.transaction(function (tx) {
         <Text style={{marginLeft: 148, marginTop: 100, fontSize: 16, color: '#a1a1a1', fontWeight: 'bold'}}>Add an Entry</Text>
         <IconButton icon="plus" size={45} style={{marginLeft: 160,  backgroundColor: '#ffffff', color:'#091629', borderWidth: 3, borderColor: 'white',}} onPress={pressHandler} />
         </View>  */}
+        {!dayoftheWeek ? (<Text style={{fontWeight: '700', fontSize: 20, color: '#091629', marginLeft: 20, marginTop: 35}}>Please Selects a day</Text>): (  
         <View>
                   <Text style={{fontWeight: '700', fontSize: 20, color: '#091629', marginLeft: 20, marginTop: 35}}>{moment(currentDate).format('dddd, MMMM Do')}  </Text> 
 
         </View>
+        )}
         <Text style={{backgroundColor: "#091629", borderColor: 'black', paddingHorizontal: 25, paddingTop: 5, borderRadius: 10, height: 40, fontSize: 20, fontWeight: 'bold', color: '#f2fbff' ,width: 300, marginTop: 5, marginLeft: 20, borderWidth: 3}}>Day Total Hours: {totalHrsforday}</Text>
           <Animated.FlatList 
     data={flatListItems}
@@ -970,7 +1004,7 @@ onValueChange={setCheckBox}
           <ActionButton.Item buttonColor='#1abc9c' title="Add Entry" onPress={pressHandler}>
             <Icon name="add" style={styles.actionButtonIcon} />
           </ActionButton.Item>
-          <ActionButton.Item buttonColor='#3498db' title="Submit" onPress={deleteHandler}>
+          <ActionButton.Item buttonColor='#3498db' title="Submit" onPress={DOWEntry}>
             <Icon name="checkmark-sharp" style={styles.actionButtonIcon} />
           </ActionButton.Item>
         </ActionButton>
@@ -1243,4 +1277,3 @@ onValueChange={setCheckBox}
               },
               
      });
-     

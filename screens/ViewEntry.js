@@ -12,32 +12,32 @@ export default function DeleteUser ({ navigation })  {
     const [selectedValue, setSelectedValue] = useState(null);
 
     useEffect(() => {
-      //   fetch('https://aboutreact.herokuapp.com/demosearchables.php')
-      //   .then(response => response.json())
-      //   .then(responseJson => {
-      //       setValues(responseJson.results)
-      //   })
-      //   .catch((error) => {
-      //       console.error(error);
-      //     });
-      // }, []);s
+        fetch('https://aboutreact.herokuapp.com/demosearchables.php')
+        .then(response => response.json())
+        .then(responseJson => {
+            setValues(responseJson.results)
+        })
+        .catch((error) => {
+            console.error(error);
+          });
+      }, []);
 
-      axios
-      .get('https:aboutreact.herokuapp.com/demosearchables.php')
-      .then(function (response) {
-        // handle success
-        alert(response);
-          setValues(response)
-      })
-      .catch(function (error) {
-        // handle error
-        alert(error.message);
-      })
-      .finally(function () {
-        // always executed
-        alert('Finally called');
-      });
-  }, []);
+  //     axios
+  //     .get('https:aboutreact.herokuapp.com/demosearchables.php')
+  //     .then(function (response) {
+  //       // handle success
+  //       alert(response);
+  //         setValues(response)
+  //     })
+  //     .catch(function (error) {
+  //       // handle error
+  //       alert(error.message);
+  //     })
+  //     .finally(function () {
+  //       // always executed
+  //       alert('Finally called');
+  //     });
+  // }, []);
 
     return (        
         <View style={{flex: 1,backgroundColor:'white'}}>
