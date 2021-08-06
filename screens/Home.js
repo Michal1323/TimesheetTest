@@ -405,34 +405,133 @@ let deleteEntry = (IDtimesheet) => { //function to delete an entry from DB
 };
 
 let DOWEntry = () => { //function to delete an entry from DB 
-  console.log(moment(selectedWeek).day("Monday").format('L'))
   db.transaction((tx) => {
     tx.executeSql(
       //SQL Insert Statement to insert a Lunch entry into Timesheet Table 5 times for 5 different days of the week
-      'SELECT * FROM Timesheet WHERE date = ?',
-      [moment(selectedWeek).day("Monday").format('L'),],
+      'SELECT dayoftheweek FROM Timesheet WHERE eow = ?',
+      [Week],
       (tx, results) => {  // ----------------------------------------> getting results back from querying the SQL Statement
         console.log('Results', results.rows.length);
-        if (results.rows.length > 0) {  //If length to results returned is greater than 0, then the entry is added succesfully
-          Alert.alert(
-            'Sucess',
-            'Entry added succesfully to DB !!!',
-            [
-              {
-                text: 'Ok',
-                //When the entry added is succesfull, call SearchEntry() 
-                //which Searches and gives updated list of all entries including the ones we recently added
-                onPress: deleteHandler() 
-              },
-            ],
-            { cancelable: false }
-          );
-        } else alert('No Entry Has been added for Monday');  //If length to results returned is lesser than or equal to 0, then the entry added is unsuccesfull!
-      }
-    ); 
-  });
+        var temp = [];
+        var len = results.rows.length; 
+         if (len >= 0) {  //If length to results returned is greater than 0, then the entry is added succesfully
+          for (let i = 0; i < results.rows.length; ++i) {
+            temp.push(results.rows.item(i)); //populate Temp array with values we get from results varaible(i.e  result from the SQL Statement)
+          }
+          var finalTemp = temp.map(function (obj){
+            return obj.dayoftheweek
+          }); 
+          console.log(finalTemp); 
+          var arr = [];
+          if (arr != null)
+          {
+            var arr = ['monday','tuesday','wednesday','thursday','friday'];                   //declaring an empty array
+            var diff  = arr_diff(finalTemp, arr);
+            console.log(diff)
+            alert('You have not entered entries for this date ' + diff )
+          
+          
+          }
+
+          else 
+          { 
+        db.transaction((tx) => {
+         tx.executeSql(
+        //SQL Insert Statement to insert a Lunch entry into Timesheet Table 5 times for 5 different days of the week
+        'SELECT dayoftheweek FROM Timesheet WHERE projNum = "Lunch" AND eow = ?',
+        [Week],
+        (tx, results) => {  // ----------------------------------------> getting results back from querying the SQL Statement
+          console.log('Results', results.rows.length);
+          var temp = [];
+          var len = results.rows.length; 
+           if (len >= 0) {  //If length to results returned is greater than 0, then the entry is added succesfully
+            for (let i = 0; i < results.rows.length; ++i) {
+              temp.push(results.rows.item(i)); //populate Temp array with values we get from results varaible(i.e  result from the SQL Statement)
+            }
+            var finalTemp = temp.map(function (obj){
+              return obj.dayoftheweek
+            }); 
+            console.log(finalTemp); 
+            var arr = [];
+            if (arr != null)
+            {
+              var arr = ['monday','tuesday','wednesday','thursday','friday'];                   //declaring an empty array
+              var diff  = arr_diff(finalTemp, arr);
+              console.log(diff)
+              alert('There Is no Lunch listed for these days ' + diff )
+            }
   
+            else 
+            {
+              Alert.alert(
+                'Sucess',
+                'You have submitted your timesheet for the week',
+                [
+                  {
+                    text: 'Ok',
+                    onPress: deleteHandler()
+                  }
+                ],
+              );
+            }
+          
+          } 
+     
+    });
+  })
+            Alert.alert(
+              'Sucess',
+              'You have submitted your timesheet for the week',
+              [
+                {
+                  text: 'Ok',
+                  onPress: deleteHandler()
+                }
+              ],
+            );
+          }
+        
+        } 
+   
+  });
+})
+
+   
   };
+
+
+  
+
+  const arr_diff = (a1, a2) => {
+
+    var a = [], diff = [];
+
+    for (var i = 0; i < a1.length; i++) {
+        a[a1[i]] = true;
+    }
+
+    for (var i = 0; i < a2.length; i++) {
+        if (a[a2[i]]) {
+            delete a[a2[i]];
+        } else {
+            a[a2[i]] = true;
+        }
+    }
+
+    for (var k in a) {
+        diff.push(k);
+    }
+
+    return diff;
+}
+
+
+const searchnDestroy  = () => 
+{
+  hide_LModal();
+  SearchEntry();
+  
+}
 
 
 const setCheckBox = (newValue) => {
@@ -532,7 +631,7 @@ const add_lunch = () => {
             [
               {
                 text: 'Ok',
-                onPress: hide_LModal,
+                onPress: searchnDestroy(),
               },
             ],
             { cancelable: false }
@@ -563,7 +662,7 @@ db.transaction(function (tx) {
           [
             {
               text: 'Ok',
-              onPress: hide_LModal,
+              onPress: searchnDestroy(),
             },
           ],
           { cancelable: false }
