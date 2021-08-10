@@ -5,8 +5,16 @@ import Animated, { Easing } from 'react-native-reanimated';
 import { TapGestureHandler, State } from 'react-native-gesture-handler';
 import { TextInput } from 'react-native';
 import { withNavigation } from 'react-navigation';
+import AsyncStorage from "@react-native-community/async-storage";
+import * as AppAuth from 'expo-app-auth';
+import * as AuthSession from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
+import { Linking } from 'expo';
+import Constants from 'expo-constants';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 const { width, height } = Dimensions.get('window');
+
+WebBrowser.maybeCompleteAuthSession();
 
 const {
   Value,
@@ -54,9 +62,27 @@ function runTiming(clock, value, dest) {
     state.position
   ]);
 }
+const redirectUrl = 'graph-tutorial://react-native-auth/';
+
+// const Config = {
+//   issuer: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize/<5bf7a77a-a567-4887-a8ca-c07b522f3498>/v2.0',
+//   scopes: ['openid', 'offline_access','User.Read','MailboxSettings.Read','Calendars.ReadWrite'],
+//   clientId: '5bf7a77a-a567-4887-a8ca-c07b522f3498',
+//   redirectUrl: redirectUrl,
+//   additionalParameters: { prompt: 'select_account' },
+//   serviceConfiguration: {
+//     authorizationEndpoint: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+//     tokenEndpoint: 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
+//   },
+// };
+
+
+
+const StorageKey = 'authState';
+
 class MusicApp extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.buttonOpacity = new Value(1);
 
@@ -202,7 +228,7 @@ class MusicApp extends Component {
               />
 
               <Animated.View style={styles.button}>
-              <Text style={{fontSize:20,fontWeight:'bold'}} onPress={() => { this.props.navigation.navigate('Home') }}>SIGN IN</Text>
+              <Text style={{fontSize:20,fontWeight:'bold'}} onPress={this._handleOpenWithWebBrowser}>SIGN IN</Text>
               </Animated.View>
 
           </Animated.View>
@@ -211,6 +237,33 @@ class MusicApp extends Component {
     );
   }
 }
+_cacheAuthAsync = async (authState) => {
+  return AsyncStorage.setItem(StorageKey, JSON.stringify(authState));
+}
+
+_handleOpenWithWebBrowser = () => {
+  WebBrowser.openBrowserAsync('https://login.microsoftonline.com/common/oauth2/v2.0/authorize');
+};
+
+
+_signInAsync = async () => {
+try{
+  const authState = await AppAuth.authAsync({
+    issuer: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+    scopes: ['openid'],
+    clientId: '5bf7a77a-a567-4887-a8ca-c07b522f3498',
+    redirectUrl: redirectUrl,
+    
+});
+  console.log(authState); // Never gets here...
+  this.props.navigation.navigate('Home');
+}
+catch{
+  alert('Null n Void');
+  }
+};
+
+
 export default withNavigation(MusicApp);
 
 const styles = StyleSheet.create({
@@ -254,3 +307,5 @@ const styles = StyleSheet.create({
    backgroundColor: '#fcfdff'
   }
 });
+
+
