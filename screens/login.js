@@ -1,54 +1,34 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import * as React from 'react';
+import * as WebBrowser from 'expo-web-browser';
+import { makeRedirectUri, useAuthRequest, useAutoDiscovery } from 'expo-auth-session';
+import { Button } from 'react-native';
+import * as Linking from 'expo-linking';
 
-import { Asset } from 'expo-asset';
-import AppLoading  from 'expo-app-loading';
-import MusicApp from '../app/index';
-function cacheImages(images) {
-  return images.map(image => {
-    if (typeof image === 'string') {
-      return Image.prefetch(image);
-    } else {
-      return Asset.fromModule(image).downloadAsync();
-    }
-  });
-}
+WebBrowser.maybeCompleteAuthSession();
 
+export default function login({ navigation }) { 
+  // Endpoint
+  const discovery = useAutoDiscovery('https://login.microsoftonline.com/c22e361c-58d9-4c39-a875-4b26582548fb/v2.0');
+  // Request
+  const [request, response, promptAsync] = useAuthRequest(
+    {
+      clientId: '5bf7a77a-a567-4887-a8ca-c07b522f3498',
+      scopes: ['openid', 'profile', 'email', 'offline_access'],
+      redirectUri: makeRedirectUri({
+        scheme: 'exp://192.168.1.8:19000'
+        }),
+    },
+    discovery
+  );
 
-export default class login extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      isReady: false
-    };
-  }
-  
-
-  async _loadAssetsAsync() {
-    const imageAssets = cacheImages([require('../assets/bg.jpg')]);
-
-    await Promise.all([...imageAssets]);
-  }
-  
-
-  render() {
-    if (!this.state.isReady) {
-      return (
-        <AppLoading
-          startAsync={this._loadAssetsAsync}
-          onFinish={() => this.setState({ isReady: true })}
-          onError={console.warn}
-        />
-      );
-    }
-    return <MusicApp />;
-  }
-}
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center'
-  }
-});
+  return (
+    <Button
+      disabled={!request}
+      title="Login"
+      onPress={() => {
+        promptAsync();
+        navigation.navigate('Home');
+        }}
+    />
+  );
+      }

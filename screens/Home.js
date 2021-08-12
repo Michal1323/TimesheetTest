@@ -433,15 +433,13 @@ let DOWEntry = () => { //function to delete an entry from DB
                alert('You have not entered entries for this date ' + diff )
                console.log('Diff ' + diff);
             } else {
-              console.log('All days have DOW Entry')
-            }
-
+              console.log('All days have DOW Entry')      
               db.transaction((tx) => {
                 tx.executeSql(
                    //SQL Insert Statement to insert a Lunch entry into Timesheet Table 5 times for 5 different days of the week
                    'SELECT dayoftheweek FROM Timesheet WHERE projNum = "Lunch" AND eow = ?',
                    [Week],
-                   (tx, results) => {  // ----------------------------------------> getting results back from querying the SQL Statement
+                   (tx, results) => {  // ---------------------------------------> getting results back from querying the SQL Statement
                      console.log('Results', results.rows.length);
                      var temp = [];
                      var len = results.rows.length; 
@@ -453,7 +451,7 @@ let DOWEntry = () => { //function to delete an entry from DB
                          return obj.dayoftheweek
                        }); 
                        console.log(finalTemp); 
-                       var arr = ['monday','tuesday','wednesday','thursday','friday'];//declaring an empty array
+                       var arr = ['Monday','Tuesday','Wednesday','Thursday','Friday'];//declaring an empty array
                        var diff  = arr_diff(finalTemp, arr);
                        console.log(diff)
                        if (diff != '')
@@ -480,64 +478,16 @@ let DOWEntry = () => { //function to delete an entry from DB
                 
                }
                 )});
+            }
+
+        
               
         
     }})
   })};
 
 
-const LOWEntry = () => {
-  db.transaction((tx) => {
-    tx.executeSql(
-       //SQL Insert Statement to insert a Lunch entry into Timesheet Table 5 times for 5 different days of the week
-       'SELECT dayoftheweek FROM Timesheet WHERE projNum = "Lunch" AND eow = ?',
-       [Week],
-       (tx, results) => {  // ----------------------------------------> getting results back from querying the SQL Statement
-         console.log('Results', results.rows.length);
-         var temp = [];
-         var len = results.rows.length; 
-          if (len >= 0) {  //If length to results returned is greater than 0, then the entry is added succesfully
-           for (let i = 0; i < results.rows.length; ++i) {
-             temp.push(results.rows.item(i)); //populate Temp array with values we get from results varaible(i.e  result from the SQL Statement)
-           }
-           var finalTemp = temp.map(function (obj){
-             return obj.dayoftheweek
-           }); 
-           console.log(finalTemp); 
-           var arr = ['monday','tuesday','wednesday','thursday','friday'];//declaring an empty array
-           var diff  = arr_diff(finalTemp, arr);
-           console.log(diff)
-           if (diff != '')
-           {
-              alert('There Is no Lunch listed for these days ' + diff );
-              console.log('Diff ' + diff);
-           }
-          
-           else
-           {
-             Alert.alert(
-               'Sucess',
-               'You have submitted your timesheet for the week',
-               [
-                 {
-                   text: 'Ok',
-                   onPress: deleteHandler()
-                 }
-               ],
-             );
-           }
-         
-         }
-    
-   }
-    )});
-}
 
-  const combiner = () => {
-   // LOWEntry();
-    DOWEntry();
-  }
-  
 
   const arr_diff = (a1, a2) => {
 
@@ -685,11 +635,11 @@ else if (toggleCheckBox == true)
 db.transaction(function (tx) {
   tx.executeSql(
     'INSERT INTO Timesheet(user_id, eow, date, projNum, comment , arrival, depart, totalHrs, siteID, dayoftheweek) VALUES (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?), (?,?,?,?,?,?,?,?,?,?)',
-    [1, selectedWeek, moment(selectedWeek).day("Monday").format('L'), "Lunch", 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek , 
-    1, selectedWeek, moment(selectedWeek).day("Tuesday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes,  Thrs, 'Lunch', dayoftheWeek , 
-    1, selectedWeek, moment(selectedWeek).day("Wednesday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes,  Thrs, 'Lunch', dayoftheWeek ,
-    1, selectedWeek, moment(selectedWeek).day("Thursday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek ,
-    1, selectedWeek, moment(selectedWeek).day("Friday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', dayoftheWeek ],
+    [1, selectedWeek, moment(selectedWeek).day("Monday").format('L'), "Lunch", 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', 'Monday' , 
+    1, selectedWeek, moment(selectedWeek).day("Tuesday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes,  Thrs, 'Lunch', 'Tuesday' , 
+    1, selectedWeek, moment(selectedWeek).day("Wednesday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes,  Thrs, 'Lunch', 'Wednesday' ,
+    1, selectedWeek, moment(selectedWeek).day("Thursday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', 'Thursday' ,
+    1, selectedWeek, moment(selectedWeek).day("Friday").format('L'), 'Lunch', 'Lunch', frTimes, frFinTimes, Thrs, 'Lunch', 'Friday' ],
     (tx, results) => {
       console.log('Results', results.rowsAffected);
       if (results.rowsAffected > 0) {
@@ -1140,7 +1090,7 @@ onValueChange={setCheckBox}
           <ActionButton.Item buttonColor='#1abc9c' title="Add Entry" onPress={pressHandler}>
             <Icon name="add" style={styles.actionButtonIcon} />
           </ActionButton.Item>
-          <ActionButton.Item buttonColor='#3498db' title="Submit" onPress={combiner}>
+          <ActionButton.Item buttonColor='#3498db' title="Submit" onPress={DOWEntry}>
             <Icon name="checkmark-sharp" style={styles.actionButtonIcon} />
           </ActionButton.Item>
         </ActionButton>

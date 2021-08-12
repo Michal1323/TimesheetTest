@@ -2,7 +2,7 @@
   "expo": {
     "name": "TimesheetTest",
     "slug": "TimesheetTest",
-    "scheme": "myapp",
+    "scheme": "exp://192.168.1.8:19000",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

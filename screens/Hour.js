@@ -20,6 +20,7 @@ import logout from '../assets/logout.png'
 // Menu
 import menu from '../assets/menu.png';
 import close from '../assets/close.png';
+import { TouchableWithoutFeedback } from 'react-native';
 
 
 const db = DatabaseConnection.getConnection();
@@ -713,7 +714,7 @@ style={styles.input}
 />
 
 
-<TouchableHighlight style={{ alignItems: 'center',
+<TouchableWithoutFeedback style={{ alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
     paddingHorizontal: 30,
@@ -723,6 +724,7 @@ style={styles.input}
     marginLeft: 110,
     marginTop: 10,
     }}
+    onPressIn={calcTotalHrs}
     onPress={time_clash}
     
     >
@@ -732,7 +734,7 @@ style={styles.input}
     letterSpacing: 0.25,
     color: 'black',
     }}> Add </Text>
-</TouchableHighlight>
+</TouchableWithoutFeedback>
     </View>
     </Animated.View>
     </Animated.View>
