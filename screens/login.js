@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as WebBrowser from 'expo-web-browser';
-import { makeRedirectUri, useAuthRequest, useAutoDiscovery } from 'expo-auth-session';
+import { makeRedirectUri, useAuthRequest, useAutoDiscovery, exchangeCodeAsync } from 'expo-auth-session';
 import { Button } from 'react-native';
 import * as Linking from 'expo-linking';
 
@@ -15,11 +15,50 @@ export default function login({ navigation }) {
       clientId: '5bf7a77a-a567-4887-a8ca-c07b522f3498',
       scopes: ['openid', 'profile', 'email', 'offline_access'],
       redirectUri: makeRedirectUri({
-        scheme: 'exp://192.168.1.8:19000'
+        scheme: 'exp://192.168.1.2:19000'
         }),
     },
     discovery
   );
+
+  React.useEffect(() => {
+    if (response && 'params' in response) {
+        if (response.params && 'code' in response.params) {
+
+            (async function getToken() {
+                console.log('-----------------------')
+                console.log(response.params.code)
+                console.log('-----------------------')
+
+                try {
+                    // @ts-ignore
+                    const { accessToken } = await exchangeCodeAsync({
+                        code: response.params.code,
+                        clientId: '5bf7a77a-a567-4887-a8ca-c07b522f3498',
+                        redirectUri: makeRedirectUri({
+                          scheme: 'exp://192.168.1.2:19000'
+                          }),
+                        scopes: ['openid', 'profile', 'email', 'offline_access'],
+                        extraParams: {
+                          code_verifier: request?.codeVerifier || "",
+                      },
+                    }, {
+                        tokenEndpoint: 'https://login.microsoftonline.com/c22e361c-58d9-4c39-a875-4b26582548fb/oauth2/v2.0/token' // Sera utilisé pour le refresh
+                    })
+
+                    console.log('------- Before ----------------')
+                    console.log(accessToken)
+                    console.log('-----------------------')
+                } catch (e) {
+                    console.log(e)
+                    console.log(e.status)
+                    console.log(e.message)
+                }
+            })()
+        }
+    }
+}, [response]);
+
 
   return (
     <Button
