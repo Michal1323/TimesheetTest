@@ -32,7 +32,7 @@ const db = DatabaseConnection.getConnection();
 
 
 
-export default function Home ({ navigation }) {
+export default function Home ({navigation}) {
 
   const selectDate = new Date();                                           //var to get date
   const [flatListItems, setFlatListItems] = React.useState([]);            //variable for storing entries into the FlatList
@@ -205,7 +205,7 @@ export default function Home ({ navigation }) {
 
     const deleteHandler = () => //Submit Button: Onclicking this will Submit entries only when it "Friday" or "Monday"
     {
-      if (moment(Week).day("Monday").format('MMM Do') == moment().format('MMM Do') || moment(Week).day("Friday").format('MMM Do') == moment().format('MMM Do')) {
+      if (moment(Week).day("Monday").format('MMM Do') == moment().format('MMM Do') || moment(Week).day("Thursday").format('MMM Do') == moment().format('MMM Do')) {
         navigation.navigate('ViewEntry');
       } else {
         alert('Its not Friday or Monday Yet!');
@@ -721,7 +721,7 @@ db.transaction(function (tx) {
 
   
   
-   
+
     return (
       <SafeAreaView style={styles.container1}>
          <View style={{ justifyContent: 'flex-start', padding: 15 }}>
@@ -732,12 +732,15 @@ db.transaction(function (tx) {
           marginTop: 12
         }}></Image>
 
-        <Text style={{
+        <Text style=
+        {{
           fontSize: 20,
           fontWeight: 'bold',
           color: 'white',
           marginTop: 20
-        }}>John Doe</Text>
+        }}>
+{navigation.getParam('name')}
+        </Text>
 
         <TouchableOpacity>
           <Text style={{
@@ -1097,8 +1100,9 @@ onValueChange={setCheckBox}
       </Animated.View>
       </SafeAreaView>
 );
+};
             
-   }
+   
     /*
     <View style={{marginLeft: -200, marginTop: -550}}>
               

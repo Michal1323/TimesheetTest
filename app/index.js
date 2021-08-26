@@ -153,6 +153,7 @@ class MusicApp extends Component {
             <Animated.View
               style={{
                 ...styles.button,
+                marginTop:1500,
                 opacity: this.buttonOpacity,
                 transform: [{ translateY: this.buttonY }]
               }}
@@ -189,7 +190,7 @@ class MusicApp extends Component {
 
           <TextInput 
           placeholder='LOGIN'
-              style={styles.textInput}
+              style={styles.textInput1}
              // defaultValue={login}
               placeholderTextColor='black'
           />
@@ -234,6 +235,7 @@ const styles = StyleSheet.create({
   closeButton:{
     height:40,
     width:40,
+    marginTop:760,
     backgroundColor:'white',
     borderRadius:20,
     alignItems: 'center',
@@ -245,6 +247,7 @@ const styles = StyleSheet.create({
 
   textInput:{
    height:50,
+   marginTop:0,
    borderRadius:25,
    borderWidth:0.5,
    marginHorizontal:20,
@@ -252,5 +255,18 @@ const styles = StyleSheet.create({
    marginVertical:5,
    borderColor:'rgba(0,0,0,0.2)',
    backgroundColor: '#fcfdff'
-  }
+  },
+  
+  textInput1:{
+    height:50,
+    marginTop:1500,
+    borderRadius:25,
+    borderWidth:0.5,
+    marginHorizontal:20,
+    paddingLeft:10,
+    marginVertical:5,
+    borderColor:'rgba(0,0,0,0.2)',
+    backgroundColor: '#fcfdff'
+   }
+
 });
