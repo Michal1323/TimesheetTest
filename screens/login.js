@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as WebBrowser from 'expo-web-browser';
-import { makeRedirectUri, useAuthRequest, useAutoDiscovery, exchangeCodeAsync } from 'expo-auth-session';
+import { makeRedirectUri, useAuthRequest, useAutoDiscovery, exchangeCodeAsync, refreshAsync } from 'expo-auth-session';
 import { StyleSheet, View, Text, Image, StatusBar, Animated, TouchableOpacity, Alert, SafeAreaView, TouchableHighlight} from 'react-native';
 import { AuthSession } from 'expo-auth-session';
 import { Button } from 'react-native';
@@ -48,10 +48,11 @@ export default function login({ navigation }) {
       clientId: '5bf7a77a-a567-4887-a8ca-c07b522f3498',
       scopes: ['openid', 'profile', 'email', 'offline_access'],
       redirectUri: makeRedirectUri({
-        scheme: 'exp://192.168.1.2:19000'
+        scheme: 'exp://192.168.1.5:19000'
         }),
-        codeChallenge: '65EAF20592B581A9748B057E282C5FA93A69EA5BC88D8D0E264E31E0ED6B0EEE',
-        codeChallengeMethod: 'S256',
+        // codeChallenge: '65EAF20592B581A9748B057E282C5FA93A69EA5BC88D8D0E264E31E0ED6B0EEE',
+        // codeChallengeMethod: 'S256',
+        // usePKCE: true
       },
     discovery
   );
@@ -71,23 +72,24 @@ export default function login({ navigation }) {
                         code: response.params.code,
                         clientId: '5bf7a77a-a567-4887-a8ca-c07b522f3498',
                         redirectUri: makeRedirectUri({
-                          scheme: 'exp://192.168.1.2:19000'
+                          scheme: 'exp://192.168.1.5:19000'
                           }),
                         scopes: ['openid', 'profile', 'email', 'offline_access'],
                         grant_type: "authorization_code",
                         extraParams: {
-                         // code_verifier: "YTFjNjI1OWYzMzA3MTI4ZDY2Njg5M2RkNmVjNDE5YmEyZGRhOGYyM2IzNjdmZWFhMTQ1ODg3NDcxY2Nl",
-                          code_verifier: request?.codeVerifier ,
+                          // code_verifier: "YTFjNjI1OWYzMzA3MTI4ZDY2Njg5M2RkNmVjNDE5YmEyZGRhOGYyM2IzNjdmZWFhMTQ1ODg3NDcxY2Nl",
+                          code_verifier: request?.codeVerifier || '' ,
                       },
                     }, {
                         tokenEndpoint: 'https://login.microsoftonline.com/c22e361c-58d9-4c39-a875-4b26582548fb/oauth2/v2.0/token' // Sera utilisé pour le refresh
                     })
 
-                    console.log('------- Before ----------------')
+                    console.log('------- Access ----------------')
                     console.log(accessToken)
                     console.log('-----------------------')
                     setTok(accessToken);
-                    
+
+// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                       /* make a GET request using fetch and querying with the token */
                       let graphResponse = null;
                       await fetch('https://graph.microsoft.com/v1.0/me?$select=displayName', {
